@@ -1,0 +1,2561 @@
+================================================================================
+  CHAPTER 2: PROCESSES AND THREADS                                [10 Hours]
+  Pokhara University — BE Computer Engineering
+  Encyclopedic Study Notes
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  2.1  Process
+       2.1.1  Definition, States, and Transition Diagram
+       2.1.2  Process Control Block (PCB)
+       2.1.3  Concurrent and Parallel Processes
+  2.2  Interprocess Communication and Synchronization
+       2.2.1  Introduction, Race Condition, Critical Regions
+       2.2.2  Avoiding Critical Regions: Mutual Exclusion & Serializability
+       2.2.3  Mutual Exclusion Methods
+       2.2.4  Types of Mutual Exclusion (Semaphore, Monitors, etc.)
+       2.2.5  Classical IPC Problems
+       2.2.6  Serializability: Locking and Timestamp Protocols
+  2.3  Process Scheduling
+       2.3.1  Basic Concepts and Types
+       2.3.2  Scheduling Criteria and Performance Analysis
+       2.3.3  Scheduling Algorithms with Solved Examples
+  2.4  Threads
+       2.4.1  Definition of Threads
+       2.4.2  Types of Thread Processes
+       2.4.3  Benefits of Multithreading
+       2.4.4  Thread Models
+       2.4.5  User Space and Kernel Space Threads
+       2.4.6  Difference between Processes and Threads
+  ── Arch Linux: Hands-on Implementation ──
+
+================================================================================
+2.1  PROCESS
+================================================================================
+
+────────────────────────────────────────────────────
+2.1.1  Definition, States, and Transition Diagram
+────────────────────────────────────────────────────
+
+A process is fundamentally defined as a program in execution. However, this
+simple definition belies the complexity of what a process truly represents in
+an operating system. A program is a passive entity—it is merely a file on disk
+containing a list of instructions (the executable binary, e.g., an ELF file on
+Linux). A process, in contrast, is an active entity with a program counter
+specifying the next instruction to execute, a set of associated resources
+(memory, open files, network connections), and a current state.
+
+A single program can give rise to multiple processes. For example, when
+multiple users run the same web browser binary simultaneously, each instance
+is a separate process with its own address space, open file descriptors, and
+execution state, even though they all share the same executable code (which
+may be shared in physical memory via shared code pages).
+
+    Micro-topic: The ELF (Executable and Linkable Format) Binary
+    ─────────────────────────────────────────────────────────────
+    On Linux, the standard executable format is ELF. An ELF binary contains
+    several sections:
+      - .text: The executable machine code.
+      - .data: Initialized global and static variables.
+      - .bss: Uninitialized global and static variables (zero-filled at
+              runtime).
+      - .rodata: Read-only data (string constants, etc.).
+      - .symtab: Symbol table (for debugging and linking).
+      - .rel.text / .rel.data: Relocation entries.
+
+    When you execute a program, the kernel's ELF loader (fs/binfmt_elf.c)
+    reads the ELF header, maps the .text, .data, and .bss sections into
+    the process's virtual address space, sets up the stack and heap, and
+    transfers control to the entry point.
+
+        Deeper: The Program Header and Process Memory Layout
+        ────────────────────────────────────────────────────
+        The ELF program header (viewed with `readelf -l <binary>`) contains
+        LOAD segments that tell the kernel exactly which parts of the file
+        to map into memory and at what virtual addresses. A typical process
+        memory layout on x86-64 Linux:
+
+          High addresses (0x7FFF...)
+            ┌─────────────┐
+            │    Stack    │  (grows downward)
+            │     ↓       │
+            ├─────────────┤
+            │   (gap)     │
+            ├─────────────┤
+            │   mmap area │  (shared libraries, mmap'd files)
+            ├─────────────┤
+            │   (gap)     │
+            ├─────────────┤
+            │    Heap     │  (grows upward, via brk()/sbrk())
+            │     ↑       │
+            ├─────────────┤
+            │    .bss     │  (uninitialized data)
+            ├─────────────┤
+            │    .data    │  (initialized data)
+            ├─────────────┤
+            │    .text    │  (code)
+            └─────────────┘
+          Low addresses (0x0000...)
+
+PROCESS STATES
+
+At any given instant, a process is in one of several states. The exact set of
+states varies by operating system, but the most common model includes:
+
+  1. New (Created): The process is being created. The OS is allocating
+     resources, creating the PCB, and setting up the address space.
+
+  2. Ready: The process is loaded in memory and waiting to be assigned to a
+     CPU. It has all resources it needs except the CPU itself. Multiple
+     processes can be in the Ready state simultaneously, organized in a
+     ready queue.
+
+  3. Running: The process is currently being executed by a CPU. On a
+     single-processor system, only one process can be in this state at a time.
+     On a multi-core system, up to N processes can be Running (one per core).
+
+  4. Blocked (Waiting): The process is waiting for some event to occur—
+     typically an I/O operation to complete (disk read, network packet
+     arrival), a signal from another process, or the availability of a
+     resource (e.g., a semaphore). The process cannot run even if a CPU is
+     available.
+
+  5. Terminated (Zombie/Exit): The process has finished execution. The OS is
+     cleaning up its resources. In UNIX/Linux, a terminated process becomes a
+     "zombie" (TASK_ZOMBIE) until its parent calls wait() to collect its
+     exit status.
+
+PROCESS STATE TRANSITION DIAGRAM
+
+    ┌───────┐    admitted     ┌───────┐   dispatch    ┌─────────┐
+    │  New  │ ─────────────→  │ Ready │ ────────────→ │ Running │
+    └───────┘                 └───────┘               └─────────┘
+                                  ↑                     │    │
+                                  │                     │    │
+                    I/O or event  │    interrupt/       │    │ exit
+                    completed     │    preemption       │    │
+                                  │                     │    ↓
+                              ┌─────────┐               │  ┌────────────┐
+                              │ Blocked │ ←─────────────┘  │ Terminated │
+                              └─────────┘  I/O or event    └────────────┘
+                                           wait
+
+Transitions:
+  New → Ready:        Process creation is complete; admitted to ready queue.
+  Ready → Running:    Scheduler selects this process (dispatch).
+  Running → Ready:    Process is preempted (time quantum expires, higher-
+                      priority process arrives).
+  Running → Blocked:  Process requests I/O or waits for an event.
+  Blocked → Ready:    The awaited event occurs (I/O completes).
+  Running → Terminated: Process calls exit() or is killed.
+
+    Micro-topic: Linux Process States (In-Depth)
+    ─────────────────────────────────────────────
+    Linux defines more nuanced states than the simple five-state model:
+
+      TASK_RUNNING (R):          Running or runnable (on the run queue).
+      TASK_INTERRUPTIBLE (S):    Sleeping, waiting for an event. Can be
+                                 woken by signals.
+      TASK_UNINTERRUPTIBLE (D):  Deep sleep. Cannot be interrupted by
+                                 signals. Used for critical I/O waits
+                                 (e.g., disk I/O via NFS). A process stuck
+                                 in D state cannot be killed even with
+                                 SIGKILL—this is the infamous
+                                 "unkillable process" problem.
+      TASK_STOPPED (T):          Stopped by a signal (SIGSTOP, SIGTSTP).
+                                 Can be resumed with SIGCONT.
+      TASK_TRACED (t):           Being traced by a debugger (ptrace).
+      EXIT_ZOMBIE (Z):           Process has exited but its parent hasn't
+                                 called wait(). The task_struct still exists
+                                 to hold the exit status.
+      EXIT_DEAD (X):             Final state. The task_struct is being
+                                 deallocated.
+      TASK_IDLE (I):             Kernel idle thread state.
+
+        Deeper: The TASK_UNINTERRUPTIBLE Problem and TASK_KILLABLE
+        ───────────────────────────────────────────────────────────
+        The D state was historically problematic because processes stuck in
+        it (e.g., waiting for an NFS server that went down) could not be
+        killed. Linux kernel 2.6.25 introduced TASK_KILLABLE, which is a
+        variant of TASK_UNINTERRUPTIBLE that still responds to fatal signals
+        (SIGKILL). This has been gradually adopted by many kernel subsystems
+        to fix the "unkillable process" issue.
+
+────────────────────────────────────────────────────
+2.1.2  Process Control Block (PCB)
+────────────────────────────────────────────────────
+
+The Process Control Block (PCB) is the data structure that the operating system
+maintains for every process. It is the kernel's representation of a process
+and contains all the information needed to manage the process. The PCB is
+created when a process is created and destroyed when the process terminates.
+
+A typical PCB contains the following information:
+
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  PROCESS CONTROL BLOCK (PCB)                                     │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  Process Identification:                                         │
+  │    - Process ID (PID)                                            │
+  │    - Parent Process ID (PPID)                                    │
+  │    - User ID (UID), Group ID (GID)                               │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  Process State:                                                  │
+  │    - Current state (New, Ready, Running, Blocked, Terminated)    │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  CPU Scheduling Information:                                     │
+  │    - Priority                                                    │
+  │    - Scheduling queue pointers                                   │
+  │    - Scheduling parameters (nice value, policy)                  │
+  │    - Virtual runtime (vruntime for CFS)                          │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  CPU Context (Register State):                                   │
+  │    - Program Counter (RIP on x86-64)                             │
+  │    - Stack Pointer (RSP)                                         │
+  │    - General-purpose registers (RAX, RBX, RCX, ..., R15)         │
+  │    - Flags register (RFLAGS)                                     │
+  │    - Floating-point/SIMD state (XMM, YMM, ZMM registers)         │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  Memory Management Information:                                  │
+  │    - Page table base register (CR3 on x86-64)                    │
+  │    - Memory limits, segment table                                │
+  │    - mm_struct pointer (Linux)                                   │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  I/O Status Information:                                         │
+  │    - List of open files (file descriptor table)                  │
+  │    - List of I/O devices allocated to the process                │
+  ├──────────────────────────────────────────────────────────────────┤
+  │  Accounting Information:                                         │
+  │    - CPU time used                                               │
+  │    - Wall clock time elapsed                                     │
+  │    - Time limits, memory usage                                   │
+  └──────────────────────────────────────────────────────────────────┘
+
+    Micro-topic: The task_struct as Linux's PCB
+    ────────────────────────────────────────────
+    In Linux, the PCB is implemented as the task_struct (defined in
+    include/linux/sched.h). It is one of the largest kernel structures,
+    containing over 100 fields. Key mappings to PCB components:
+
+      PCB Field                  →  task_struct Field
+      ─────────────────────────────────────────────────
+      PID                        →  pid, tgid
+      State                      →  __state
+      Priority                   →  prio, static_prio, normal_prio
+      CPU Context                →  thread (struct thread_struct)
+      Memory                     →  mm (struct mm_struct *)
+      Open Files                 →  files (struct files_struct *)
+      Credentials                →  cred (struct cred *)
+      Scheduling Entity          →  se (struct sched_entity)
+      Parent                     →  parent, real_parent
+      Children                   →  children (struct list_head)
+      Signal Info                →  signal, sighand, pending
+
+        Deeper: The thread_struct and Register State Saving
+        ───────────────────────────────────────────────────
+        The thread_struct (arch-specific, defined in arch/x86/include/asm/
+        processor.h for x86-64) stores the hardware context that must be
+        saved/restored during a context switch:
+
+          - sp: Kernel stack pointer
+          - fs, gs: Segment registers (used for thread-local storage)
+          - debugreg[]: Debug registers (DR0-DR7 for hardware breakpoints)
+          - fpu: Floating-point unit state (struct fpu), including
+            SSE/AVX/AVX-512 registers
+
+        During a context switch, the __switch_to() function saves the
+        current task's thread_struct and loads the next task's. The general-
+        purpose registers (RAX, RBX, etc.) are saved on the kernel stack
+        by the context switch assembly code (__switch_to_asm in
+        arch/x86/entry/entry_64.S).
+
+    Micro-topic: Process Table and PID Allocation
+    ──────────────────────────────────────────────
+    The kernel maintains all task_structs in several data structures:
+      - A hash table indexed by PID for O(1) lookup by PID.
+      - A doubly-linked list (tasks list) for iterating all processes.
+      - The per-CPU run queues for scheduling.
+
+    PIDs are allocated from a PID namespace. The maximum PID value is
+    controlled by /proc/sys/kernel/pid_max (default: 4194304 on 64-bit
+    systems, configurable). PID 0 is the idle task (swapper), PID 1 is
+    init (systemd on Arch Linux), and PID 2 is kthreadd (the kernel
+    thread daemon that spawns all other kernel threads).
+
+────────────────────────────────────────────────────
+2.1.3  Concurrent and Parallel Processes
+────────────────────────────────────────────────────
+
+Two concepts that are often confused but are fundamentally distinct:
+
+CONCURRENCY refers to the ability of an operating system to manage multiple
+tasks that are in progress at the same time. Concurrent processes may not
+actually execute simultaneously; they may interleave their execution on a
+single CPU through time-sharing. The key idea is that the tasks make progress
+within overlapping time periods.
+
+PARALLELISM refers to the actual simultaneous execution of multiple tasks on
+multiple processing units (CPU cores). Parallelism requires hardware support
+(multiple cores, multiple processors, or hardware threads like Intel's Hyper-
+Threading).
+
+  Concurrency (single core, interleaved):
+    Time →  ──A──B──A──B──A──B──
+
+  Parallelism (multiple cores, simultaneous):
+    Core 0: ──A──A──A──A──A──A──
+    Core 1: ──B──B──B──B──B──B──
+
+Rob Pike (co-creator of Go) famously stated: "Concurrency is about dealing
+with lots of things at once. Parallelism is about doing lots of things at
+once."
+
+    Micro-topic: Amdahl's Law and the Limits of Parallelism
+    ────────────────────────────────────────────────────────
+    Amdahl's Law states that the maximum speedup of a program using N
+    processors is limited by the fraction of the program that cannot be
+    parallelized:
+
+    $$S(N) = \frac{1}{(1 - P) + \frac{P}{N}}$$
+
+    Where:
+      S(N) = speedup with N processors
+      P = fraction of the program that can be parallelized
+      N = number of processors
+
+    For example, if 95% of a program can be parallelized (P = 0.95):
+      With N = 10:  S = 1 / (0.05 + 0.095) = 6.90x
+      With N = 100: S = 1 / (0.05 + 0.0095) = 16.81x
+      With N = ∞:   S = 1 / 0.05 = 20x maximum
+
+    This shows that even with infinite processors, the maximum speedup is
+    limited by the sequential portion of the program.
+
+        Deeper: Gustafson's Law
+        ───────────────────────
+        While Amdahl's Law fixes the problem size and shows diminishing
+        returns from adding processors, Gustafson's Law (1988) takes the
+        opposite view: as the number of processors increases, the problem
+        size can increase too. The scaled speedup is:
+
+        $$S(N) = N - \alpha \cdot (N - 1)$$
+
+        Where α is the fraction of time spent in the serial part. This is
+        more optimistic and better reflects real-world parallel computing
+        where bigger machines tackle bigger problems.
+
+
+================================================================================
+2.2  INTERPROCESS COMMUNICATION AND SYNCHRONIZATION
+================================================================================
+
+When multiple processes run concurrently and share resources (memory, files,
+devices), the operating system must provide mechanisms for them to communicate
+and synchronize. Without proper synchronization, concurrent access to shared
+data leads to unpredictable and incorrect results.
+
+────────────────────────────────────────────────────
+2.2.1  Introduction, Race Condition, Critical Regions
+────────────────────────────────────────────────────
+
+RACE CONDITION
+
+A race condition occurs when two or more processes access shared data
+concurrently and the final result depends on the specific order (timing) of
+the accesses. This is one of the most insidious bugs in concurrent programming
+because the program may work correctly 999 times and fail on the 1000th run,
+depending on scheduling timing.
+
+Classic example — Consider two processes incrementing a shared counter:
+
+    Shared variable: counter = 5
+
+    Process A:                     Process B:
+    register_A = counter (5)       register_B = counter (5)
+    register_A = register_A + 1    register_B = register_B + 1
+    counter = register_A (6)       counter = register_B (6)
+
+    Expected result: counter = 7
+    Actual result:   counter = 6   ← RACE CONDITION!
+
+The problem is that the increment operation (counter++) is not atomic—it
+consists of three sub-operations (load, increment, store) that can be
+interleaved.
+
+CRITICAL REGION (CRITICAL SECTION)
+
+A critical region (or critical section) is a segment of code in which a
+process accesses shared resources (variables, files, devices). The critical
+region problem is to design a protocol that the cooperating processes can use
+to synchronize their activity so that they don't access the critical region
+at the same time.
+
+Requirements for a correct solution to the critical section problem:
+
+  1. Mutual Exclusion: If process P_i is executing in its critical section,
+     no other process can be executing in its critical section.
+
+  2. Progress: If no process is executing in its critical section and some
+     processes wish to enter their critical section, then only those
+     processes not executing in their remainder section can participate in
+     the decision, and the decision cannot be postponed indefinitely.
+
+  3. Bounded Waiting: There exists a bound on the number of times that
+     other processes are allowed to enter their critical sections after a
+     process has made a request to enter its critical section and before
+     that request is granted.
+
+    Micro-topic: The Structure of a Process with Critical Sections
+    ──────────────────────────────────────────────────────────────
+
+    do {
+        [ENTRY SECTION]        ← Protocol to request entry
+        [CRITICAL SECTION]     ← Access shared resources
+        [EXIT SECTION]         ← Protocol to release
+        [REMAINDER SECTION]    ← Non-critical code
+    } while (TRUE);
+
+        Deeper: Linearizability vs. Serializability
+        ─────────────────────────────────────────────
+        In the context of concurrent access, two correctness criteria are
+        important:
+          - Serializability: The result of concurrent execution is equivalent
+            to some serial (sequential) execution of the same operations.
+            This is the standard correctness criterion for database
+            transactions.
+          - Linearizability: A stronger condition where each operation
+            appears to take effect instantaneously at some point between
+            its invocation and response. This is the gold standard for
+            concurrent data structures.
+
+────────────────────────────────────────────────────
+2.2.2  Avoiding Critical Regions: Mutual Exclusion
+────────────────────────────────────────────────────
+
+Mutual exclusion is the requirement that when one process is accessing a shared
+resource (in its critical section), no other process is allowed to access that
+same resource. Achieving mutual exclusion correctly is one of the fundamental
+challenges of operating system design.
+
+CONDITION FOR MUTUAL EXCLUSION (Restatement):
+  1. No two processes may be simultaneously inside their critical regions.
+  2. No assumptions may be made about speeds or the number of CPUs.
+  3. No process running outside its critical region may block other processes.
+  4. No process should have to wait forever to enter its critical region.
+
+────────────────────────────────────────────────────
+2.2.3  Mutual Exclusion Methods
+────────────────────────────────────────────────────
+
+METHOD 1: DISABLING INTERRUPTS
+
+The simplest approach to mutual exclusion on a uniprocessor system: a process
+disables all interrupts before entering its critical section and re-enables
+them upon leaving. Since the CPU can only switch processes via interrupts
+(timer interrupt for preemption, I/O interrupt, etc.), disabling interrupts
+prevents any context switch.
+
+    enter_critical_region:
+        CLI                   ; Clear Interrupt Flag (disable interrupts)
+        ; ... critical section code ...
+    leave_critical_region:
+        STI                   ; Set Interrupt Flag (enable interrupts)
+
+Problems:
+  - It is unwise to give user processes the power to turn off interrupts.
+    A buggy process could disable interrupts and never re-enable them,
+    freezing the entire system.
+  - On multiprocessor systems, disabling interrupts on one CPU does not
+    prevent another CPU from accessing the shared resource. (CLI only
+    affects the local CPU.)
+  - The kernel itself uses this technique for very short critical sections
+    (e.g., spin_lock_irqsave() in the Linux kernel).
+
+METHOD 2: LOCK VARIABLE (Software Approach — Broken)
+
+Use a shared variable (lock) initialized to 0. Before entering the critical
+section, a process checks the lock: if it's 0, set it to 1 and enter; if
+it's 1, wait.
+
+    shared int lock = 0;
+
+    while (lock != 0) ;  // busy wait
+    lock = 1;            // set lock
+    // ... critical section ...
+    lock = 0;            // release lock
+
+This solution is BROKEN because the test-and-set of the lock variable is not
+atomic. Two processes can both read lock = 0, both set it to 1, and both enter
+the critical section simultaneously (the same race condition problem).
+
+METHOD 3: STRICT ALTERNATION
+
+Two processes (P0 and P1) take strict turns entering the critical section
+using a shared variable 'turn':
+
+    // Process 0:                  // Process 1:
+    while (TRUE) {                 while (TRUE) {
+        while (turn != 0) ;           while (turn != 1) ;
+        critical_section();            critical_section();
+        turn = 1;                      turn = 0;
+        noncritical_section();         noncritical_section();
+    }                              }
+
+This achieves mutual exclusion but violates the PROGRESS condition: if P0
+finishes its critical section and sets turn = 1, but P1 is in a long
+noncritical section, P0 cannot re-enter its critical section even though
+no one is in it. The processes must strictly alternate.
+
+    Micro-topic: Dekker's Algorithm
+    ────────────────────────────────
+    Dekker's Algorithm (1965) was the first known correct software solution
+    to the mutual exclusion problem for two processes. It combines flag
+    variables with a turn variable:
+
+        bool flag[2] = {false, false};
+        int turn = 0;
+
+        // Process i (i = 0 or 1), j = 1 - i
+        flag[i] = true;
+        while (flag[j]) {
+            if (turn != i) {
+                flag[i] = false;
+                while (turn != i) ;  // wait
+                flag[i] = true;
+            }
+        }
+        // CRITICAL SECTION
+        turn = j;
+        flag[i] = false;
+        // REMAINDER SECTION
+
+    This is correct but complex and only works for two processes.
+
+    Micro-topic: Peterson's Algorithm
+    ──────────────────────────────────
+    Peterson's Algorithm (1981) is a simpler and more elegant solution for
+    two processes:
+
+        bool flag[2] = {false, false};
+        int turn;
+
+        // Process i (i = 0 or 1), j = 1 - i
+        void enter_region(int i) {
+            int j = 1 - i;
+            flag[i] = TRUE;       // I want to enter
+            turn = j;             // But I give you the chance first
+            while (flag[j] && turn == j) ;  // Wait if you want in
+                                             // and it's your turn
+        }
+
+        void leave_region(int i) {
+            flag[i] = FALSE;
+        }
+
+    Why it works:
+      - Mutual Exclusion: If both flag[0] and flag[1] are TRUE, the turn
+        variable breaks the tie. Only one process can have turn == its
+        index, so the other will be stuck in the while loop.
+      - Progress: If one process doesn't want to enter (flag[j] = FALSE),
+        the other enters immediately.
+      - Bounded Waiting: After one process exits and sets flag[i] = FALSE,
+        the other can enter.
+
+    IMPORTANT CAVEAT: On modern out-of-order CPUs, Peterson's algorithm
+    requires memory barriers (fences) to prevent instruction reordering.
+    Without barriers, the compiler or CPU may reorder the flag and turn
+    writes, breaking correctness. This is why hardware-supported atomic
+    operations are preferred in practice.
+
+        Deeper: Memory Ordering and Barriers
+        ─────────────────────────────────────
+        Modern CPUs execute instructions out of order for performance. A
+        store to memory may be delayed in a write buffer and become visible
+        to other CPUs after subsequent instructions have already executed.
+        Memory barriers (fences) force ordering:
+          - lfence: Load fence (all prior loads complete before later loads)
+          - sfence: Store fence (all prior stores complete before later
+            stores)
+          - mfence: Full memory fence (both)
+        In the Linux kernel: smp_mb(), smp_rmb(), smp_wmb() provide
+        portable memory barriers. In C11/C++11: atomic_thread_fence().
+
+METHOD 4: THE TSL (Test-and-Set-Lock) INSTRUCTION
+
+TSL is a hardware instruction that reads a memory word into a register and
+simultaneously writes a nonzero value to that memory location—as a single,
+atomic, indivisible operation. The CPU locks the memory bus during the TSL
+instruction, preventing other CPUs from accessing memory.
+
+    TSL REGISTER, LOCK
+    ; Atomically: REGISTER = LOCK; LOCK = 1;
+
+Using TSL for mutual exclusion:
+
+    enter_region:
+        TSL REGISTER, LOCK     ; Copy LOCK to REGISTER, set LOCK = 1
+        CMP REGISTER, #0       ; Was LOCK zero (unlocked)?
+        JNE enter_region       ; If not, loop (busy wait / spin)
+        RET                    ; Lock acquired, enter critical section
+
+    leave_region:
+        MOVE LOCK, #0          ; Set LOCK = 0 (unlock)
+        RET
+
+A similar instruction is XCHG (exchange), which atomically swaps a register
+value with a memory location. On x86, the LOCK prefix can be used with
+various instructions (LOCK XADD, LOCK CMPXCHG, etc.) to provide atomicity.
+
+Modern equivalent in C (GCC built-ins):
+
+    while (__sync_lock_test_and_set(&lock, 1)) ;  // spin
+    // critical section
+    __sync_lock_release(&lock);
+
+Or using C11 atomics:
+
+    while (atomic_flag_test_and_set(&lock)) ;  // spin
+    // critical section
+    atomic_flag_clear(&lock);
+
+METHOD 5: SLEEP AND WAKEUP
+
+The busy-waiting approaches (Peterson's, TSL) waste CPU cycles spinning. A
+better approach is to have a process that cannot enter its critical section
+go to sleep (block) and be woken up when the critical section becomes
+available.
+
+    sleep(): Causes the calling process to block (moved to Blocked state).
+    wakeup(pid): Wakes up the specified process (moved to Ready state).
+
+THE PRODUCER-CONSUMER PROBLEM (Bounded Buffer)
+
+This is a classic synchronization problem. A producer process generates data
+items and places them in a buffer. A consumer process takes items from the
+buffer. The buffer has a fixed size N.
+
+Rules:
+  - The producer must wait if the buffer is full.
+  - The consumer must wait if the buffer is empty.
+  - Only one process may access the buffer at a time.
+
+Broken solution with sleep/wakeup:
+
+    #define N 100
+    int count = 0;  // items in buffer
+
+    void producer(void) {
+        int item;
+        while (TRUE) {
+            item = produce_item();
+            if (count == N) sleep();       // buffer full
+            insert_item(item);
+            count = count + 1;
+            if (count == 1) wakeup(consumer);  // was empty, wake consumer
+        }
+    }
+
+    void consumer(void) {
+        int item;
+        while (TRUE) {
+            if (count == 0) sleep();       // buffer empty
+            item = remove_item();
+            count = count - 1;
+            if (count == N - 1) wakeup(producer);  // was full, wake producer
+        }
+    }
+
+The FATAL FLAW: The wakeup signal can be lost. If the consumer reads
+count = 0 and is about to sleep, but before it actually calls sleep(), the
+scheduler switches to the producer, which inserts an item, increments count
+to 1, and calls wakeup(consumer). But the consumer isn't sleeping yet—the
+wakeup is lost. When the consumer finally runs, it calls sleep() and may
+never wake up (both processes sleep forever—DEADLOCK).
+
+This flaw motivates the invention of semaphores.
+
+────────────────────────────────────────────────────
+2.2.4  Types of Mutual Exclusion Mechanisms
+────────────────────────────────────────────────────
+
+SEMAPHORES
+
+A semaphore, introduced by Edsger Dijkstra in 1965, is an integer variable S
+that, apart from initialization, is accessed only through two atomic
+operations:
+
+  P(S) or wait(S) or down(S):
+      while (S <= 0) ;  // wait (in practice, blocks the process)
+      S = S - 1;
+
+  V(S) or signal(S) or up(S):
+      S = S + 1;
+
+CRITICAL: The P and V operations are themselves atomic—they cannot be
+interrupted midway. The test-and-decrement in P and the increment in V
+are indivisible.
+
+Types of Semaphores:
+  - Binary Semaphore (Mutex): S can only be 0 or 1. Used for mutual
+    exclusion. Also called a mutex (mutual exclusion) lock.
+  - Counting Semaphore: S can be any non-negative integer. Used to control
+    access to a resource with a finite number of instances (e.g., a pool
+    of N database connections).
+
+Producer-Consumer with Semaphores:
+
+    #define N 100
+    semaphore mutex = 1;      // Mutual exclusion for buffer access
+    semaphore empty = N;      // Counts empty slots (initially N)
+    semaphore full = 0;       // Counts full slots (initially 0)
+
+    void producer(void) {
+        int item;
+        while (TRUE) {
+            item = produce_item();
+            down(&empty);         // Decrement empty count (wait if 0)
+            down(&mutex);         // Enter critical section
+            insert_item(item);
+            up(&mutex);           // Leave critical section
+            up(&full);            // Increment full count
+        }
+    }
+
+    void consumer(void) {
+        int item;
+        while (TRUE) {
+            down(&full);          // Decrement full count (wait if 0)
+            down(&mutex);         // Enter critical section
+            item = remove_item();
+            up(&mutex);           // Leave critical section
+            up(&empty);           // Increment empty count
+            consume_item(item);
+        }
+    }
+
+    Micro-topic: Semaphore Implementation in the Linux Kernel
+    ──────────────────────────────────────────────────────────
+    In the Linux kernel, semaphores are defined in include/linux/semaphore.h:
+
+        struct semaphore {
+            raw_spinlock_t lock;      // Protects the semaphore internals
+            unsigned int count;       // The semaphore count
+            struct list_head wait_list; // Sleeping tasks waiting
+        };
+
+    The down() function atomically decrements count. If count would go below
+    zero, the calling task is added to the wait_list and put to sleep. The
+    up() function increments count and wakes the first task on the wait_list.
+
+    In practice, the Linux kernel has largely moved from semaphores to
+    mutexes (struct mutex) for binary locking because mutexes have better
+    debugging support and stricter semantics (only the lock holder can
+    unlock it).
+
+        Deeper: Futex (Fast Userspace Mutex)
+        ────────────────────────────────────
+        In Linux user space, the primary synchronization primitive is the
+        futex (Fast Userspace Mutex), defined by the futex() system call.
+        The key insight is that in the uncontended case (common case), the
+        lock/unlock can be done entirely in user space using atomic
+        operations—no system call needed. Only when there's contention
+        (another thread is waiting) does the futex() system call trap into
+        the kernel to put the calling thread to sleep or wake it up. This
+        dramatically reduces overhead. POSIX pthread_mutex_t on Linux is
+        implemented using futexes.
+
+MONITORS
+
+A monitor is a high-level synchronization construct (proposed by C.A.R. Hoare
+and Per Brinch Hansen) that encapsulates shared data, the operations on that
+data, and the synchronization code into a single module. Only one process may
+be active inside a monitor at any time—the mutual exclusion is guaranteed by
+the monitor construct itself (enforced by the compiler or runtime).
+
+Structure of a Monitor:
+
+    monitor monitor_name {
+        // shared variable declarations
+
+        condition x, y;
+
+        procedure P1(...) { ... }
+        procedure P2(...) { ... }
+        ...
+        initialization_code(...) { ... }
+    }
+
+Condition variables within monitors:
+  - x.wait(): The calling process is suspended and placed in a queue
+    associated with condition x. The monitor lock is released, allowing
+    another process to enter.
+  - x.signal(): Wakes up one process waiting on condition x. If no process
+    is waiting, the signal has no effect (it's lost—unlike semaphores
+    where signal increments the counter).
+
+The key difference between monitors and semaphores is that monitors provide
+mutual exclusion automatically, whereas with semaphores, the programmer must
+explicitly call down/up in the correct order. Monitors are less error-prone.
+
+Real-World Context: Java's synchronized keyword and wait()/notify() methods
+implement monitor-like semantics. Python's threading.Condition class provides
+similar functionality.
+
+    Micro-topic: Hoare Monitors vs. Mesa Monitors
+    ───────────────────────────────────────────────
+    When a process calls signal() on a condition variable in a monitor, a
+    question arises: should the signaling process or the awakened process
+    run next?
+
+    - Hoare Monitors: The signaling process immediately suspends, and the
+      awakened process runs. This guarantees that the condition is still
+      true when the awakened process resumes. Simpler for correctness
+      proofs but harder to implement (extra context switch).
+
+    - Mesa Monitors (used in most real systems): The signaling process
+      continues to run, and the awakened process is placed in the Ready
+      queue. The condition may no longer be true when the awakened process
+      eventually runs, so it must re-check the condition in a while loop:
+
+          while (!condition) wait(cv);    // Mesa semantics
+
+      This is why in Java, wait() should always be called in a while loop,
+      not an if statement.
+
+BOUNDED BUFFER (using Monitors):
+
+    monitor ProducerConsumer {
+        condition full, empty;
+        int count = 0;
+
+        void insert(int item) {
+            if (count == N) wait(full);    // Buffer full, wait
+            insert_item(item);
+            count++;
+            if (count == 1) signal(empty); // Buffer was empty, wake consumer
+        }
+
+        int remove() {
+            if (count == 0) wait(empty);   // Buffer empty, wait
+            int item = remove_item();
+            count--;
+            if (count == N - 1) signal(full);  // Buffer was full, wake producer
+            return item;
+        }
+    }
+
+MESSAGE PASSING
+
+Message passing is an IPC mechanism where processes communicate by sending
+and receiving messages, without sharing memory. It is the fundamental IPC
+mechanism in microkernel operating systems and distributed systems.
+
+Two primitives:
+  - send(destination, &message): Send a message to a destination process.
+  - receive(source, &message): Receive a message from a source process
+    (blocks if no message is available).
+
+Design issues:
+  - Addressing: Direct (specify PID) vs. Indirect (via mailboxes/ports).
+  - Synchronization: Blocking (synchronous) send/receive vs. Non-blocking
+    (asynchronous) send/receive.
+  - Buffering: Zero-capacity (rendezvous), bounded capacity, unbounded
+    capacity.
+
+Producer-Consumer with Message Passing:
+
+    #define N 100
+    void producer(void) {
+        int item;
+        message m;
+        while (TRUE) {
+            item = produce_item();
+            receive(consumer, &m);    // Wait for an empty message
+            build_message(&m, item);
+            send(consumer, &m);       // Send full message
+        }
+    }
+    void consumer(void) {
+        int item;
+        message m;
+        for (int i = 0; i < N; i++) send(producer, &m);  // Send N empties
+        while (TRUE) {
+            receive(producer, &m);    // Wait for a full message
+            item = extract_item(&m);
+            send(producer, &m);       // Return empty message
+            consume_item(item);
+        }
+    }
+
+    Micro-topic: Linux IPC Mechanisms
+    ──────────────────────────────────
+    Linux provides several IPC mechanisms beyond basic signals:
+      - Pipes (anonymous and named/FIFO)
+      - POSIX Message Queues (mq_open, mq_send, mq_receive)
+      - System V Message Queues (msgget, msgsnd, msgrcv)
+      - Shared Memory (shmget/shmat or POSIX shm_open/mmap)
+      - Sockets (UNIX domain sockets for local IPC, TCP/UDP for network)
+      - Signals (kill, sigaction)
+      - eventfd, signalfd, timerfd (Linux-specific event notification)
+
+        Deeper: D-Bus — The Modern Linux IPC
+        ─────────────────────────────────────
+        D-Bus is the standard IPC mechanism for desktop Linux applications
+        and system services. It provides a message bus for inter-process
+        communication with a well-defined protocol, introspectable
+        interfaces, and support for signals (broadcast notifications).
+        On Arch Linux, systemd uses D-Bus extensively. The system bus
+        (accessible at /run/dbus/system_bus_socket) allows services to
+        communicate with systemd and each other.
+
+────────────────────────────────────────────────────
+2.2.5  Classical IPC Problems
+────────────────────────────────────────────────────
+
+THE DINING PHILOSOPHERS PROBLEM
+
+Five philosophers sit around a circular table. Each philosopher alternates
+between thinking and eating. Between each pair of adjacent philosophers is a
+single fork (5 forks total). To eat, a philosopher needs both the left and
+right forks.
+
+    Philosopher 0       Philosopher 1
+          \  fork 0  /
+           ╲       ╱
+    fork 4   TABLE   fork 1
+           ╱       ╲
+          /  fork 3  \
+    Philosopher 4       Philosopher 2
+               fork 2
+            Philosopher 3
+
+The challenge: Design a protocol that prevents deadlock (all philosophers
+pick up their left fork simultaneously and wait forever for the right fork)
+and prevents starvation (some philosopher never gets to eat).
+
+Solution with Semaphores (Tanenbaum's solution):
+
+    #define N 5
+    #define LEFT (i + N - 1) % N
+    #define RIGHT (i + 1) % N
+    #define THINKING 0
+    #define HUNGRY 1
+    #define EATING 2
+
+    int state[N];                 // State of each philosopher
+    semaphore mutex = 1;          // Mutual exclusion for state array
+    semaphore s[N] = {0, ...};    // One semaphore per philosopher
+
+    void philosopher(int i) {
+        while (TRUE) {
+            think();
+            take_forks(i);
+            eat();
+            put_forks(i);
+        }
+    }
+
+    void take_forks(int i) {
+        down(&mutex);
+        state[i] = HUNGRY;
+        test(i);                  // Try to acquire both forks
+        up(&mutex);
+        down(&s[i]);              // Block if forks not acquired
+    }
+
+    void put_forks(int i) {
+        down(&mutex);
+        state[i] = THINKING;
+        test(LEFT);               // See if left neighbor can eat now
+        test(RIGHT);              // See if right neighbor can eat now
+        up(&mutex);
+    }
+
+    void test(int i) {
+        if (state[i] == HUNGRY
+            && state[LEFT] != EATING
+            && state[RIGHT] != EATING) {
+            state[i] = EATING;
+            up(&s[i]);            // Wake up philosopher i
+        }
+    }
+
+THE READERS AND WRITERS PROBLEM
+
+A shared database (or file) is accessed by two types of processes:
+  - Readers: Only read the data (can read concurrently with other readers).
+  - Writers: Modify the data (must have exclusive access—no other readers
+    or writers allowed).
+
+First Readers-Writers Problem (readers preference):
+  Multiple readers can read simultaneously, but a writer must wait until all
+  readers have finished. This can starve writers if readers arrive
+  continuously.
+
+    semaphore mutex = 1;   // Protects rc
+    semaphore db = 1;      // Controls database access
+    int rc = 0;            // Reader count
+
+    void reader(void) {
+        while (TRUE) {
+            down(&mutex);
+            rc++;
+            if (rc == 1) down(&db);  // First reader locks out writers
+            up(&mutex);
+
+            read_database();
+
+            down(&mutex);
+            rc--;
+            if (rc == 0) up(&db);    // Last reader unlocks for writers
+            up(&mutex);
+
+            use_data_read();
+        }
+    }
+
+    void writer(void) {
+        while (TRUE) {
+            create_data();
+            down(&db);             // Exclusive access to database
+            write_database();
+            up(&db);
+        }
+    }
+
+Real-World Context: The readers-writers pattern is implemented in the Linux
+kernel as rwlock_t (read-write spinlocks) and struct rw_semaphore (read-write
+semaphores). In user space, pthread_rwlock_t provides the same semantics.
+
+THE SLEEPING BARBER PROBLEM
+
+A barbershop has one barber, one barber chair, and N waiting chairs. When
+there are no customers, the barber sleeps. When a customer arrives: if all
+waiting chairs are full, the customer leaves; otherwise, if the barber is
+sleeping, the customer wakes the barber; otherwise, the customer sits in a
+waiting chair.
+
+    #define CHAIRS 5
+    semaphore customers = 0;    // Customers waiting (signals barber)
+    semaphore barbers = 0;      // Barber ready (signals customer)
+    semaphore mutex = 1;        // For mutual exclusion
+    int waiting = 0;            // Customers waiting (readable count)
+
+    void barber(void) {
+        while (TRUE) {
+            down(&customers);   // Sleep if no customers
+            down(&mutex);
+            waiting--;
+            up(&barbers);       // Barber is ready
+            up(&mutex);
+            cut_hair();
+        }
+    }
+
+    void customer(void) {
+        down(&mutex);
+        if (waiting < CHAIRS) {
+            waiting++;
+            up(&customers);     // Wake barber if sleeping
+            up(&mutex);
+            down(&barbers);     // Wait for barber to be ready
+            get_haircut();
+        } else {
+            up(&mutex);         // Shop is full, leave
+        }
+    }
+
+────────────────────────────────────────────────────
+2.2.6  Serializability: Locking and Timestamp Protocols
+────────────────────────────────────────────────────
+
+In database and transaction processing, serializability ensures that the
+concurrent execution of transactions produces the same result as some serial
+(sequential) execution.
+
+LOCKING PROTOCOLS
+
+Two-Phase Locking (2PL):
+  - Phase 1 (Growing phase): A transaction may acquire locks but may not
+    release any lock.
+  - Phase 2 (Shrinking phase): A transaction may release locks but may not
+    acquire any new lock.
+
+    Transaction T:
+      LOCK(A)     ← Growing phase
+      LOCK(B)     ←
+      ...operations...
+      UNLOCK(A)   ← Shrinking phase
+      UNLOCK(B)   ←
+
+2PL guarantees serializability but may lead to deadlocks.
+
+Strict 2PL: All exclusive (write) locks are held until the transaction commits
+or aborts. Prevents cascading rollbacks.
+
+TIMESTAMP PROTOCOLS
+
+Each transaction T_i is assigned a unique timestamp TS(T_i) when it enters
+the system (e.g., a logical counter or system clock value). For each data
+item Q:
+  - W-timestamp(Q): Largest timestamp of any transaction that successfully
+    executed write(Q).
+  - R-timestamp(Q): Largest timestamp of any transaction that successfully
+    executed read(Q).
+
+Timestamp Ordering Protocol:
+  - If T_i wants to read(Q):
+    If TS(T_i) < W-timestamp(Q): T_i is trying to read a value that was
+    already overwritten → T_i is rolled back (abort and restart with new
+    timestamp).
+    Otherwise: Read is allowed; R-timestamp(Q) = max(R-timestamp(Q), TS(T_i)).
+
+  - If T_i wants to write(Q):
+    If TS(T_i) < R-timestamp(Q): A later transaction already read the old
+    value → T_i is rolled back.
+    If TS(T_i) < W-timestamp(Q): T_i is trying to write an obsolete value →
+    T_i is rolled back (or ignored under Thomas's Write Rule).
+    Otherwise: Write is allowed; W-timestamp(Q) = TS(T_i).
+
+
+================================================================================
+2.3  PROCESS SCHEDULING
+================================================================================
+
+────────────────────────────────────────────────────
+2.3.1  Basic Concepts and Types
+────────────────────────────────────────────────────
+
+Process scheduling is the activity of the operating system that determines
+which process runs at any given point in time. The process scheduler is one
+of the most critical components of the OS, as it directly affects system
+performance, responsiveness, and fairness.
+
+WHY SCHEDULING IS NEEDED:
+In a multiprogramming environment, there are typically more processes ready to
+run than there are CPUs. The scheduler must decide which process gets the CPU,
+for how long, and in what order.
+
+TYPES OF SCHEDULING:
+
+  1. Long-term Scheduling (Job Scheduler):
+     Controls the degree of multiprogramming—how many processes are loaded
+     into memory. It selects processes from the job pool (on disk) and loads
+     them into memory. Runs infrequently (seconds to minutes). Not present
+     in most modern time-sharing systems (e.g., Linux does not have a
+     long-term scheduler; processes are loaded on demand).
+
+  2. Short-term Scheduling (CPU Scheduler):
+     Selects which process in the ready queue gets the CPU next. Runs very
+     frequently (every few milliseconds on each timer interrupt). This is
+     what we typically mean by "process scheduling."
+
+  3. Medium-term Scheduling (Swapper):
+     Temporarily removes processes from memory (swaps them to disk) to
+     reduce the degree of multiprogramming. Swapped-out processes are later
+     swapped back in to resume execution. This is related to virtual memory
+     management.
+
+PREEMPTIVE vs. NON-PREEMPTIVE SCHEDULING:
+
+  Non-preemptive (Cooperative): Once a process is allocated the CPU, it
+  keeps the CPU until it voluntarily releases it (by terminating, performing
+  I/O, or calling yield()). Windows 3.1 and classic Mac OS used cooperative
+  scheduling.
+
+  Preemptive: The OS can forcibly take the CPU away from a running process
+  (via a timer interrupt) and give it to another process. All modern
+  operating systems (Linux, Windows, macOS) use preemptive scheduling.
+
+SCHEDULING CONTEXTS:
+
+  Batch scheduling: Optimize throughput and turnaround time. No interactive
+  users, so longer time quanta are acceptable.
+
+  Interactive scheduling: Optimize response time. Users expect immediate
+  feedback. Short time quanta.
+
+  Real-time scheduling: Meet deadlines. Predictability is more important
+  than average throughput.
+
+    Micro-topic: The Linux Scheduling Classes
+    ──────────────────────────────────────────
+    Linux supports multiple scheduling policies organized into scheduling
+    classes (from highest to lowest priority):
+
+      1. SCHED_DEADLINE: Earliest Deadline First (EDF) scheduler for hard
+         real-time tasks. Tasks specify runtime, deadline, and period.
+
+      2. SCHED_FIFO: Real-time FIFO. Highest-priority real-time task runs
+         until it blocks or yields. No time quantum.
+
+      3. SCHED_RR: Real-time Round Robin. Like SCHED_FIFO but with a time
+         quantum (default 100ms). When the quantum expires, the task is
+         moved to the end of the queue for its priority level.
+
+      4. SCHED_OTHER (SCHED_NORMAL): The default policy for regular
+         processes. Uses the Completely Fair Scheduler (CFS).
+
+      5. SCHED_BATCH: Like SCHED_OTHER but for CPU-intensive batch tasks.
+         Slightly disfavored in scheduling decisions.
+
+      6. SCHED_IDLE: Lowest priority. Only runs when no other tasks are
+         runnable.
+
+        Deeper: EEVDF (Earliest Eligible Virtual Deadline First)
+        ────────────────────────────────────────────────────────
+        As of Linux kernel 6.6 (2023), the CFS scheduler is being replaced
+        by EEVDF (Earliest Eligible Virtual Deadline First). EEVDF assigns
+        each task a virtual deadline based on its weight and the current
+        virtual time. Tasks are eligible to run when their virtual time is
+        at or below the global virtual time. Among eligible tasks, the one
+        with the earliest virtual deadline is selected. This provides
+        better latency guarantees than pure vruntime-based CFS, especially
+        for latency-sensitive workloads.
+
+────────────────────────────────────────────────────
+2.3.2  Scheduling Criteria and Performance Analysis
+────────────────────────────────────────────────────
+
+Scheduling algorithms are evaluated on several criteria:
+
+  1. CPU Utilization: Keep the CPU as busy as possible. In practice, ranges
+     from 40% (light load) to 90% (heavy load).
+
+     $$\text{CPU Utilization} = \frac{\text{Total CPU Busy Time}}{\text{Total Time}} \times 100\%$$
+
+  2. Throughput: Number of processes completed per unit time.
+
+     $$\text{Throughput} = \frac{\text{Number of Processes Completed}}{\text{Total Time}}$$
+
+  3. Turnaround Time: Total time from process submission to completion.
+
+     $$\text{Turnaround Time} = \text{Completion Time} - \text{Arrival Time}$$
+
+  4. Waiting Time: Total time a process spends in the ready queue.
+
+     $$\text{Waiting Time} = \text{Turnaround Time} - \text{Burst Time}$$
+
+  5. Response Time: Time from submission of a request until the first
+     response is produced (not the total output, just the first response).
+
+     $$\text{Response Time} = \text{First Run Time} - \text{Arrival Time}$$
+
+────────────────────────────────────────────────────
+2.3.3  Scheduling Algorithms with Solved Examples
+────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════
+ALGORITHM 1: FIRST COME FIRST SERVED (FCFS)
+═══════════════════════════════════════════════════
+
+FCFS is the simplest scheduling algorithm. Processes are executed in the order
+they arrive in the ready queue. It is non-preemptive: once a process starts
+executing, it runs to completion (or until it blocks).
+
+Implementation: A simple FIFO queue. New processes are added to the tail.
+The scheduler always selects the process at the head.
+
+Advantages: Simple to understand and implement.
+Disadvantages: Convoy effect—short processes behind a long process suffer
+large waiting times. Poor for interactive systems.
+
+────────────────────────────
+FCFS EXAMPLE SET 1 (Basic)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              6
+    P2          1              8
+    P3          2              7
+    P4          3              3
+
+  Gantt Chart:
+  |    P1    |      P2      |     P3     |  P4  |
+  0          6             14           21      24
+
+  Completion Time (CT):
+    P1: 6    P2: 14    P3: 21    P4: 24
+
+  Turnaround Time (TAT = CT - AT):
+    P1: 6 - 0 = 6
+    P2: 14 - 1 = 13
+    P3: 21 - 2 = 19
+    P4: 24 - 3 = 21
+
+  Waiting Time (WT = TAT - BT):
+    P1: 6 - 6 = 0
+    P2: 13 - 8 = 5
+    P3: 19 - 7 = 12
+    P4: 21 - 3 = 18
+
+  Average Turnaround Time:
+  $$\text{Avg TAT} = \frac{6 + 13 + 19 + 21}{4} = \frac{59}{4} = 14.75$$
+
+  Average Waiting Time:
+  $$\text{Avg WT} = \frac{0 + 5 + 12 + 18}{4} = \frac{35}{4} = 8.75$$
+
+────────────────────────────
+FCFS EXAMPLE SET 2 (Convoy Effect)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0             24
+    P2          2              3
+    P3          4              3
+
+  Gantt Chart:
+  |            P1                |  P2  |  P3  |
+  0                            24     27     30
+
+  TAT: P1: 24   P2: 25   P3: 26
+  WT:  P1: 0    P2: 22   P3: 23
+
+  $$\text{Avg WT} = \frac{0 + 22 + 23}{3} = \frac{45}{3} = 15.0$$
+
+  The convoy effect: P2 and P3 (short processes) wait a long time behind P1.
+
+────────────────────────────
+FCFS EXAMPLE SET 3 (Same Arrival Time)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              10
+    P2          0               5
+    P3          0               8
+    P4          0               2
+
+  Order: P1, P2, P3, P4 (by PID)
+
+  Gantt Chart:
+  |    P1     | P2  |   P3    | P4|
+  0          10    15        23  25
+
+  TAT: P1: 10  P2: 15  P3: 23  P4: 25
+  WT:  P1: 0   P2: 10  P3: 15  P4: 23
+
+  $$\text{Avg TAT} = \frac{10 + 15 + 23 + 25}{4} = \frac{73}{4} = 18.25$$
+  $$\text{Avg WT} = \frac{0 + 10 + 15 + 23}{4} = \frac{48}{4} = 12.0$$
+
+────────────────────────────
+FCFS EXAMPLE SET 4 (With I/O — Staggered Arrivals)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              5
+    P2          1              3
+    P3          3              1
+    P4          5              2
+    P5          6              4
+
+  Gantt Chart:
+  | P1  |  P2 | P3|  P4 |  P5  |
+  0     5     8  9     11     15
+
+  CT: P1:5  P2:8  P3:9  P4:11  P5:15
+  TAT: 5    7     6     6      9
+  WT:  0    4     5     4      5
+
+  $$\text{Avg TAT} = \frac{5+7+6+6+9}{5} = \frac{33}{5} = 6.6$$
+  $$\text{Avg WT} = \frac{0+4+5+4+5}{5} = \frac{18}{5} = 3.6$$
+
+
+═══════════════════════════════════════════════════
+ALGORITHM 2: SHORTEST JOB FIRST (SJF) — Non-Preemptive
+═══════════════════════════════════════════════════
+
+SJF selects the process with the smallest burst time from the ready queue.
+If two processes have the same burst time, FCFS is used as a tiebreaker.
+SJF is provably optimal for minimizing average waiting time (among non-
+preemptive algorithms).
+
+The main difficulty with SJF is that the burst time of a process is not known
+in advance. It must be estimated, typically using exponential averaging:
+
+$$\tau_{n+1} = \alpha \cdot t_n + (1 - \alpha) \cdot \tau_n$$
+
+Where:
+  $t_n$ = actual burst time of the nth CPU burst
+  $\tau_n$ = predicted value for the nth burst
+  $\alpha$ = smoothing factor (0 ≤ α ≤ 1), typically 0.5
+
+────────────────────────────
+SJF EXAMPLE SET 1 (Basic)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              6
+    P2          2              8
+    P3          4              7
+    P4          5              3
+
+  Time 0: Only P1 available → Run P1 (finishes at 6)
+  Time 6: P2, P3, P4 available → Shortest is P4 (BT=3) → Run P4 (finishes 9)
+  Time 9: P2, P3 available → Shortest is P3 (BT=7) → Run P3 (finishes 16)
+  Time 16: P2 → Run P2 (finishes 24)
+
+  Gantt Chart:
+  |    P1    |  P4  |     P3     |      P2      |
+  0          6      9           16             24
+
+  CT: P1:6  P4:9  P3:16  P2:24
+  TAT: P1:6  P2:22  P3:12  P4:4
+  WT:  P1:0  P2:14  P3:5   P4:1
+
+  $$\text{Avg TAT} = \frac{6+22+12+4}{4} = \frac{44}{4} = 11.0$$
+  $$\text{Avg WT} = \frac{0+14+5+1}{4} = \frac{20}{4} = 5.0$$
+
+────────────────────────────
+SJF EXAMPLE SET 2 (All Arrive at Time 0)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              7
+    P2          0              4
+    P3          0              1
+    P4          0              4
+
+  Sorted by burst: P3(1), P2(4), P4(4), P1(7)
+
+  Gantt Chart:
+  |P3|  P2  |  P4  |     P1     |
+  0  1      5      9           16
+
+  CT: P3:1  P2:5  P4:9  P1:16
+  TAT: 1    5     9     16
+  WT:  0    1     5     9
+
+  $$\text{Avg WT} = \frac{0+1+5+9}{4} = \frac{15}{4} = 3.75$$
+
+  Compare FCFS (order P1,P2,P3,P4): Avg WT = (0+7+11+12)/4 = 7.5
+  SJF reduces average waiting time by 50%!
+
+────────────────────────────
+SJF EXAMPLE SET 3 (Complex Staggered Arrivals)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              8
+    P2          1              4
+    P3          2              9
+    P4          3              5
+    P5          4              2
+
+  Time 0: Only P1 → Run P1 (finishes at 8)
+  Time 8: P2(4), P3(9), P4(5), P5(2) → Shortest P5(2) → Run P5 (finishes 10)
+  Time 10: P2(4), P3(9), P4(5) → Shortest P2(4) → Run P2 (finishes 14)
+  Time 14: P3(9), P4(5) → Shortest P4(5) → Run P4 (finishes 19)
+  Time 19: P3(9) → Run P3 (finishes 28)
+
+  Gantt:
+  |   P1    | P5|  P2  | P4   |     P3       |
+  0         8  10     14     19             28
+
+  TAT: P1:8  P2:13  P3:26  P4:16  P5:6
+  WT:  P1:0  P2:9   P3:17  P4:11  P5:4
+
+  $$\text{Avg WT} = \frac{0+9+17+11+4}{5} = \frac{41}{5} = 8.2$$
+
+────────────────────────────
+SJF EXAMPLE SET 4 (With Ties)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              3
+    P2          1              3
+    P3          2              3
+    P4          3              3
+
+  Time 0: P1 → Run P1 (finishes at 3)
+  Time 3: P2(3), P3(3), P4(3) → All same BT, FCFS tiebreak → P2
+  Time 6: P3(3), P4(3) → P3
+  Time 9: P4
+
+  Gantt:
+  |  P1  |  P2  |  P3  |  P4  |
+  0      3      6      9     12
+
+  TAT: 3, 5, 7, 9    WT: 0, 2, 4, 6
+
+  $$\text{Avg WT} = \frac{0+2+4+6}{4} = \frac{12}{4} = 3.0$$
+
+
+═══════════════════════════════════════════════════
+ALGORITHM 3: SHORTEST REMAINING TIME NEXT (SRTN / SRTF)
+═══════════════════════════════════════════════════
+
+SRTN is the preemptive version of SJF. Whenever a new process arrives in the
+ready queue, the scheduler compares its burst time with the remaining burst
+time of the currently running process. If the new process has a shorter
+remaining time, the current process is preempted.
+
+────────────────────────────
+SRTN EXAMPLE SET 1 (Basic)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              8
+    P2          1              4
+    P3          2              9
+    P4          3              5
+
+  Time 0: P1 starts (remaining: 8)
+  Time 1: P2 arrives (BT=4). P1 remaining=7. 4<7 → Preempt P1, run P2.
+  Time 2: P3 arrives (BT=9). P2 remaining=3. 9>3 → P2 continues.
+  Time 3: P4 arrives (BT=5). P2 remaining=2. 5>2 → P2 continues.
+  Time 5: P2 finishes. Ready: P1(rem=7), P3(9), P4(5). Shortest=P4 → Run P4.
+  Time 10: P4 finishes. Ready: P1(7), P3(9). Shortest=P1 → Run P1.
+  Time 17: P1 finishes. Run P3.
+  Time 26: P3 finishes.
+
+  Gantt:
+  |P1| P2  | P4   |   P1      |     P3       |
+  0  1     5     10          17             26
+
+  CT: P1:17  P2:5  P3:26  P4:10
+  TAT: P1:17  P2:4  P3:24  P4:7
+  WT:  P1:9   P2:0  P3:15  P4:2
+
+  $$\text{Avg WT} = \frac{9+0+15+2}{4} = \frac{26}{4} = 6.5$$
+
+────────────────────────────
+SRTN EXAMPLE SET 2 (Frequent Preemption)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              7
+    P2          2              4
+    P3          4              1
+    P4          5              4
+
+  Time 0: P1 starts (rem=7)
+  Time 2: P2 arrives (BT=4). P1 rem=5. 4<5 → Preempt, run P2.
+  Time 4: P3 arrives (BT=1). P2 rem=2. 1<2 → Preempt, run P3.
+  Time 5: P3 finishes. P4 arrives (BT=4). Ready: P1(5), P2(2), P4(4).
+          Shortest=P2(2) → Run P2.
+  Time 7: P2 finishes. Ready: P1(5), P4(4). Shortest=P4 → Run P4.
+  Time 11: P4 finishes. Run P1.
+  Time 16: P1 finishes.
+
+  Gantt:
+  | P1 | P2|P3| P2| P4  |  P1    |
+  0    2   4  5   7    11       16
+
+  CT: P1:16  P2:7  P3:5  P4:11
+  TAT: 16    5     1     6
+  WT:  9     1     0     2
+
+  $$\text{Avg WT} = \frac{9+1+0+2}{4} = \frac{12}{4} = 3.0$$
+
+────────────────────────────
+SRTN EXAMPLE SET 3 (All at Time 0 — Same as SJF)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              6
+    P2          0              2
+    P3          0              8
+    P4          0              3
+
+  At time 0: All available. Shortest=P2(2) → Run P2.
+  No new arrivals, so SRTN behaves like SJF.
+
+  Gantt:
+  |P2| P4 |  P1   |   P3    |
+  0  2    5      11        19
+
+  WT: P1:5  P2:0  P3:11  P4:2
+
+  $$\text{Avg WT} = \frac{5+0+11+2}{4} = \frac{18}{4} = 4.5$$
+
+────────────────────────────
+SRTN EXAMPLE SET 4 (Complex, 6 Processes)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time
+  ─────────────────────────────────────
+    P1          0              5
+    P2          1              3
+    P3          2              6
+    P4          3              1
+    P5          4              4
+    P6          6              2
+
+  Time 0: P1(5) starts.
+  Time 1: P2(3) arrives. P1 rem=4. 3<4 → Preempt, run P2.
+  Time 2: P3(6) arrives. P2 rem=2. 6>2 → P2 continues.
+  Time 3: P4(1) arrives. P2 rem=1. 1=1 → Tie, continue P2 (FCFS).
+  Time 4: P2 finishes. P5(4) arrives. Ready: P1(4),P3(6),P4(1),P5(4).
+          Shortest=P4(1) → Run P4.
+  Time 5: P4 finishes. Ready: P1(4),P3(6),P5(4). Shortest=P1(4) or P5(4).
+          Tie: P1 arrived first → Run P1.
+  Time 6: P6(2) arrives. P1 rem=3. 2<3 → Preempt, run P6.
+  Time 8: P6 finishes. Ready: P1(3),P3(6),P5(4). Shortest=P1(3) → Run P1.
+  Time 11: P1 finishes. Ready: P3(6),P5(4). Shortest=P5(4) → Run P5.
+  Time 15: P5 finishes. Run P3.
+  Time 21: P3 finishes.
+
+  Gantt:
+  |P1|  P2 |P4|P1|P6| P1 | P5  |  P3   |
+  0  1    4  5  6  8   11   15        21
+
+  CT: P1:11  P2:4  P3:21  P4:5  P5:15  P6:8
+  TAT: 11    3     19     2     11     2
+  WT:  6     0     13     1     7      0
+
+  $$\text{Avg WT} = \frac{6+0+13+1+7+0}{6} = \frac{27}{6} = 4.5$$
+
+
+═══════════════════════════════════════════════════
+ALGORITHM 4: ROUND ROBIN (RR)
+═══════════════════════════════════════════════════
+
+Round Robin is designed for time-sharing systems. Each process gets a small
+unit of CPU time called a time quantum (or time slice), typically 10-100 ms.
+After the quantum expires, the process is preempted and added to the end of
+the ready queue. If the process finishes before the quantum expires, it
+releases the CPU voluntarily.
+
+The ready queue is treated as a circular FIFO queue.
+
+Choice of quantum:
+  - Too large → Degenerates to FCFS.
+  - Too small → Too many context switches (overhead).
+  - Rule of thumb: 80% of CPU bursts should be shorter than the quantum.
+
+Real-World Context: The Linux CFS doesn't use a fixed time quantum like
+traditional RR. Instead, CFS dynamically calculates the "ideal runtime" for
+each process based on its weight (priority) and the number of runnable
+processes. The sched_min_granularity (default 0.75ms) and sched_latency
+(default 6ms for ≤8 tasks) parameters control this behavior. However, for
+SCHED_RR tasks, Linux uses a fixed quantum of 100ms by default.
+
+────────────────────────────
+RR EXAMPLE SET 1 (Basic, Quantum = 4)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time    Quantum = 4
+  ─────────────────────────────────────
+    P1          0             10
+    P2          0              5
+    P3          0              8
+
+  Ready queue at time 0: [P1, P2, P3]
+
+  Time 0-4: P1 runs (rem=6). Queue: [P2, P3, P1]
+  Time 4-8: P2 runs (rem=1). Queue: [P3, P1, P2]
+  Time 8-12: P3 runs (rem=4). Queue: [P1, P2, P3]
+  Time 12-16: P1 runs (rem=2). Queue: [P2, P3, P1]
+  Time 16-17: P2 runs (rem=0, done!). Queue: [P3, P1]
+  Time 17-21: P3 runs (rem=0, done!). Queue: [P1]
+  Time 21-23: P1 runs (rem=0, done!).
+
+  Gantt:
+  | P1 | P2 | P3 | P1 |P2|  P3 | P1|
+  0    4    8   12   16 17    21  23
+
+  CT: P1:23  P2:17  P3:21
+  TAT: 23   17     21
+  WT:  13   12     13
+
+  $$\text{Avg WT} = \frac{13+12+13}{3} = \frac{38}{3} = 12.67$$
+
+────────────────────────────
+RR EXAMPLE SET 2 (Staggered Arrivals, Quantum = 3)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time    Quantum = 3
+  ─────────────────────────────────────
+    P1          0              4
+    P2          1              5
+    P3          2              2
+    P4          3              1
+
+  Time 0-3: P1 runs (rem=1). At T=1: P2 arrives. T=2: P3 arrives. T=3: P4.
+            Queue: [P2, P3, P4, P1]
+  Time 3-6: P2 runs (rem=2). Queue: [P3, P4, P1, P2]
+  Time 6-8: P3 runs (rem=0, done!). Queue: [P4, P1, P2]
+  Time 8-9: P4 runs (rem=0, done!). Queue: [P1, P2]
+  Time 9-10: P1 runs (rem=0, done!). Queue: [P2]
+  Time 10-12: P2 runs (rem=0, done!).
+
+  Gantt:
+  |  P1  |  P2  | P3| P4|P1| P2|
+  0      3      6   8   9 10  12
+
+  CT: P1:10  P2:12  P3:8  P4:9
+  TAT: 10    11     6     6
+  WT:  6     6      4     5
+
+  $$\text{Avg WT} = \frac{6+6+4+5}{4} = \frac{21}{4} = 5.25$$
+
+────────────────────────────
+RR EXAMPLE SET 3 (Large Quantum = 10 → FCFS behavior)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time    Quantum = 10
+  ─────────────────────────────────────
+    P1          0              5
+    P2          0              3
+    P3          0              8
+
+  Time 0-5: P1 runs (done). Queue: [P2, P3]
+  Time 5-8: P2 runs (done). Queue: [P3]
+  Time 8-16: P3 runs (done).
+
+  Gantt (same as FCFS since all bursts < quantum):
+  | P1  | P2|   P3    |
+  0     5   8        16
+
+  WT: P1:0  P2:5  P3:8
+
+  $$\text{Avg WT} = \frac{0+5+8}{3} = \frac{13}{3} = 4.33$$
+
+────────────────────────────
+RR EXAMPLE SET 4 (Small Quantum = 2, Many Context Switches)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time    Quantum = 2
+  ─────────────────────────────────────
+    P1          0              5
+    P2          0              4
+    P3          0              2
+    P4          0              1
+
+  Queue: [P1, P2, P3, P4]
+
+  Time 0-2: P1 (rem=3). Queue: [P2, P3, P4, P1]
+  Time 2-4: P2 (rem=2). Queue: [P3, P4, P1, P2]
+  Time 4-6: P3 (rem=0, done!). Queue: [P4, P1, P2]
+  Time 6-7: P4 (rem=0, done!). Queue: [P1, P2]
+  Time 7-9: P1 (rem=1). Queue: [P2, P1]
+  Time 9-11: P2 (rem=0, done!). Queue: [P1]
+  Time 11-12: P1 (rem=0, done!).
+
+  Gantt:
+  |P1|P2|P3|P4|P1|P2|P1|
+  0  2  4  6  7  9 11 12
+
+  CT: P1:12  P2:11  P3:6  P4:7
+  TAT: 12   11     6     7
+  WT:  7    7      4     6
+
+  $$\text{Avg WT} = \frac{7+7+4+6}{4} = \frac{24}{4} = 6.0$$
+
+  Note: 6 context switches occurred. Smaller quantum = more overhead.
+
+
+═══════════════════════════════════════════════════
+ALGORITHM 5: PRIORITY SCHEDULING
+═══════════════════════════════════════════════════
+
+Each process is assigned a priority (integer). The CPU is allocated to the
+process with the highest priority. Equal-priority processes are scheduled FCFS.
+
+Priority can be:
+  - Static: Assigned at creation, doesn't change. Simple but may lead to
+    starvation of low-priority processes.
+  - Dynamic: Changes over time based on aging, CPU usage, etc.
+
+Convention varies: In some systems, lower number = higher priority (Linux
+real-time: 0 = highest). In others, higher number = higher priority.
+
+Problem: Starvation (indefinite blocking) — Low-priority processes may never
+execute if high-priority processes keep arriving.
+
+Solution: Aging — Gradually increase the priority of waiting processes over
+time until they eventually get to run.
+
+────────────────────────────
+PRIORITY EXAMPLE SET 1 (Non-Preemptive, Lower # = Higher Priority)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time   Priority
+  ────────────────────────────────────────────────
+    P1          0              10          3
+    P2          0               1          1
+    P3          0               2          4
+    P4          0               1          5
+    P5          0               5          2
+
+  Order by priority: P2(1), P5(2), P1(3), P3(4), P4(5)
+
+  Gantt:
+  |P2| P5   |    P1     | P3| P4|
+  0  1      6          16  18  19
+
+  WT: P1:6  P2:0  P3:16  P4:18  P5:1
+
+  $$\text{Avg WT} = \frac{6+0+16+18+1}{5} = \frac{41}{5} = 8.2$$
+
+────────────────────────────
+PRIORITY EXAMPLE SET 2 (Preemptive)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time   Priority (lower = higher)
+  ────────────────────────────────────────────────
+    P1          0              7          4
+    P2          1              4          2
+    P3          3              1          1
+    P4          4              5          3
+
+  Time 0: P1(pri=4) starts.
+  Time 1: P2(pri=2) arrives. 2<4 → Preempt P1, run P2.
+  Time 3: P3(pri=1) arrives. 1<2 → Preempt P2, run P3.
+  Time 4: P3 done. P4(pri=3) arrives. Ready: P1(4,rem=6), P2(2,rem=2), P4(3).
+          Highest priority = P2(2) → Run P2.
+  Time 6: P2 done. Ready: P1(4,rem=6), P4(3,rem=5). P4(3) → Run P4.
+  Time 11: P4 done. Run P1.
+  Time 17: P1 done.
+
+  Gantt:
+  |P1|  P2 |P3| P2| P4   |    P1     |
+  0  1     3  4   6     11          17
+
+  CT: P1:17  P2:6  P3:4  P4:11
+  TAT: 17   5     1     7
+  WT:  10   1     0     2
+
+  $$\text{Avg WT} = \frac{10+1+0+2}{4} = \frac{13}{4} = 3.25$$
+
+────────────────────────────
+PRIORITY EXAMPLE SET 3 (With Aging)
+────────────────────────────
+
+  Consider: After every 5 time units waiting, a process's priority improves
+  by 1 (lower number).
+
+  Process   Arrival Time   Burst Time   Initial Priority
+  ────────────────────────────────────────────────
+    P1          0              4          5
+    P2          0              3          2
+    P3          0              5          3
+
+  Without aging:
+    Order: P2(2) → P3(3) → P1(5)
+    P1 waits until time 8.
+
+  With aging (tracked every 5 units):
+    Time 0: Run P2(2). P1 waits, P3 waits.
+    Time 3: P2 done. P1(pri=5, waited 3), P3(pri=3, waited 3). → Run P3.
+    Time 5: P1 has waited 5 units → Priority becomes 4.
+    Time 8: P3 done. Run P1 (now pri=4 after aging).
+    Time 12: P1 done.
+
+  Aging prevents starvation by gradually boosting P1's priority.
+
+────────────────────────────
+PRIORITY EXAMPLE SET 4 (Mixed Arrivals, Preemptive)
+────────────────────────────
+
+  Process   Arrival Time   Burst Time   Priority
+  ────────────────────────────────────────────────
+    P1          0              6          3
+    P2          2              2          1
+    P3          4              3          4
+    P4          6              4          2
+
+  Time 0: P1(3) runs.
+  Time 2: P2(1) arrives. 1<3 → Preempt, run P2.
+  Time 4: P2 done. P3(4) arrives. Ready: P1(3,rem=4), P3(4). P1(3) → Run P1.
+  Time 6: P4(2) arrives. 2<3 → Preempt P1, run P4.
+  Time 10: P4 done. Ready: P1(3,rem=2), P3(4). P1(3) → Run P1.
+  Time 12: P1 done. Run P3.
+  Time 15: P3 done.
+
+  Gantt:
+  | P1 | P2|  P1 |  P4  | P1| P3 |
+  0    2   4     6     10  12   15
+
+  CT: P1:12  P2:4  P3:15  P4:10
+  TAT: 12   2     11     4
+  WT:  6    0     8      0
+
+  $$\text{Avg WT} = \frac{6+0+8+0}{4} = \frac{14}{4} = 3.5$$
+
+
+═══════════════════════════════════════════════════
+ALGORITHM 6: LOTTERY SCHEDULING
+═══════════════════════════════════════════════════
+
+Lottery scheduling is a probabilistic scheduling algorithm. Each process
+receives a certain number of "lottery tickets." At each scheduling decision,
+a ticket is drawn at random, and the process holding that ticket gets the CPU.
+
+Key properties:
+  - Proportional share: A process with 20% of the tickets gets approximately
+    20% of the CPU time over the long run.
+  - Responsive: A newly created process with tickets gets a chance to run
+    immediately (probabilistically).
+  - Simple: No complex data structures needed.
+  - Ticket transfer: A client can give its tickets to a server it's waiting
+    on, boosting the server's priority (priority donation).
+
+Example:
+  P1: 50 tickets (50%)
+  P2: 30 tickets (30%)
+  P3: 20 tickets (20%)
+
+  Draw random number 1-100. If 1-50 → P1, 51-80 → P2, 81-100 → P3.
+
+    Micro-topic: Stride Scheduling
+    ───────────────────────────────
+    Stride scheduling is a deterministic version of lottery scheduling. Each
+    process is assigned a "stride" inversely proportional to its ticket
+    count. The process with the lowest "pass" value runs next, and its pass
+    value is incremented by its stride.
+
+    Example:
+      P1: 100 tickets → stride = 10000/100 = 100
+      P2: 50 tickets  → stride = 10000/50 = 200
+      P3: 250 tickets → stride = 10000/250 = 40
+
+    Initially all pass values are 0. P3 (lowest stride) gets roughly 5x
+    more CPU time than P2.
+
+
+═══════════════════════════════════════════════════
+OTHER SCHEDULING ALGORITHMS (Brief Coverage)
+═══════════════════════════════════════════════════
+
+SHORTEST PROCESS NEXT (SPN): Same as SJF for non-preemptive scheduling.
+Uses past behavior to predict future burst lengths via exponential averaging.
+
+FAIR-SHARE SCHEDULING: CPU time is divided among groups (users or process
+groups) rather than individual processes. Each group gets its fair share
+regardless of how many processes it has. Linux's CFS achieves this via
+the cgroup CPU controller, where each cgroup has a weight.
+
+GUARANTEED SCHEDULING: If there are N users logged in, each gets 1/N of the
+CPU time. The system tracks actual vs. entitled CPU time and schedules the
+process that has used the least fraction of its entitlement.
+
+REAL-TIME SCHEDULING:
+  - Rate Monotonic Scheduling (RMS): Static priority based on period.
+    Shorter period = higher priority. Optimal among static-priority
+    preemptive algorithms for independent, periodic tasks.
+
+    Schedulability test: $$U = \sum_{i=1}^{n} \frac{C_i}{T_i} \leq n(2^{1/n} - 1)$$
+
+    Where $C_i$ is the computation time and $T_i$ is the period.
+
+  - Earliest Deadline First (EDF): Dynamic priority based on deadline. The
+    task with the earliest absolute deadline gets highest priority.
+    Schedulable if:
+
+    $$U = \sum_{i=1}^{n} \frac{C_i}{T_i} \leq 1$$
+
+
+================================================================================
+2.4  THREADS
+================================================================================
+
+────────────────────────────────────────────────────
+2.4.1  Definition of Threads
+────────────────────────────────────────────────────
+
+A thread is a basic unit of CPU utilization. It is the smallest sequence of
+programmed instructions that can be managed independently by the operating
+system's scheduler. A thread is sometimes called a lightweight process (LWP).
+
+While a process is defined by its address space and resources, a thread is
+defined by its execution context within a process:
+  - Thread ID
+  - Program counter (PC)
+  - Register set
+  - Stack
+
+All threads within a process share:
+  - Address space (code, data, heap)
+  - Open files (file descriptor table)
+  - Signals and signal handlers
+  - Current working directory
+  - User and group IDs
+
+    Micro-topic: Thread Control Block (TCB)
+    ────────────────────────────────────────
+    Just as a process has a PCB, each thread has a Thread Control Block (TCB)
+    that stores thread-specific information:
+      - Thread ID
+      - Thread state (running, ready, blocked)
+      - Saved register context (PC, SP, general-purpose registers)
+      - Stack pointer (each thread has its own stack)
+      - Priority
+      - Pointer to the parent PCB (the process it belongs to)
+      - Thread-local storage (TLS) pointer
+
+    In Linux, there is no separate TCB—threads are represented as task_struct
+    entries (just like processes). A thread group shares the same tgid
+    (thread group ID, which equals the PID of the main thread). Each thread
+    has a unique tid (thread ID, stored in the pid field of task_struct).
+
+        Deeper: Thread-Local Storage (TLS) Implementation
+        ─────────────────────────────────────────────────
+        TLS allows each thread to have its own copy of certain variables.
+        On x86-64 Linux, TLS is implemented using the FS segment register.
+        When a thread is created, a TLS block is allocated, and the FS
+        register is set to point to it (via the arch_prctl(ARCH_SET_FS, ...)
+        system call). Accessing a TLS variable (declared with __thread in
+        GCC or thread_local in C11) is compiled as a memory access relative
+        to the FS register, e.g., mov rax, fs:[offset].
+
+        The errno variable in glibc is a classic example of TLS—each
+        thread has its own errno so that system call failures in one thread
+        don't affect another.
+
+────────────────────────────────────────────────────
+2.4.2  Types of Thread Processes
+────────────────────────────────────────────────────
+
+SINGLE-THREADED PROCESS:
+  A process with only one thread of execution. The traditional UNIX process
+  model (before threads were introduced). One program counter, one stack,
+  one execution flow.
+
+  ┌─────────────────────────┐
+  │  Process                │
+  │  ┌───────────────────┐  │
+  │  │  Thread           │  │
+  │  │  Code, Data, Files│  │
+  │  │  Registers, Stack │  │
+  │  └───────────────────┘  │
+  └─────────────────────────┘
+
+MULTITHREADED PROCESS:
+  A process with multiple threads of execution sharing the same address space.
+  Each thread has its own PC, registers, and stack, but all threads share
+  the code, data (heap), and open files.
+
+  ┌──────────────────────────────────────────────────┐
+  │  Process                                         │
+  │  ┌──────────┐  ┌──────────┐  ┌──────────┐        │
+  │  │ Thread 1 │  │ Thread 2 │  │ Thread 3 │        │
+  │  │ Regs,    │  │ Regs,    │  │ Regs,    │        │
+  │  │ Stack    │  │ Stack    │  │ Stack    │        │
+  │  └──────────┘  └──────────┘  └──────────┘        │
+  │  ─────────────────────────────────────────       │
+  │   Shared: Code, Data (Heap), Files               │
+  └──────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────
+2.4.3  Benefits of Multithreading
+────────────────────────────────────────────────────
+
+  1. Responsiveness: In a GUI application, one thread handles user input
+     while another performs computation. The UI remains responsive even
+     during heavy processing.
+
+  2. Resource Sharing: Threads share the address space and resources of
+     their parent process, making communication between threads much cheaper
+     than between processes (no need for IPC mechanisms).
+
+  3. Economy: Thread creation is much faster than process creation (10-100x
+     on Linux) because there's no need to allocate a new address space,
+     copy file descriptors, etc. Context switching between threads of the
+     same process is also faster (no need to flush the TLB if they share
+     the same page table).
+
+  4. Scalability: On multi-core systems, different threads can run on
+     different cores simultaneously, achieving true parallelism. A single-
+     threaded process can only use one core.
+
+    Micro-topic: Why Thread Creation Is Faster Than Process Creation
+    ────────────────────────────────────────────────────────────────
+    When fork() creates a new process:
+      - A new task_struct is allocated
+      - The entire page table is copied (CoW)
+      - New mm_struct, files_struct, signal_struct are created
+      - The process gets a new PID
+
+    When clone() creates a new thread (with CLONE_VM|CLONE_FS|CLONE_FILES|
+    CLONE_SIGHAND|CLONE_THREAD flags):
+      - A new task_struct is allocated
+      - BUT the mm_struct, files_struct, signal_struct are SHARED (just
+        increment reference counts)
+      - Only a new stack and TLS area are allocated
+      - The thread gets a new tid but shares the tgid
+
+        Deeper: The clone() Flags
+        ─────────────────────────
+        The clone() system call is the unified mechanism for creating both
+        processes and threads in Linux. The flags parameter controls sharing:
+          CLONE_VM:      Share address space (memory)
+          CLONE_FS:      Share filesystem info (cwd, root, umask)
+          CLONE_FILES:   Share file descriptor table
+          CLONE_SIGHAND: Share signal handlers
+          CLONE_THREAD:  Same thread group (same tgid)
+          CLONE_PARENT_SETTID: Write child's tid to specified location
+          CLONE_CHILD_CLEARTID: Clear tid on exit (for futex-based joining)
+
+        fork() = clone(SIGCHLD, 0)
+        pthread_create() = clone(CLONE_VM|CLONE_FS|CLONE_FILES|
+                                 CLONE_SIGHAND|CLONE_THREAD|
+                                 CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID|
+                                 SIGCHLD, child_stack)
+
+────────────────────────────────────────────────────
+2.4.4  Thread Models
+────────────────────────────────────────────────────
+
+The relationship between user-level threads (managed by a user-space thread
+library) and kernel-level threads (managed by the OS kernel) defines the
+threading model.
+
+MANY-TO-ONE MODEL:
+  Many user-level threads are mapped to a single kernel thread. Thread
+  management is done in user space (efficient), but only one thread can
+  access the kernel at a time. If one thread makes a blocking system call,
+  the entire process blocks.
+
+  User threads:  T1  T2  T3  T4
+                   \  |  /  /
+                    \ | / /
+  Kernel thread:      K1
+
+  Advantages: Efficient thread management (no kernel transitions).
+  Disadvantages: Cannot exploit multiple cores; blocking calls block all
+  threads.
+  Examples: Green threads (early Java), GNU Portable Threads.
+
+ONE-TO-ONE MODEL:
+  Each user-level thread maps to one kernel thread. Provides true parallelism
+  on multi-core systems. Blocking one thread doesn't affect others. But
+  creating a user thread requires creating a kernel thread, which has more
+  overhead.
+
+  User threads:  T1  T2  T3  T4
+                  |   |   |   |
+  Kernel threads: K1  K2  K3  K4
+
+  Advantages: True parallelism, blocking doesn't affect other threads.
+  Disadvantages: More overhead per thread (kernel thread creation).
+  Examples: Linux (NPTL), Windows threads.
+
+MANY-TO-MANY MODEL:
+  Many user threads are multiplexed over a smaller or equal number of kernel
+  threads. The user-space thread scheduler distributes user threads among
+  the available kernel threads.
+
+  User threads:  T1  T2  T3  T4  T5
+                   \  | \|/  / /
+                    \ |  X  / /
+  Kernel threads:    K1   K2  K3
+
+  Advantages: Best of both worlds—true parallelism with efficient thread
+  management.
+  Disadvantages: Complex to implement.
+  Examples: Solaris LWP model, Windows fiber model (with manual scheduling).
+
+    Micro-topic: The M:N Threading Model and Goroutines
+    ────────────────────────────────────────────────────
+    The Go programming language uses an M:N threading model where M
+    goroutines (lightweight user-space threads) are multiplexed onto N OS
+    threads (called "M" in Go's runtime). The Go runtime scheduler manages
+    this multiplexing, using a work-stealing algorithm to balance goroutines
+    across OS threads. Goroutines have very small stack sizes (initially
+    2-8 KB, growable) and can number in the millions. This is effectively
+    a modern implementation of the Many-to-Many model.
+
+────────────────────────────────────────────────────
+2.4.5  User Space and Kernel Space Threads
+────────────────────────────────────────────────────
+
+USER-LEVEL THREADS (ULT):
+  - Implemented entirely in user space by a thread library (e.g., GNU Pth).
+  - The kernel is unaware of threads; it sees only one process.
+  - Thread switching is done by the library (saving/restoring user registers),
+    which is very fast (no kernel mode switch needed).
+  - Problem: If one thread makes a blocking system call, the entire process
+    blocks (all threads) because the kernel doesn't know about them.
+  - Problem: Cannot run threads on multiple cores simultaneously.
+
+KERNEL-LEVEL THREADS (KLT):
+  - Thread management is done by the kernel itself.
+  - The kernel maintains a TCB for each thread and schedules them.
+  - Thread switching requires a mode switch (user→kernel→user).
+  - Advantage: If one thread blocks, the kernel can schedule another thread
+    from the same process.
+  - Advantage: Threads can run on different cores simultaneously.
+  - Disadvantage: Slower thread creation and switching (kernel overhead).
+
+HYBRID APPROACH:
+  Linux uses the 1:1 model (each pthread maps to a kernel thread) through
+  NPTL (Native POSIX Threads Library). This provides real parallelism and
+  proper blocking semantics. The overhead of kernel threads is acceptable on
+  modern hardware, and NPTL is highly optimized (thread creation takes about
+  50-100 microseconds).
+
+────────────────────────────────────────────────────
+2.4.6  Difference between Processes and Threads
+────────────────────────────────────────────────────
+
+  ┌───────────────────────┬─────────────────────┬──────────────────────┐
+  │      Property         │      Process        │      Thread          │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Definition            │ Program in execution│ Unit of execution    │
+  │                       │                     │ within a process     │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Address Space         │ Own (separate)      │ Shared (within       │
+  │                       │                     │ process)             │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Creation Overhead     │ Heavy (copy page    │ Light (share         │
+  │                       │ table, allocate     │ address space,       │
+  │                       │ structures)         │ new stack only)      │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Context Switch Cost   │ Expensive (TLB      │ Cheaper (no TLB      │
+  │                       │ flush, page table   │ flush needed for     │
+  │                       │ switch)             │ same-process switch) │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Communication         │ IPC needed (pipes,  │ Direct shared        │
+  │                       │ sockets, shared mem)│ memory access        │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Independence          │ Independent (crash  │ Dependent (one       │
+  │                       │ doesn't affect      │ thread crash can     │
+  │                       │ others)             │ kill all threads)    │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Resources             │ Own files, memory,  │ Shared files,        │
+  │                       │ signals             │ memory, signals      │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Scheduling            │ Scheduled by OS     │ May be scheduled     │
+  │                       │                     │ by OS or library     │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Memory Protection     │ Strong (separate    │ Weak (all threads    │
+  │                       │ address spaces)     │ can access all       │
+  │                       │                     │ process memory)      │
+  ├───────────────────────┼─────────────────────┼──────────────────────┤
+  │ Linux Implementation  │ task_struct with own│ task_struct sharing  │
+  │                       │ mm_struct           │ mm_struct with       │
+  │                       │                     │ parent               │
+  └───────────────────────┴─────────────────────┴──────────────────────┘
+
+
+================================================================================
+  ARCH LINUX: HANDS-ON IMPLEMENTATION
+================================================================================
+
+────────────────────────────────────────
+Lab 2.1: Exploring Processes and States
+────────────────────────────────────────
+
+# View all processes with their states
+    $ ps aux
+    # STAT column: R (running), S (sleeping), D (uninterruptible),
+    #              T (stopped), Z (zombie), I (idle kernel thread)
+
+# Create a zombie process (C code — save as zombie.c):
+# ───────────────────────────────────────────────────────
+#   #include <stdio.h>
+#   #include <stdlib.h>
+#   #include <unistd.h>
+#
+#   int main() {
+#       pid_t pid = fork();
+#       if (pid == 0) {
+#           // Child exits immediately → becomes zombie
+#           printf("Child PID: %d exiting...\n", getpid());
+#           exit(0);
+#       } else {
+#           // Parent sleeps without calling wait() → child stays zombie
+#           printf("Parent PID: %d sleeping...\n", getpid());
+#           sleep(60);
+#           // After 60 seconds, parent exits and init adopts the zombie
+#       }
+#       return 0;
+#   }
+# ───────────────────────────────────────────────────────
+#
+# Compile and run:
+#   $ gcc -o zombie zombie.c
+#   $ ./zombie &
+#
+# In another terminal:
+#   $ ps aux | grep Z
+#   # Shows the zombie process with state Z+
+
+# View process tree of your session
+    $ pstree -p $$
+    # Shows the current shell and its children
+
+# View a process's PCB information via /proc
+    $ cat /proc/$$/status    # Status of the current shell
+    $ cat /proc/$$/stat      # Raw stat values
+    $ cat /proc/$$/maps      # Virtual memory map
+    $ cat /proc/$$/fd        # Open file descriptors (use ls -la)
+    $ ls -la /proc/$$/fd
+
+────────────────────────────────────────
+Lab 2.2: Race Conditions in Action
+────────────────────────────────────────
+
+# Demonstrate a race condition with a shared counter (C code — race.c):
+# ──────────────────────────────────────────────────────────────────────
+#   #include <stdio.h>
+#   #include <pthread.h>
+#
+#   int counter = 0;
+#   #define ITERATIONS 1000000
+#
+#   void *increment(void *arg) {
+#       for (int i = 0; i < ITERATIONS; i++) {
+#           counter++;   // NOT atomic!
+#       }
+#       return NULL;
+#   }
+#
+#   int main() {
+#       pthread_t t1, t2;
+#       pthread_create(&t1, NULL, increment, NULL);
+#       pthread_create(&t2, NULL, increment, NULL);
+#       pthread_join(t1, NULL);
+#       pthread_join(t2, NULL);
+#       printf("Expected: %d\n", 2 * ITERATIONS);
+#       printf("Actual:   %d\n", counter);
+#       return 0;
+#   }
+# ──────────────────────────────────────────────────────────────────────
+#
+# Compile and run:
+#   $ gcc -o race race.c -lpthread
+#   $ ./race
+#   Expected: 2000000
+#   Actual:   1387432    ← Different each run! RACE CONDITION!
+
+# Fix with mutex:
+# Replace counter++ with:
+#   pthread_mutex_lock(&lock);
+#   counter++;
+#   pthread_mutex_unlock(&lock);
+
+────────────────────────────────────────
+Lab 2.3: Semaphores and Producer-Consumer
+────────────────────────────────────────
+
+# Producer-Consumer with POSIX semaphores (prodcons.c):
+# ────────────────────────────────────────────────────────────────
+#   #include <stdio.h>
+#   #include <pthread.h>
+#   #include <semaphore.h>
+#   #include <unistd.h>
+#
+#   #define BUFFER_SIZE 5
+#   int buffer[BUFFER_SIZE];
+#   int in = 0, out = 0;
+#
+#   sem_t empty_slots, full_slots;
+#   pthread_mutex_t mutex;
+#
+#   void *producer(void *arg) {
+#       for (int i = 0; i < 10; i++) {
+#           sem_wait(&empty_slots);
+#           pthread_mutex_lock(&mutex);
+#           buffer[in] = i;
+#           printf("Produced: %d at index %d\n", i, in);
+#           in = (in + 1) % BUFFER_SIZE;
+#           pthread_mutex_unlock(&mutex);
+#           sem_post(&full_slots);
+#           usleep(100000);  // 100ms
+#       }
+#       return NULL;
+#   }
+#
+#   void *consumer(void *arg) {
+#       for (int i = 0; i < 10; i++) {
+#           sem_wait(&full_slots);
+#           pthread_mutex_lock(&mutex);
+#           int item = buffer[out];
+#           printf("Consumed: %d from index %d\n", item, out);
+#           out = (out + 1) % BUFFER_SIZE;
+#           pthread_mutex_unlock(&mutex);
+#           sem_post(&empty_slots);
+#           usleep(200000);  // 200ms
+#       }
+#       return NULL;
+#   }
+#
+#   int main() {
+#       sem_init(&empty_slots, 0, BUFFER_SIZE);
+#       sem_init(&full_slots, 0, 0);
+#       pthread_mutex_init(&mutex, NULL);
+#       pthread_t prod, cons;
+#       pthread_create(&prod, NULL, producer, NULL);
+#       pthread_create(&cons, NULL, consumer, NULL);
+#       pthread_join(prod, NULL);
+#       pthread_join(cons, NULL);
+#       sem_destroy(&empty_slots);
+#       sem_destroy(&full_slots);
+#       pthread_mutex_destroy(&mutex);
+#       return 0;
+#   }
+# ────────────────────────────────────────────────────────────────
+#
+#   $ gcc -o prodcons prodcons.c -lpthread
+#   $ ./prodcons
+
+────────────────────────────────────────
+Lab 2.4: Scheduling Exploration
+────────────────────────────────────────
+
+# View scheduling policy and priority of current process
+    $ chrt -p $$
+    # Shows policy (SCHED_OTHER, SCHED_FIFO, etc.) and priority
+
+# View all processes with their scheduling info
+    $ ps -eo pid,cls,rtprio,ni,comm | head -20
+    # cls: scheduling class (TS=SCHED_OTHER, FF=SCHED_FIFO, RR=SCHED_RR)
+    # rtprio: real-time priority
+    # ni: nice value
+
+# Change nice value (priority for SCHED_OTHER)
+    $ nice -n 10 sleep 60 &    # Start a low-priority process
+    $ renice -n -5 -p <PID>    # Increase priority (requires root for negative)
+
+# Run a process with real-time FIFO scheduling (requires root)
+    $ sudo chrt -f 50 sleep 10     # SCHED_FIFO, priority 50
+
+# View CFS scheduling parameters
+    $ cat /proc/sys/kernel/sched_min_granularity_ns
+    # Minimum time slice for CFS (in nanoseconds)
+    $ cat /proc/sys/kernel/sched_latency_ns
+    # Target scheduling period
+
+# View a process's scheduling stats
+    $ cat /proc/$$/sched | head -20
+    # Shows vruntime, nr_switches, exec_start, etc.
+
+────────────────────────────────────────
+Lab 2.5: Threads in Action
+────────────────────────────────────────
+
+# View threads of a process
+    $ ps -T -p <PID>
+    # -T shows threads (SPID column = thread ID)
+
+# Or use top:
+    $ top -H -p <PID>
+    # -H shows individual threads
+
+# View threads in /proc
+    $ ls /proc/$$/task/
+    # Each directory is a thread ID
+
+# Multithreaded program (threads_demo.c):
+# ────────────────────────────────────────────────────
+#   #include <stdio.h>
+#   #include <pthread.h>
+#   #include <unistd.h>
+#   #include <sys/syscall.h>
+#
+#   void *thread_func(void *arg) {
+#       int num = *(int *)arg;
+#       printf("Thread %d: PID=%d, TID=%ld\n",
+#              num, getpid(), syscall(SYS_gettid));
+#       sleep(30);  // Keep alive for observation
+#       return NULL;
+#   }
+#
+#   int main() {
+#       pthread_t threads[4];
+#       int nums[4] = {1, 2, 3, 4};
+#
+#       printf("Main: PID=%d, TID=%ld\n", getpid(), syscall(SYS_gettid));
+#
+#       for (int i = 0; i < 4; i++)
+#           pthread_create(&threads[i], NULL, thread_func, &nums[i]);
+#
+#       for (int i = 0; i < 4; i++)
+#           pthread_join(threads[i], NULL);
+#
+#       return 0;
+#   }
+# ────────────────────────────────────────────────────
+#
+#   $ gcc -o threads_demo threads_demo.c -lpthread
+#   $ ./threads_demo &
+#
+# In another terminal:
+#   $ ps -T -p $(pgrep threads_demo)
+#   # Shows 5 threads (main + 4 worker threads), all sharing same PID
+
+# Watch clone() system call during thread creation
+    $ strace -f -e trace=clone ./threads_demo 2>&1 | grep clone
+
+# Verify threads share the same address space
+    $ cat /proc/$(pgrep threads_demo)/maps
+    # Same for all threads (since they share mm_struct)
+
+────────────────────────────────────────
+Lab 2.6: IPC Mechanisms
+────────────────────────────────────────
+
+# Pipes
+    $ ls /tmp | wc -l          # Anonymous pipe
+    $ mkfifo /tmp/myfifo       # Named pipe (FIFO)
+    $ echo "Hello" > /tmp/myfifo &   # Writer (blocks until reader)
+    $ cat /tmp/myfifo                # Reader
+
+# Shared Memory (inspect)
+    $ ipcs -m                  # List System V shared memory segments
+
+# Message Queues
+    $ ipcs -q                  # List System V message queues
+
+# Sockets
+    $ ss -tlnp                 # List listening TCP sockets
+    $ ss -xlnp                 # List listening UNIX domain sockets
+
+# D-Bus (modern IPC on Arch with systemd)
+    $ busctl list | head -20   # List D-Bus services
+
+# Signals
+    $ kill -l                  # List all signals
+    $ kill -SIGSTOP <PID>      # Stop a process
+    $ kill -SIGCONT <PID>      # Resume it
+
+
+================================================================================
+  CHAPTER 2 SUMMARY
+================================================================================
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  Key Takeaways:                                                        │
+  │                                                                        │
+  │  1. A PROCESS is a program in execution with its own address space,    │
+  │     PCB, and resources. States: New → Ready → Running → Blocked →      │
+  │     Terminated.                                                        │
+  │                                                                        │
+  │  2. RACE CONDITIONS occur when shared data is accessed without proper  │
+  │     synchronization. The CRITICAL SECTION problem requires mutual      │
+  │     exclusion, progress, and bounded waiting.                          │
+  │                                                                        │
+  │  3. Solutions progress in sophistication:                              │
+  │     Disable interrupts → Lock variable (broken) → Peterson's →         │
+  │     TSL → Semaphores → Monitors → Message Passing                     │
+  │                                                                        │
+  │  4. SCHEDULING ALGORITHMS trade off fairness, throughput, and latency: │
+  │     FCFS (simple but convoy effect) → SJF (optimal avg wait) →        │
+  │     SRTN (preemptive SJF) → RR (fair, time-sharing) →                 │
+  │     Priority → Lottery/Stride → CFS/EEVDF (Linux)                     │
+  │                                                                        │
+  │  5. THREADS share address space within a process. Models: M:1, 1:1,   │
+  │     M:N. Linux uses 1:1 (NPTL). Thread creation is ~100x faster than  │
+  │     process creation.                                                  │
+  │                                                                        │
+  │  6. Classic IPC problems (Dining Philosophers, Readers-Writers,        │
+  │     Sleeping Barber) test understanding of synchronization.            │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+  END OF CHAPTER 2
+================================================================================

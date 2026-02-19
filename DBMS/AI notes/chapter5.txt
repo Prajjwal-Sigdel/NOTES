@@ -1,0 +1,495 @@
+================================================================================
+                    CHAPTER 5: SECURITY
+                        [3 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  5.1  Security and Integrity Violations
+  5.2  Access Control
+  5.3  Authorization
+  5.4  Security and Views
+
+================================================================================
+5.1  SECURITY AND INTEGRITY VIOLATIONS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Database Security** refers to the collective mechanisms, policies, and
+procedures used to protect the database against intentional or accidental
+threats that could compromise its confidentiality, integrity, and
+availability (the **CIA Triad**).
+
+■ THE CIA TRIAD
+────────────────
+  ┌───────────────────┬──────────────────────────────────────────────────┐
+  │ Property          │ Description                                      │
+  ├───────────────────┼──────────────────────────────────────────────────┤
+  │ Confidentiality   │ Data is accessible only to authorized users.     │
+  │                   │ (No unauthorized reading)                        │
+  │ Integrity         │ Data is accurate, consistent, and trustworthy.   │
+  │                   │ (No unauthorized modification)                   │
+  │ Availability      │ Data is accessible when needed by authorized     │
+  │                   │   users. (No denial of service)                  │
+  └───────────────────┴──────────────────────────────────────────────────┘
+
+■ SECURITY VIOLATIONS
+──────────────────────
+Security violations are UNAUTHORIZED actions that compromise the CIA
+properties of the database.
+
+  ┌──────────────────────────┬─────────────────────────────────────────────┐
+  │ Type of Violation        │ Description & Example                       │
+  ├──────────────────────────┼─────────────────────────────────────────────┤
+  │ Unauthorized Data        │ Reading data without permission.            │
+  │ Reading                  │ Ex: Employee accessing salary records       │
+  │                          │     of other employees.                     │
+  │ Unauthorized Data        │ Modifying data without permission.          │
+  │ Modification             │ Ex: Student changing their own grades.      │
+  │ Unauthorized Data        │ Deleting data without permission.           │
+  │ Destruction              │ Ex: Disgruntled employee deleting           │
+  │                          │     customer records.                       │
+  │ SQL Injection            │ Injecting malicious SQL through input       │
+  │                          │     fields to bypass security.              │
+  │ Privilege Escalation     │ User gaining higher privileges than         │
+  │                          │     intended.                               │
+  │ Data Theft               │ Stealing database dumps or backups.         │
+  └──────────────────────────┴─────────────────────────────────────────────┘
+
+■ INTEGRITY VIOLATIONS
+───────────────────────
+Integrity violations occur when the data's accuracy or consistency is
+compromised.
+
+  ┌──────────────────────────┬─────────────────────────────────────────────┐
+  │ Type                     │ Description & Example                       │
+  ├──────────────────────────┼─────────────────────────────────────────────┤
+  │ Domain Integrity         │ Values outside the allowed domain.          │
+  │                          │ Ex: Age = -5 or Age = "abc"                 │
+  │ Entity Integrity         │ NULL primary key or duplicate PKs.          │
+  │                          │ Ex: Two students with same roll_no.         │
+  │ Referential Integrity    │ Foreign key references non-existent PK.     │
+  │                          │ Ex: enrollment.course_id = 'C99' when       │
+  │                          │     C99 doesn't exist in course table.      │
+  │ Semantic Integrity       │ Data that is logically incorrect.           │
+  │                          │ Ex: end_date < start_date.                  │
+  └──────────────────────────┴─────────────────────────────────────────────┘
+
+■ SECURITY vs INTEGRITY VIOLATIONS
+────────────────────────────────────
+  ┌───────────────────┬─────────────────────────┬──────────────────────────┐
+  │ Aspect            │ Security Violation      │ Integrity Violation       │
+  ├───────────────────┼─────────────────────────┼──────────────────────────┤
+  │ Cause             │ Unauthorized access     │ Invalid/inconsistent data│
+  │ Intent            │ Often intentional       │ Often accidental         │
+  │ Prevention        │ Access control, auth,   │ Constraints, triggers,   │
+  │                   │   encryption            │   validation             │
+  │ Example           │ Hacker reads salary data│ Balance becomes negative │
+  │ Focus             │ WHO can access data     │ WHAT data is valid       │
+  └───────────────────┴─────────────────────────┴──────────────────────────┘
+
+■ SQL INJECTION — A CRITICAL SECURITY THREAT
+──────────────────────────────────────────────
+SQL injection occurs when an attacker inserts malicious SQL code into
+application input fields that are directly concatenated into SQL queries.
+
+Example of vulnerable code (Python):
+  query = "SELECT * FROM users WHERE username = '" + user_input + "'"
+
+If user inputs: ' OR '1'='1' --
+  Query becomes: SELECT * FROM users WHERE username = '' OR '1'='1' --'
+  This returns ALL users!
+
+Prevention:
+  1. **Parameterized Queries / Prepared Statements**:
+     cursor.execute("SELECT * FROM users WHERE username = %s", (user_input,))
+  2. **Input Validation**: Whitelist acceptable characters.
+  3. **ORMs**: Use frameworks that abstract SQL (Django, SQLAlchemy).
+  4. **Least Privilege**: DB user has only necessary permissions.
+
+■ DATABASE SECURITY MEASURES OVERVIEW
+───────────────────────────────────────
+
+```mermaid
+graph TD
+    A[Database Security] --> B[Authentication]
+    A --> C[Authorization]
+    A --> D[Access Control]
+    A --> E[Encryption]
+    A --> F[Auditing]
+    A --> G[Views]
+    B --> B1[Verify identity: passwords, MFA]
+    C --> C1[GRANT/REVOKE privileges]
+    D --> D1[DAC, MAC, RBAC]
+    E --> E1[At rest + In transit]
+    F --> F1[Audit logs, tracking]
+    G --> G1[Restrict visible data]
+```
+
+
+================================================================================
+5.2  ACCESS CONTROL
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Access Control** is the mechanism that determines WHO is allowed to
+perform WHICH operations on WHICH database objects. It is the enforcement
+layer that implements authorization policies.
+
+■ AUTHENTICATION vs AUTHORIZATION
+───────────────────────────────────
+  ┌─────────────────────┬─────────────────────────┬──────────────────────────┐
+  │ Aspect              │ Authentication          │ Authorization             │
+  ├─────────────────────┼─────────────────────────┼──────────────────────────┤
+  │ Question answered   │ WHO are you?            │ WHAT can you do?          │
+  │ Process             │ Verify identity         │ Verify permissions        │
+  │ When                │ First (before access)   │ After authentication      │
+  │ Mechanism           │ Password, biometrics,   │ Privileges, roles,        │
+  │                     │   certificates, MFA     │   GRANT/REVOKE            │
+  │ Example             │ Login with username +   │ User can SELECT from      │
+  │                     │   password              │   employee but not DELETE │
+  └─────────────────────┴─────────────────────────┴──────────────────────────┘
+
+■ TYPES OF ACCESS CONTROL
+───────────────────────────
+
+**1. Discretionary Access Control (DAC)**
+  - The OWNER of a database object controls who can access it.
+  - Access rights are granted at the owner's DISCRETION.
+  - Implemented in SQL via GRANT and REVOKE.
+  - Most relational databases use DAC.
+
+  Example: User 'admin' owns the employee table and grants SELECT to
+  user 'hr_staff':
+    GRANT SELECT ON employee TO hr_staff;
+
+  Pros: Flexible, easy to implement.
+  Cons: Vulnerable to Trojan horse attacks; users may grant access
+        too liberally.
+
+**2. Mandatory Access Control (MAC)**
+  - Access decisions are made by the SYSTEM based on security labels
+    (classifications) assigned to both subjects (users) and objects (data).
+  - Users CANNOT override system-imposed access controls.
+  - Based on the Bell-LaPadula model:
+    • **No Read Up**: A user can only READ objects at or below their
+      security level.
+    • **No Write Down**: A user can only WRITE to objects at or above
+      their security level.
+
+  Security Levels (typical):
+    Top Secret > Secret > Confidential > Unclassified
+
+  Example: A "Confidential" user cannot read "Secret" data, and a
+  "Secret" user cannot write to "Confidential" data (to prevent leaks).
+
+  Pros: Very secure; prevents information leakage.
+  Cons: Rigid, complex, difficult to administer.
+
+**3. Role-Based Access Control (RBAC)**
+  - Access is assigned to ROLES, not individual users.
+  - Users are assigned to roles based on their job function.
+  - A role is a named collection of privileges.
+  - Most modern systems use RBAC.
+
+  ┌────────────────┬────────────────────────────────────────────────────┐
+  │ Role           │ Privileges                                        │
+  ├────────────────┼────────────────────────────────────────────────────┤
+  │ Doctor         │ SELECT, UPDATE on patient_records, prescriptions  │
+  │ Nurse          │ SELECT on patient_records (limited columns)       │
+  │ Administrator  │ ALL PRIVILEGES on all tables                      │
+  │ Receptionist   │ SELECT, INSERT on appointments                    │
+  │ Billing Staff  │ SELECT on patient_billing, insurance              │
+  └────────────────┴────────────────────────────────────────────────────┘
+
+  SQL Implementation:
+    CREATE ROLE doctor;
+    GRANT SELECT, UPDATE ON patient_records TO doctor;
+    GRANT doctor TO user_dr_sharma;
+
+  Pros: Scalable, easy to manage (change role = change all users in role).
+  Cons: Role explosion if too many specialized roles.
+
+■ REAL-WORLD SCENARIO: HOSPITAL DATABASE RBAC
+───────────────────────────────────────────────
+  - Dr. Sharma (role: Doctor) → Can view and update patient records,
+    write prescriptions, view lab results.
+  - Nurse Sita (role: Nurse) → Can view patient vitals and medications,
+    but CANNOT write prescriptions or view billing.
+  - Admin Ram (role: Administrator) → Can manage all tables, users, and
+    configurations.
+  - Billing Staff Hari (role: Billing) → Can view insurance and payment
+    data but CANNOT view medical records.
+
+  Each role limits access to exactly what's needed → **Principle of
+  Least Privilege**.
+
+■ MULTI-FACTOR AUTHENTICATION (MFA)
+─────────────────────────────────────
+MFA requires TWO OR MORE verification factors:
+  1. **Something you know**: Password, PIN
+  2. **Something you have**: Phone (OTP), security token
+  3. **Something you are**: Fingerprint, retina scan
+
+Modern database access (especially cloud DBs like AWS RDS, Azure SQL)
+supports MFA for administrative access.
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: Differentiate DAC and MAC.
+  A: DAC: Object owners control access; flexible but less secure.
+     MAC: System enforces access based on security labels; rigid but
+     more secure. Users can't override MAC policies.
+
+  Q: What is RBAC?
+  A: Role-Based Access Control assigns permissions to roles (not users).
+     Users inherit permissions by being assigned to roles. It's scalable
+     and follows the principle of least privilege.
+
+
+================================================================================
+5.3  AUTHORIZATION
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Authorization** in a database context is the process of granting or
+revoking specific privileges (permissions) to users or roles on database
+objects (tables, views, procedures).
+
+■ TYPES OF AUTHORIZATION PRIVILEGES
+─────────────────────────────────────
+
+  ┌──────────────────┬──────────────────────────────────────────────────┐
+  │ Privilege        │ Description                                      │
+  ├──────────────────┼──────────────────────────────────────────────────┤
+  │ READ (SELECT)    │ Allows reading/querying data                     │
+  │ INSERT           │ Allows adding new rows                           │
+  │ UPDATE           │ Allows modifying existing rows                   │
+  │ DELETE           │ Allows removing rows                             │
+  │ INDEX            │ Allows creating/dropping indices                 │
+  │ REFERENCES       │ Allows creating foreign keys referencing a table │
+  │ EXECUTE          │ Allows running stored procedures/functions       │
+  │ ALL PRIVILEGES   │ Grants all of the above                         │
+  └──────────────────┴──────────────────────────────────────────────────┘
+
+■ GRANT COMMAND
+────────────────
+Syntax:
+  GRANT privilege_list ON object TO user_or_role [WITH GRANT OPTION];
+
+Examples:
+  -- Grant SELECT on employee to hr_user
+  GRANT SELECT ON employee TO hr_user;
+
+  -- Grant SELECT and UPDATE on specific columns
+  GRANT SELECT, UPDATE(salary, dept_id) ON employee TO hr_manager;
+
+  -- Grant all privileges
+  GRANT ALL PRIVILEGES ON employee TO admin;
+
+  -- Grant with ability to pass privilege to others
+  GRANT SELECT ON employee TO hr_user WITH GRANT OPTION;
+
+■ REVOKE COMMAND
+─────────────────
+Syntax:
+  REVOKE privilege_list ON object FROM user_or_role [CASCADE | RESTRICT];
+
+Examples:
+  -- Revoke INSERT privilege
+  REVOKE INSERT ON employee FROM hr_user;
+
+  -- Revoke with CASCADE (also revokes from users who got it via this user)
+  REVOKE SELECT ON employee FROM hr_user CASCADE;
+
+  -- Revoke with RESTRICT (fails if others depend on this grant)
+  REVOKE SELECT ON employee FROM hr_user RESTRICT;
+
+■ AUTHORIZATION GRAPH
+──────────────────────
+When privileges are granted WITH GRANT OPTION, they can be passed along,
+forming an **authorization graph**:
+
+  DBA → hr_manager → hr_staff → hr_intern
+        (GRANT OPT)  (GRANT OPT)
+
+If DBA revokes hr_manager's privilege with CASCADE:
+  → hr_staff and hr_intern also lose the privilege.
+
+If DBA revokes hr_manager's privilege with RESTRICT:
+  → FAILS because hr_staff depends on hr_manager's grant.
+
+■ PRIVILEGE LEVELS
+───────────────────
+  ┌───────────────┬──────────────────────────────────────────────────────┐
+  │ Level         │ Example                                              │
+  ├───────────────┼──────────────────────────────────────────────────────┤
+  │ Global        │ GRANT ALL ON *.* TO admin;  (all DBs, all tables)   │
+  │ Database      │ GRANT ALL ON university.* TO dba;                   │
+  │ Table         │ GRANT SELECT ON employee TO user;                   │
+  │ Column        │ GRANT UPDATE(salary) ON employee TO hr;             │
+  │ Procedure     │ GRANT EXECUTE ON add_user TO app_user;              │
+  └───────────────┴──────────────────────────────────────────────────────┘
+
+■ ENCRYPTION FOR DATABASE SECURITY
+────────────────────────────────────
+
+**Encryption** converts plaintext data into ciphertext using an algorithm
+and a key, making it unreadable without the decryption key.
+
+**1. Symmetric Key Encryption (Private Key):**
+  - SAME key for encryption AND decryption.
+  - Algorithms: AES (Advanced Encryption Standard), DES, 3DES
+  - Fast but key distribution is a challenge.
+  - Used for: encrypting data at rest, database column encryption.
+
+  Plaintext → [Encrypt with Key K] → Ciphertext
+  Ciphertext → [Decrypt with Key K] → Plaintext
+
+**2. Asymmetric Key Encryption (Public Key):**
+  - TWO keys: Public Key (encrypts) and Private Key (decrypts).
+  - Algorithms: RSA, ECC
+  - Slower but solves key distribution problem.
+  - Used for: secure communication (SSL/TLS), digital signatures.
+
+  Plaintext → [Encrypt with Public Key] → Ciphertext
+  Ciphertext → [Decrypt with Private Key] → Plaintext
+
+  ┌────────────────────┬────────────────────┬──────────────────────────┐
+  │ Aspect             │ Symmetric Key      │ Asymmetric Key           │
+  ├────────────────────┼────────────────────┼──────────────────────────┤
+  │ Keys               │ One shared key     │ Public + Private key pair│
+  │ Speed              │ Fast               │ Slow                     │
+  │ Key Distribution   │ Difficult          │ Easy (public key shared) │
+  │ Use Case           │ Data at rest       │ Key exchange, signatures │
+  │ Example Algorithm  │ AES-256            │ RSA-2048                 │
+  └────────────────────┴────────────────────┴──────────────────────────┘
+
+**Database Encryption Types:**
+  1. **Transparent Data Encryption (TDE)**: Encrypts entire data files
+     at rest. Decryption happens automatically when data is read.
+  2. **Column-Level Encryption**: Encrypt specific sensitive columns
+     (e.g., SSN, credit card numbers).
+  3. **Application-Level Encryption**: Application encrypts data before
+     sending it to the database.
+  4. **SSL/TLS**: Encrypts data in transit between client and server.
+
+
+================================================================================
+5.4  SECURITY AND VIEWS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Views** serve as a security mechanism by providing a controlled,
+restricted view of the database to users. By granting access to a view
+instead of the base table, administrators can hide sensitive data and
+limit the operations users can perform.
+
+■ HOW VIEWS PROVIDE SECURITY
+──────────────────────────────
+
+  1. **Column-Level Security**: Hide sensitive columns.
+  2. **Row-Level Security**: Filter rows based on conditions.
+  3. **Aggregation Security**: Show only summaries, not raw data.
+  4. **Operation Restriction**: Views can be read-only.
+
+■ EXAMPLES
+───────────
+
+Example 1: Column-Level Security (Hide Salary)
+  -- Base table: employee(emp_id, name, dept, salary, ssn, address)
+
+  -- View for general staff (no salary or SSN visible)
+  CREATE VIEW emp_public AS
+  SELECT emp_id, name, dept FROM employee;
+
+  GRANT SELECT ON emp_public TO general_staff;
+  -- general_staff can see emp_id, name, dept but NOT salary or SSN.
+
+Example 2: Row-Level Security (Department-specific access)
+  -- HR staff in CS department sees only CS employees
+  CREATE VIEW cs_employees AS
+  SELECT * FROM employee WHERE dept = 'CS';
+
+  GRANT SELECT ON cs_employees TO cs_hr;
+
+Example 3: Aggregation Security (Hide individual data)
+  -- Management sees department averages, not individual salaries
+  CREATE VIEW dept_salary_summary AS
+  SELECT dept, COUNT(*) AS num_emp, AVG(salary) AS avg_salary,
+         MAX(salary) AS max_salary
+  FROM employee
+  GROUP BY dept;
+
+  GRANT SELECT ON dept_salary_summary TO management;
+
+Example 4: Combining Column and Row Security
+  -- Billing staff at a hospital
+  CREATE VIEW billing_view AS
+  SELECT patient_id, patient_name, insurance_id, amount_due
+  FROM patient_records
+  WHERE discharge_date IS NOT NULL;
+
+  GRANT SELECT ON billing_view TO billing_staff;
+  -- Billing staff can see only discharged patients and only
+  -- billing-related columns. No medical data visible.
+
+■ SECURITY ARCHITECTURE WITH VIEWS
+
+  ┌───────────────────────────────────────────────────────────────┐
+  │                    BASE TABLE: patient_records                 │
+  │  patient_id | name | dob | diagnosis | prescription |         │
+  │  insurance_id | amount_due | doctor_id | ...                   │
+  ├───────────────────────────────────────────────────────────────┤
+  │                                                                │
+  │  ┌──────────────────┐   ┌──────────────────┐                   │
+  │  │ DOCTOR VIEW      │   │ BILLING VIEW     │                   │
+  │  │ name, diagnosis, │   │ name, insurance, │                   │
+  │  │ prescription     │   │ amount_due       │                   │
+  │  └────────┬─────────┘   └────────┬─────────┘                   │
+  │           │                      │                              │
+  │     GRANT to Doctors       GRANT to Billing                    │
+  └───────────────────────────────────────────────────────────────┘
+
+■ LIMITATIONS OF VIEW-BASED SECURITY
+──────────────────────────────────────
+  • Views can be complex and hard to maintain.
+  • Updatable views have restrictions.
+  • Cannot enforce all security policies (e.g., time-based access).
+  • Performance overhead for complex views.
+  • Modern DBMS offer Row-Level Security (RLS) policies as a better
+    alternative for row-level restrictions.
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**Banking Application (Nabil Bank):**
+  - Tellers see: account number, customer name, balance.
+  - Loan Officers see: customer name, loan amount, interest rate, EMI.
+  - Auditors see: all transactions with timestamps and amounts.
+  - Customers (mobile app) see: only their OWN account and transactions.
+
+  Each role gets a SPECIFIC VIEW — the same base tables, but different
+  perspectives with different levels of access.
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: How do views provide security?
+  A: Views restrict access by: (1) hiding sensitive columns (column-level),
+     (2) filtering rows based on conditions (row-level), (3) showing
+     only aggregated data, and (4) being read-only. Users are granted
+     access to views instead of base tables.
+
+  Q: What is the difference between security violation and integrity violation?
+  A: Security violation: unauthorized access to data (reading/modifying
+     without permission). Integrity violation: storing invalid or
+     inconsistent data (e.g., violating constraints). Security is about
+     WHO accesses; integrity is about WHAT is stored.
+
+
+================================================================================
+                     END OF CHAPTER 5 NOTES
+================================================================================

@@ -1,0 +1,638 @@
+================================================================================
+           CHAPTER 7: STORAGE MANAGEMENT AND INDEXING
+                            [3 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  7.1  File Organization
+       7.1.1  Fixed-Length Records
+       7.1.2  Variable-Length Records
+  7.2  Organization of Records in Files
+       7.2.1  Heap File Organization
+       7.2.2  Sequential File Organization
+       7.2.3  Indexed Sequential File Organization
+  7.3  B⁺ Tree Index Files
+  7.4  Hash Indices
+
+================================================================================
+7.1  FILE ORGANIZATION
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**File Organization** refers to the method of arranging records
+(tuples) within files on secondary storage (disk). The choice of file
+organization affects the efficiency of data access, insertion, deletion,
+and modification operations.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Data in a database is ultimately stored as files on disk. A **file** is
+a sequence of **records**, and each record is a sequence of **fields**
+(corresponding to attributes). The file is divided into fixed-size
+**disk blocks** (typically 4KB–8KB), and each block holds multiple
+records.
+
+Key concepts:
+  • **Record**: A single row/tuple stored on disk.
+  • **Field**: A single attribute value within a record.
+  • **Block (Page)**: A fixed-size unit of disk I/O (4KB–8KB).
+  • **Blocking Factor** (fᵣ): Number of records per block.
+    fᵣ = ⌊block_size / record_size⌋
+
+■ MAGNETIC DISK PERFORMANCE
+─────────────────────────────
+  Access Time = Seek Time + Rotational Latency + Transfer Time
+
+  ┌───────────────────────┬──────────────────────────────────────────────┐
+  │ Component             │ Description                                  │
+  ├───────────────────────┼──────────────────────────────────────────────┤
+  │ Seek Time             │ Time to move disk head to correct track.     │
+  │                       │ (~4-10 ms for HDD; 0 for SSD)               │
+  │ Rotational Latency    │ Time for disk to rotate to correct sector.   │
+  │                       │ (~2-5 ms for HDD; 0 for SSD)                │
+  │ Transfer Time         │ Time to read/write the data block.           │
+  │                       │ (~0.05-0.1 ms per block)                     │
+  └───────────────────────┴──────────────────────────────────────────────┘
+
+  Optimization techniques to reduce disk access:
+    • Buffer management (caching blocks in memory)
+    • Sequential I/O (reading consecutive blocks is faster)
+    • RAID (parallel disk access)
+    • Indexing (avoid full scans)
+
+────────────────────────────────────────────────
+7.1.1  FIXED-LENGTH RECORDS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **fixed-length record** has a predetermined, constant size. Every
+record in the file occupies exactly the same number of bytes, regardless
+of the actual data values.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Each field has a fixed maximum size based on its data type:
+  • INT = 4 bytes
+  • CHAR(50) = 50 bytes (padded if shorter)
+  • FLOAT = 8 bytes
+
+Record size = sum of all field sizes.
+
+Example:
+  employee(emp_id INT, name CHAR(30), salary FLOAT)
+  Record size = 4 + 30 + 8 = 42 bytes
+  Block size = 4096 bytes
+  Blocking factor = ⌊4096/42⌋ = 97 records/block
+
+Storage Structure:
+  ┌────────────────────────────────────────────────────────┐
+  │ Block                                                   │
+  │ ┌──────────┬──────────┬──────────┬─────┬──────────┐     │
+  │ │ Record 0 │ Record 1 │ Record 2 │ ... │ Record 96│     │
+  │ │ 42 bytes │ 42 bytes │ 42 bytes │     │ 42 bytes │     │
+  │ └──────────┴──────────┴──────────┴─────┴──────────┘     │
+  │ [Unused space: 4096 - 97×42 = 22 bytes]                 │
+  └────────────────────────────────────────────────────────┘
+
+**Advantages:**
+  • Simple to implement and access (direct address calculation).
+  • Easy to find the ith record: offset = i × record_size.
+  • No fragmentation within records.
+
+**Disadvantages:**
+  • Wastes space when actual values are shorter than max (padding).
+  • Deletion leaves "holes" → need free-space management.
+
+**Handling Deletions:**
+  Option 1: Shift subsequent records (expensive).
+  Option 2: Mark deleted records and maintain a free list.
+  Option 3: Replace deleted record with the last record in the file.
+
+────────────────────────────────────────────────
+7.1.2  VARIABLE-LENGTH RECORDS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **variable-length record** has a size that varies from record to
+record, depending on the actual data values stored.
+
+■ WHY VARIABLE-LENGTH?
+───────────────────────
+Variable-length records arise from:
+  1. VARCHAR fields (e.g., name VARCHAR(100) — stores only actual length).
+  2. Repeating groups or multi-valued attributes.
+  3. Records with optional (nullable) fields.
+  4. Relations with different record types in the same file.
+
+■ IMPLEMENTATION: SLOTTED PAGE STRUCTURE
+─────────────────────────────────────────
+The most common approach is the **slotted page** structure:
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │ BLOCK HEADER                                                  │
+  │ ┌────────────────────────────────────────────────────────┐     │
+  │ │ # Records │ Free Space End │ Slot 0 │ Slot 1 │ Slot 2 │     │
+  │ │           │    Pointer     │(off,len)│(off,len)│(off,len)│   │
+  │ └────────────────────────────────────────────────────────┘     │
+  │                                                                │
+  │ ← Free Space →                                                │
+  │                                                                │
+  │ ┌──────────────────┬──────────────┬────────────────────┐       │
+  │ │    Record 2      │  Record 1    │    Record 0        │       │
+  │ │   (variable)     │  (variable)  │    (variable)      │       │
+  │ └──────────────────┴──────────────┴────────────────────┘       │
+  └──────────────────────────────────────────────────────────────┘
+
+  • Header grows from the BEGINNING of the block.
+  • Records are allocated from the END of the block.
+  • Free space is in the MIDDLE.
+  • Each slot stores (offset, length) for its record.
+  • When a record is deleted, records can be compacted.
+
+**Record Internal Structure:**
+  ┌────────────────────────────────────────────────┐
+  │ Null Bitmap │ Offset1 │ Offset2 │ ... │ Data   │
+  └────────────────────────────────────────────────┘
+  The null bitmap indicates which fields are NULL.
+  Offsets point to the end of each variable-length field.
+
+**Advantages:**
+  • Efficient storage — no wasted padding.
+  • Handles VARCHAR, nullable fields naturally.
+
+**Disadvantages:**
+  • More complex to implement and manage.
+  • Record access requires indirection (slot → offset).
+  • Fragmentation requires periodic compaction.
+
+
+================================================================================
+7.2  ORGANIZATION OF RECORDS IN FILES
+================================================================================
+
+────────────────────────────────────────────────
+7.2.1  HEAP FILE ORGANIZATION
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+In **Heap File Organization**, records are placed in the file in the
+order they are inserted — there is NO particular ordering. New records
+are added at the END of the file (or in any available free space).
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+This is the simplest file organization. Records are just appended.
+
+  ┌──────────┬──────────┬──────────┬──────────┬──────────┐
+  │ Block 1  │ Block 2  │ Block 3  │ Block 4  │ Block 5  │
+  │ R1,R2,R3 │ R4,R5,R6 │ R7,R8,R9 │R10,R11   │R12       │
+  │ (insert  │ (order)  │          │ (deleted │ (newest  │
+  │  order)  │          │          │  gaps)   │  record) │
+  └──────────┴──────────┴──────────┴──────────┴──────────┘
+
+■ OPERATIONS AND COSTS
+───────────────────────
+  ┌──────────────┬──────────────────────────────────────────────────────┐
+  │ Operation    │ Cost                                                 │
+  ├──────────────┼──────────────────────────────────────────────────────┤
+  │ INSERT       │ O(1) — just append to end. Very fast.               │
+  │ SEARCH       │ O(n) — must scan entire file (linear search).       │
+  │              │ Cost = bᵣ block reads (full scan).                │
+  │ DELETE       │ O(n) — find record (linear search) + mark deleted.  │
+  │ UPDATE       │ O(n) — find record + update in place.               │
+  └──────────────┴──────────────────────────────────────────────────────┘
+
+■ PROS AND CONS
+────────────────
+  ✓ Simple to implement.
+  ✓ Fast insertion (O(1)).
+  ✓ Good for bulk loading data.
+  ✓ Works well for small files.
+
+  ✗ Slow search (must scan entire file).
+  ✗ Deletion leaves wasted space (fragmentation).
+  ✗ No ordering — range queries are expensive.
+  ✗ Not suitable for large files with frequent searches.
+
+■ WHEN TO USE
+──────────────
+  • Tables with mostly INSERT and full-scan operations.
+  • Staging/temporary tables.
+  • Small tables where full scan is acceptable.
+  • When records are accessed through an index (index does the search).
+
+────────────────────────────────────────────────
+7.2.2  SEQUENTIAL FILE ORGANIZATION
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+In **Sequential File Organization**, records are stored in SORTED ORDER
+based on a **search key** (an attribute or set of attributes). This
+ordering facilitates efficient sequential access and binary search.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+  ┌──────────────────────────────────────────────────────────┐
+  │ Sorted by emp_id:                                         │
+  │ Block 1: [101, Aarav] [102, Bipana] [103, Chetan]        │
+  │ Block 2: [104, Deepa] [105, Eshan] [106, Faisal]        │
+  │ Block 3: [107, Gita]  [108, Hari]  [109, Isha]          │
+  └──────────────────────────────────────────────────────────┘
+
+■ OPERATIONS AND COSTS
+───────────────────────
+  ┌──────────────┬──────────────────────────────────────────────────────┐
+  │ Operation    │ Cost                                                 │
+  ├──────────────┼──────────────────────────────────────────────────────┤
+  │ SEARCH (key) │ O(log n) — binary search possible.                  │
+  │              │ Cost = ⌈log₂(bᵣ)⌉ blocks.                          │
+  │ RANGE QUERY  │ Efficient — records in order, read sequentially.    │
+  │ INSERT       │ EXPENSIVE — must maintain sort order.               │
+  │              │ May require shifting many records.                   │
+  │ DELETE       │ MODERATE — find + mark as deleted.                  │
+  │              │ Periodic file reorganization needed.                 │
+  └──────────────┴──────────────────────────────────────────────────────┘
+
+■ HANDLING INSERTIONS
+──────────────────────
+  Option 1: Shift all subsequent records (very expensive).
+  Option 2: Use an **overflow block** — insert into a linked overflow
+            area. Periodically reorganize the file to merge overflow.
+  Option 3: Leave free space in each block during initial loading.
+
+■ PROS AND CONS
+────────────────
+  ✓ Efficient for range queries and ordered retrieval.
+  ✓ Binary search possible on the ordering attribute.
+  ✓ Good for batch processing and reporting.
+
+  ✗ Insertion and deletion are expensive (maintain order).
+  ✗ File must be periodically reorganized.
+  ✗ Sorting only on ONE search key.
+
+────────────────────────────────────────────────
+7.2.3  INDEXED SEQUENTIAL FILE ORGANIZATION (ISAM)
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+**Indexed Sequential File Organization** combines sequential file
+organization with an **index structure** to provide both sequential
+access (for range queries) AND fast random access (for point queries).
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+The data file is stored in sequential order, and an additional **index
+file** is built on top of it. The index contains (search-key, pointer)
+pairs that allow direct access to the block containing a desired record.
+
+  INDEX FILE                         DATA FILE (sorted)
+  ┌──────────────┐                  ┌─────────────────────┐
+  │ 101 → Block1 │──────────────────│ Block1: 101,102,103 │
+  │ 104 → Block2 │──────────────────│ Block2: 104,105,106 │
+  │ 107 → Block3 │──────────────────│ Block3: 107,108,109 │
+  └──────────────┘                  └─────────────────────┘
+
+**Types of Indices:**
+
+  1. **Dense Index**: One index entry for EVERY record in the data file.
+     → More space, but can locate any record directly.
+
+  2. **Sparse Index**: One index entry for EVERY BLOCK (not every record).
+     → Less space, but requires searching within the block.
+     → Only works on sequentially ordered files.
+
+  3. **Primary Index**: Built on the ordering key (the attribute used to
+     sort the file). Usually sparse.
+
+  4. **Secondary Index**: Built on a NON-ordering attribute. Always dense
+     (because records aren't sorted on this attribute).
+
+  5. **Multi-Level Index**: When the index itself is too large, build an
+     index on the index → leads to B⁺ trees!
+
+■ PROS AND CONS
+────────────────
+  ✓ Fast point queries via index.
+  ✓ Efficient range queries via sequential data file.
+  ✓ Combines benefits of both sequential and indexed access.
+
+  ✗ Index must be maintained on insertions/deletions.
+  ✗ Overflow chains degrade performance over time.
+  ✗ Periodic reorganization still needed.
+
+
+================================================================================
+7.3  B⁺ TREE INDEX FILES
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **B⁺ Tree** is a balanced, multi-level index structure that maintains
+sorted data and allows efficient search, insertion, deletion, and range
+queries in O(log n) time. It is the MOST WIDELY USED index structure
+in relational databases.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+
+WHY B⁺ Trees?
+  • Binary search trees degrade with skewed data → O(n) worst case.
+  • Multi-level indices have fixed structure → hard to maintain.
+  • B⁺ trees are ALWAYS balanced (every leaf at the same depth).
+  • Designed for disk: each node = one disk block → minimizes I/O.
+
+■ STRUCTURE OF B⁺ TREE
+───────────────────────
+
+A B⁺ tree of **order** n (or degree n) has the following properties:
+
+**Internal Nodes:**
+  • Contain up to n−1 search keys and n pointers (to children).
+  • Minimum keys: ⌈n/2⌉ − 1 (except root).
+  • Format: [P₁|K₁|P₂|K₂|P₃|...|Kₙ₋₁|Pₙ]
+  • Pᵢ points to subtree with keys < Kᵢ.
+  • Pᵢ₊₁ points to subtree with keys ≥ Kᵢ.
+
+**Leaf Nodes:**
+  • Contain up to n−1 search keys and n−1 pointers to data records.
+  • Minimum keys: ⌈(n−1)/2⌉.
+  • ALL data pointers are in leaf nodes.
+  • Leaf nodes are linked together (doubly or singly linked list) for
+    efficient range queries.
+
+**Root Node:**
+  • At least 1 key (if not a leaf) or can be empty (tree is empty).
+  • Can have as few as 2 pointers.
+
+■ B⁺ TREE PROPERTIES
+─────────────────────
+  1. **Balanced**: All leaf nodes are at the SAME level (same depth).
+  2. **Sorted**: Keys within each node are in sorted order.
+  3. **Linked Leaves**: Leaf nodes are linked for sequential access.
+  4. **Logarithmic Height**: Height = O(logₙ(N)) where N is the
+     number of records.
+  5. **Self-Balancing**: Insertions and deletions automatically maintain
+     balance through splits and merges.
+
+■ B⁺ TREE VISUALIZATION (Order 4)
+───────────────────────────────────
+
+  Insert values: 5, 8, 12, 15, 20, 25, 30, 35, 40 into B⁺ tree order 4
+  (max 3 keys per node, max 4 pointers)
+
+  Final structure after all insertions:
+
+                        [15 | 25]
+                       ╱    │    ╲
+              [5|8|12]   [15|20]   [25|30|35|40]
+
+  Wait — the last leaf overflows. Let's trace carefully:
+
+  After inserting 5,8,12: [5|8|12] (one leaf, fits)
+
+  Insert 15: [5|8|12|15] overflows (max 3 keys) → SPLIT
+    Left leaf: [5|8]    Right leaf: [12|15]
+    Parent: [12]
+
+                    [12]
+                   ╱    ╲
+             [5|8]     [12|15]
+
+  Insert 20: goes to right leaf → [12|15|20] (fits)
+
+  Insert 25: right leaf → [12|15|20|25] overflows → SPLIT
+    Left: [12|15]   Right: [20|25]
+    Push 20 to parent: [12|20]
+
+                    [12 | 20]
+                   ╱    │    ╲
+            [5|8]  [12|15]  [20|25]
+
+  Insert 30: rightmost leaf → [20|25|30] (fits)
+
+  Insert 35: rightmost leaf → [20|25|30|35] overflows → SPLIT
+    Left: [20|25]   Right: [30|35]
+    Push 30 to parent: [12|20|30]
+
+                    [12 | 20 | 30]
+                   ╱    │    │    ╲
+            [5|8] [12|15] [20|25] [30|35]
+
+  Insert 40: rightmost leaf → [30|35|40] (fits)
+
+  Final B⁺ Tree:
+                    [12 | 20 | 30]
+                   ╱    │    │    ╲
+            [5|8] [12|15] [20|25] [30|35|40]
+
+  Leaf nodes linked: [5|8]→[12|15]→[20|25]→[30|35|40]
+
+■ B⁺ TREE OPERATIONS
+─────────────────────
+
+**Search (Point Query):**
+  Start at root, follow pointers based on key comparison.
+  Cost: O(h) where h = height of tree = O(logₙ(N))
+  Typically h = 2-4 for millions of records.
+
+**Range Query:**
+  Find the starting leaf, then follow leaf pointers sequentially.
+  Cost: O(h + k) where k = number of qualifying records.
+
+**Insertion:**
+  1. Find the correct leaf node.
+  2. If leaf has space, insert in sorted position.
+  3. If leaf is full, SPLIT:
+     a. Create new leaf, distribute keys evenly.
+     b. Copy the middle key UP to the parent.
+     c. If parent overflows, recursively split.
+
+**Deletion:**
+  1. Find and remove key from leaf.
+  2. If leaf has too few keys (underflow), REBALANCE:
+     a. Try to BORROW from a sibling (redistribute).
+     b. If siblings can't lend, MERGE with a sibling.
+     c. Update parent; may propagate merges up.
+
+■ ADVANTAGES OF B⁺ TREES
+──────────────────────────
+  ✓ Balanced — guaranteed O(log n) for all operations.
+  ✓ Efficient for both point and range queries.
+  ✓ Linked leaf nodes enable fast sequential access.
+  ✓ Self-balancing — no manual reorganization needed.
+  ✓ Optimized for disk I/O (wide, shallow tree; each node = 1 block).
+  ✓ Handles insertions and deletions gracefully.
+
+■ B⁺ TREE vs OTHER INDEX METHODS
+──────────────────────────────────
+  ┌─────────────────────┬──────────────┬──────────────┬──────────────┐
+  │ Feature             │ B⁺ Tree      │ Hash Index   │ ISAM         │
+  ├─────────────────────┼──────────────┼──────────────┼──────────────┤
+  │ Point query         │ O(log n)     │ O(1) average │ O(log n)     │
+  │ Range query         │ Efficient    │ Not possible │ Efficient    │
+  │ Insertion/Deletion  │ O(log n)     │ O(1) average │ Expensive    │
+  │ Dynamic?            │ Yes (balanced│ Yes (dynamic)│ No (static)  │
+  │                     │   growth)    │              │              │
+  │ Ordering            │ Maintained   │ Not maintained│ Maintained  │
+  │ Most common use     │ General index│ Equi-joins   │ Legacy       │
+  └─────────────────────┴──────────────┴──────────────┴──────────────┘
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**MySQL InnoDB** uses B⁺ trees as its primary index structure. The
+primary key index (clustered index) IS a B⁺ tree where leaf nodes
+contain the actual data rows. Secondary indices are B⁺ trees where leaf
+nodes contain pointers (primary key values) to the clustered index.
+
+For a table with 10 million rows, a B⁺ tree of order ~500 (typical for
+8KB pages) has height ≈ 3. Finding any row requires only 3 disk reads!
+
+
+================================================================================
+7.4  HASH INDICES
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **Hash Index** uses a **hash function** to map search key values
+directly to the disk block (bucket) where the record is stored. This
+provides O(1) average-case access for equality queries.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+HOW does hashing work for file organization?
+
+  1. A **hash function** h(K) maps a search key value K to a
+     **bucket number** (0 to B−1, where B = number of buckets).
+  2. Each bucket corresponds to one or more disk blocks.
+  3. A record with search key K is stored in bucket h(K).
+  4. To search for key K: compute h(K), go directly to that bucket.
+
+  Hash Function: h(K) = K mod B
+
+  Example: B = 10 buckets
+    h(101) = 101 mod 10 = 1 → Bucket 1
+    h(205) = 205 mod 10 = 5 → Bucket 5
+    h(301) = 301 mod 10 = 1 → Bucket 1 (collision!)
+
+■ BUCKET STRUCTURE
+───────────────────
+
+  Hash Function h(K) = K mod 5
+
+  Bucket 0: [Records with h(K)=0] → [100] → [205] → ...
+  Bucket 1: [Records with h(K)=1] → [101] → [301] → [406] → ...
+  Bucket 2: [Records with h(K)=2] → [102] → [207] → ...
+  Bucket 3: [Records with h(K)=3] → [103] → ...
+  Bucket 4: [Records with h(K)=4] → [104] → [209] → ...
+
+  When a bucket overflows, an **overflow chain** (linked list of
+  overflow blocks) is used.
+
+■ STATIC HASHING
+──────────────────
+The number of buckets is FIXED at creation time.
+
+Problems:
+  1. **Overflow chains**: As data grows, buckets overflow, creating long
+     linked lists → performance degrades to O(n).
+  2. **Wasted space**: If too many buckets allocated, many are empty.
+  3. **Periodic reorganization**: Need to rehash with more buckets.
+
+■ DYNAMIC (EXTENDABLE) HASHING
+────────────────────────────────
+The number of buckets GROWS DYNAMICALLY as data is inserted.
+
+**Extendable Hashing:**
+  - Uses a **directory** of pointers to buckets.
+  - The directory size doubles when needed.
+  - Uses the first d bits of the hash value (called **global depth**).
+  - Each bucket has a **local depth** indicating how many bits it uses.
+
+  When a bucket overflows:
+  1. If local depth < global depth: split the bucket.
+  2. If local depth = global depth: double the directory, then split.
+
+  ┌─────────────────────────────────┐
+  │ DIRECTORY (Global Depth = 2)    │
+  │ 00 → Bucket A (local depth 2)  │
+  │ 01 → Bucket B (local depth 2)  │
+  │ 10 → Bucket C (local depth 1)  │
+  │ 11 → Bucket C (local depth 1)  │  ← 10 and 11 share a bucket
+  └─────────────────────────────────┘
+
+  Advantage: No overflow chains; grows gracefully.
+
+■ LINEAR HASHING
+─────────────────
+Another dynamic scheme that splits buckets in a round-robin fashion
+(not necessarily the overflowing bucket). Uses a split pointer.
+
+■ PROS AND CONS OF HASH INDICES
+─────────────────────────────────
+
+  ┌──────────────────────┬───────────────────────┬──────────────────────┐
+  │ Aspect               │ Advantages            │ Disadvantages        │
+  ├──────────────────────┼───────────────────────┼──────────────────────┤
+  │ Equality lookup      │ O(1) average — FAST   │                      │
+  │ Range queries        │                       │ NOT SUPPORTED        │
+  │                      │                       │ (hash destroys order)│
+  │ Dynamic data         │                       │ Static: overflow     │
+  │                      │                       │ Dynamic: complex     │
+  │ Implementation       │ Simple concept        │ Collision handling   │
+  │ Space                │ Efficient if sized    │ Can waste space      │
+  │                      │   well                │ if poorly sized      │
+  │ Ordering             │                       │ No sorted access     │
+  └──────────────────────┴───────────────────────┴──────────────────────┘
+
+■ WHEN TO USE HASH vs B⁺ TREE INDEX
+─────────────────────────────────────
+  ┌────────────────────────────┬──────────────┬──────────────────────┐
+  │ Query Type                 │ Hash Index   │ B⁺ Tree Index        │
+  ├────────────────────────────┼──────────────┼──────────────────────┤
+  │ Exact match (WHERE x = 5)  │ BEST O(1)   │ Good O(log n)        │
+  │ Range (WHERE x BETWEEN)    │ Cannot use   │ BEST (ordered leaves)│
+  │ ORDER BY                   │ Cannot use   │ BEST (sorted)        │
+  │ Pattern match (LIKE 'A%')  │ Cannot use   │ Can use (prefix)     │
+  │ JOIN (equality)            │ Good (hash   │ Good (sort-merge)    │
+  │                            │   join)      │                      │
+  └────────────────────────────┴──────────────┴──────────────────────┘
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**PostgreSQL** supports both B⁺ tree (default) and hash indices:
+  CREATE INDEX idx_emp_id ON employee USING hash (emp_id);
+  CREATE INDEX idx_emp_name ON employee USING btree (name);
+
+Use hash for: session lookups (session_id = ?), cache keys.
+Use B⁺ tree for: almost everything else (most versatile).
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is a B⁺ tree? Why is it preferred?
+  A: A B⁺ tree is a balanced, multi-level index where all data pointers
+     are in leaf nodes (linked for range queries). It's preferred because
+     it guarantees O(log n) for searches, handles range queries
+     efficiently, is self-balancing, and is optimized for disk I/O.
+
+  Q: When would you use hash indexing over B⁺ tree?
+  A: Only when all queries are exact-match (equality) lookups and no
+     range queries, ordering, or pattern matching is needed. Hash gives
+     O(1) for equality, but can't do ranges.
+
+  Q: What is the problem with static hashing?
+  A: Fixed number of buckets leads to overflow chains as data grows,
+     degrading performance. Dynamic hashing (extendable or linear)
+     solves this by growing the bucket structure as needed.
+
+
+================================================================================
+                     END OF CHAPTER 7 NOTES
+================================================================================

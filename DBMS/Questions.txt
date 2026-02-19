@@ -1,0 +1,299 @@
+════════════════════════════════════════════════════════════════
+                        QUESTION 1 (a)
+════════════════════════════════════════════════════════════════
+
+Q. 1 (a) Define DBMS. What are the advantages of DBMS over traditional file system?
+
+Q. 1 (a) What is data independency? Why is it required in DBMS? Explain in detail.
+
+Q. 1 (a) Define data independency. Differentiate between schema and instance with the help of an example.
+
+Q. 1 (a) What do you understand by data independence? How is schema different from instance? Justify with some suitable examples.
+
+Q. 1 (a) Explain the concept of DBMS and its applications, tracing its evolution.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 1 (b)
+════════════════════════════════════════════════════════════════
+
+Q. 1 (b) Why do you need ER diagram? Draw an ER diagram for online shop management system. Assume relevant entities and attributes for the given system.
+
+Q. 1 (b) What is ER diagram? Draw an ER diagram for a library system. Assume the entities student, teacher, book and semester. In the diagram illustrate the concept of strong entity, weak entity, composite attributes, multivalued attributes, and derived attributes.
+
+Q. 1 (b) Differentiate between data model and ER model. Draw an ER diagram for a library management system including primary key, weak entity, composite attribute, derived attribute, and multivalued attribute in your ER diagram.
+
+Q. 1 (b) How does a UML diagram assist during data modeling? Draw an ER diagram for a Gandaki auto vehicle shop system, including primary key, weak entity, composite attribute, derived attribute, and multivalued attributes.
+
+Q. 1 (b) Construct an ER diagram for keeping records of a library management system.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 2 (a)
+════════════════════════════════════════════════════════════════
+
+Q. 2 (a) Suppose we have the following relation:
+        employee(person_name, street, city)
+        works(person_name, company_name, salary)
+        company(company_name, city)
+
+        Write relational algebra expressions for the following queries:
+        i. Find the names of all employees who live in 'Butwal' and whose salary is less than Rs. 50,000.
+        ii. Find the names of all employees who work for 'Nabil Bank Limited'.
+        iii. Find the names and cities of residences of all employees who work for 'Global Bank'.
+        iv. Update the salary of all employees by 10%.
+
+Q. 2 (a) Define schema and views. Considering the following schemas:
+        SAILORS(Sid, name, rating, age)
+        boats(bid, bname, color)
+        reserves(sid, bid, day)
+
+        Write relational algebra expressions for the following queries:
+        i. Find the records of sailors who have reserved boat number 103, bid=103.
+        ii. Update the color of the boat, where bid is 104, into green.
+        iii. Find the names of sailors who have reserved a red or green boat.
+        iv. Find the names of sailors who have reserved boat number 103 on day 5.
+        v. Find the names of sailors whose name is not 'ram'.
+        vi. Find the names of all boats.
+
+Q. 2 (a) Consider the following relations, where the primary keys are underlined. Give an expression in the relational algebra to express each of the following queries:
+        doctor(SSN, firstname, lastname, speciality, yearsofexperience, phonenumber)
+        patient(ssn, firstname, lastname, address, dob, primarydoctor_ssn)
+        medicine(trade_name, unitprice, genericflag)
+        prescription(id, date, doctor_ssn, patient_ssn)
+        prescription_medicine(prescription_id, trade_name, numofunits)
+
+        i. List the trade name of generic medicine with unit price less than $50.
+        ii. List the first and last name of patient whose primary doctor named "John Smith".
+        iii. List the first and last name of doctor who are not primary doctors to any patient_ssn.
+        iv. List the SSN of distinct patients who have 'aspirin' prescribed to them by doctor named 'John Smith'.
+
+Q. 2 (a) How is relational algebra different from relational calculus? Define TRC and DRC.
+
+Q. 2 (a) Using the following schema, represent the queries using relational algebra:
+        • Project (Project_Num, Project_Name, Project_Type, Project_Manager)
+        • Employee (Emp_Num, Emp_Name)
+        • Assign (Project_Num, Emp_Num)
+
+        Then:
+        i. Find employee details working on a project whose name starts with 'L'.
+        ii. List all employee details working under project manager Rohan.
+        iii. List employees not assigned to any project.
+        iv. List employees working in more than one project.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 2 (b)
+════════════════════════════════════════════════════════════════
+
+Q. 2 (b) Define stored procedure. What is the advantage of the stored procedure? Explain how stored procedures are created in SQL.
+
+Q. 2 (b) What are DDL and DML queries in SQL? Consider the relations in 2 (a) and write the SQL commands for the queries in 2 (a).
+
+Q. 2 (b) Write the SQL statements for the following:
+        i. Create a table named chef with chef_license as primary key and following attributes:
+                chef_license, c_fname, c_lname, c_dob, c_gender, c_experience_hours, c_photograph
+        ii. Enter a full detailed information of a chef.
+        iii. Change the chef's experience hours by any value.
+        iv. Remove all the chef records whose name contains character 'r' in second position in his first name.
+        v. Display the total experience hours of all chef.
+        vi. Create a view from above table.
+        vii. Display details of chef ordering on descending manner in last name and by first name when last name matches.
+
+Q. 2 (b) Consider a simple relational database of a hospital management system. Underline attributes represent primary key attributes.
+        Doctors: (Doctor_ID, Doctor_Name, Department, Address, Salary)
+        Patients: (Patient_ID, Patient_Name, Address, Age, Gender)
+        Hospitals: (Hospital_ID, Name, Address)
+
+        Write down the SQL statements for the following:
+        i. Display ID of patients admitted to hospital at Pokhara and whose name ends with 'S'.
+        ii. Delete the record of doctors whose salary is greater than the average salary of doctors.
+        iii. Increase the salary of doctors by 18.5% who work in the OPD department.
+        iv. Find the average salary of doctors for each address who have average salary more than 55K.
+
+Q. 2 (b) Write SQL statements for the following queries by reference to the Hotel_Details relation. The table is as follows:
+        | Hotel_ID | Hotel_Name    | Establishment_Year | Hotel_Star | Hotel_Worth |
+        |----------|---------------|--------------------|-----------|--------------|
+        | 1        | Hyatt         | 2047               | 5         | 15 Million   |
+        | 2        | Hotel KTM     | 2043               | 3         | 5 Million    |
+        | 3        | Fulbari       | 2050               | 5         | 20 Million   |
+        | 4        | Yak & Yeti    | 2052               | 4         | 11 Million   |
+        | 5        | Hotel Chitwan | 2055               | 4         | 12 Million   |
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 3 (a)
+════════════════════════════════════════════════════════════════
+
+Q. 3 (a) Consider the relation Actress_details and write the SQL statements for the following queries:
+        | Players id| Actress_name  | debut_year| Recent release | Actress_fee |
+        |---------- |---------------|-----------|----------------|-------------|
+        | 1         | rebu          | 2010      | samay          | 400000      |
+        | 1         | sita          | 2022      | radha          | 300000      |
+        | 3         | geeta         | 2001      | mato           | 600000      |
+        | 4         | amita         | 1990      | management     | 700000      |   
+
+        i. Create the table Actress_details relation.
+        ii. Delete the data of actress whose recent release is mato.
+        iii. Modify the database so that Renu's new release is "Win the Race" film.
+        iv. Insert a new record in the above table.
+
+Q. 3 (a) What are the different types of integrity constraints? Explain with examples.
+
+Q. 3 (a) Explain data constraints and its types with examples.
+
+Q. 3 (a) What are stored procedures? Explain equijoin, natural join, left and right outer join with examples.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 3 (b)
+════════════════════════════════════════════════════════════════
+
+Q. 3 (b) Consider the relation where {M_ID and P_ID} are primary keys. State in which normal form the relation is. What anomalies can occur in this relation? How can these anomalies be removed?
+        | M_ID | M_Date             | P_ID    | Quantity     |
+        |------|--------------------|---------|--------------|
+        | M11  | 16 june,           | 11      | 20           |
+        | M11  | 26 july, 2022      | 16      | 30           |
+        | M22  | 3 september, 2022  | 15      | 20           |
+        | M22  | 13 september, 2022 | 16      | 60           |
+        | M33  | 23 september, 2002 | 12      | 35           |  
+
+Q. 3 (b) What is database normalization? Discuss normalization process with suitable example until it satisfies 3NF.
+
+Q. 3 (b) What is the role of triggers? Write an SQL trigger to carry out the following action: on delete of an account, for each owner of the account, check if the owner has any remaining amount, if she does not, delete her from the depositor relation.
+
+Q. 3 (b) What do you mean by decomposition of a relational schema? Suppose we are given a schema R = (A, B, C, D, E, F, G, H, I) and a set of functional dependencies F = {A → B, A → C, C, G → H, B → H, C, G → I}. Find the closure of functional dependency F.
+
+Q. 3 (b) Differentiate between functional dependency and multivalued dependency. Explain the closure set of functional dependencies with examples.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 4 (a)
+════════════════════════════════════════════════════════════════
+
+Q. 4 (a) When do you use triggers? Explain with any one example of triggers in SQL.
+
+Q. 4 (a) What are the needs of security? Explain about the access control, authorization, and authentication.
+
+Q. 4 (a) Explain about database normalization and its importance. Explain 1NF, 2NF, 3NF with examples.
+
+Q. 4 (a) What is an access control mechanism in a database? Explain different types of access control mechanisms.
+
+Q. 4 (a) Define Third Normal Form (3NF). Convert the following 2NF relation into 3NF. The table is as follows (Name is primary key):
+        | Name   | Address | Phone  | Salary | Post     |
+        |--------|---------|--------|--------|----------|
+        | Gil    | KTM     | 456789 | 20,000 | Engineer |
+        | Van    | BKT     | 654321 | 20,000 | Engineer |
+        | Robert | KTM     | 456789 | 20,000 | Engineer |
+        | Brown  | BKT     | 654321 | 10,000 | Overseer |
+        | Albert | KTM     | 454545 | 10,000 | Officer  |
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 4 (b)
+════════════════════════════════════════════════════════════════
+
+Q. 4 (b) Differentiate between authentication and authorization. How encryption and decryption occurs in private key and public key cryptography?
+
+Q. 4 (b) Consider the relation schema in 2 (a). Write the relational algebra for the query "Find the names of sailors who have reserved a red or green boat". Construct the initial operator tree and final efficient operator tree after applying transformation rules.
+
+Q. 4 (b) What is security violation and integrity violation? Explain the need of access control, authorization and authentication.
+
+Q. 4 (b) Diagrammatically illustrate and discuss the steps involved in processing a query.
+
+Q. 4 (b) What are security and integrity violations? Explain the need for access control, authorization, and authentication.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 5 (a)
+════════════════════════════════════════════════════════════════
+
+Q. 5 (a) Consider the relation schema in 2 (a), write the relational algebra expression for the query, "Find the names of all employees who live in Pokhara". Construct the initial operator tree and final efficient operator tree after applying transformation rules.
+
+Q. 5 (a) Explain file organization using hash indices with example.
+
+Q. 5 (a) Define query optimization. What are the basic steps of query processing with the help of a diagram?
+
+Q. 5 (a) Construct a B⁺ tree for the following set of key values: 2, 3, 5, 7, 11, 17, 19, 23, 29, 31. Assume that the tree is initially empty, and the values are added in ascending order, with the pointer number equal to 4.
+
+Q. 5 (a) What is query cost estimation? Explain cost-based and heuristic-based choice of evaluation for query optimization.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 5 (b)
+════════════════════════════════════════════════════════════════
+
+Q. 5 (b) What is file organization? Explain how you organize files using hash index.
+
+Q. 5 (b) What is crash recovery? Explain log based recovery method with example.
+
+Q. 5 (b) How do you evaluate the performance of a magnetic disk? What are the optimization techniques to reduce disk block access?
+
+Q. 5 (b) What is crash recovery? What are the problems due to a crash? How can these problems be avoided? Explain any one briefly.
+
+Q. 5 (b) Create a B⁺ tree of order 4 with the following data (inserted in ascending order): 4, 9, 16, 25, 1, 20, 13, 15, 10, 11, 12. Assume the tree is initially empty and show the structure after adding these values in ascending order. Then, show the formation after deleting the value 16.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 6 (a)
+════════════════════════════════════════════════════════════════
+
+Q. 6 (a) What is crash recovery? Discuss shadow paging with necessary diagram.
+
+Q. 6 (a) Explain serial schedule and serializable schedule with examples.
+
+Q. 6 (a) What is a transaction? Write about the ACID property of any transaction.
+
+Q. 6 (a) When does a deadlock occur? Explain the two-phase commit protocol with an example.
+
+Q. 6 (a) What is concurrency control? Describe the ACID properties of a transaction.
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 6 (b)
+════════════════════════════════════════════════════════════════
+
+Q. 6 (b) What do you understand by concurrency control? Explain two phase locking protocol with examples.
+
+Q. 6 (b) What are object oriented database model? Explain the advantage and disadvantage of object-oriented database over relational database.
+
+Q. 6 (b) What is crash recovery? Explain log based recovery and what happens for a log-based recovery:
+        <T0 Start>
+        <T0, A, 1000, 950>
+        <T0, B, 2000, 2050>
+        <T0 commit>
+        <T1 start>
+        <T1, C, 700, 600>
+
+Q. 6 (b) What are data fragmentations? State the various fragmentations with examples.
+
+Q. 6 (b) Define recovery. When are two transactions said to be in a deadlock state? How can these deadlocks be addressed?
+
+
+════════════════════════════════════════════════════════════════
+                        QUESTION 7
+════════════════════════════════════════════════════════════════
+
+Q. 7 Write short notes on: (Any two)
+        a. Remote backup system
+        b. ACID properties
+        c. Distributed database
+
+Q. 7 Write short notes on: (Any two)
+        a. Data dictionary
+        b. ACID properties
+        c. Query by example
+
+Q. 7 Write short notes on: (Any two)
+        a. RAID
+        b. Stored procedure
+        c. Distributed database
+
+Q. 7 Write short notes on any two of the following:
+        a. ACID properties
+        b. QBE
+        c. Object-Relational Model
+
+Q. 7 Write short notes on any two of the following:
+        a. Architecture of distributed database
+        b. Role of database administrator

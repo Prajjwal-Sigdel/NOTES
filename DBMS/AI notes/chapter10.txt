@@ -1,0 +1,918 @@
+================================================================================
+           CHAPTER 10: EMERGING DATABASE TRENDS
+                            [4 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  10.1  NoSQL Databases
+        10.1.1  Characteristics of NoSQL
+        10.1.2  Categories of NoSQL Databases
+        10.1.3  NoSQL vs RDBMS
+  10.2  Object-Oriented Databases (OODB)
+  10.3  Object-Relational Model
+  10.4  Object-Relational Mapping (ORM)
+  10.5  Query By Example (QBE)
+  10.6  Distributed Databases
+        10.6.1  Architecture
+        10.6.2  Data Fragmentation
+        10.6.3  Data Replication
+  10.7  Distributed Ledger Technology
+        10.7.1  Blockchain
+        10.7.2  Cryptocurrency
+
+================================================================================
+10.1  NoSQL DATABASES
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**NoSQL** ("Not Only SQL") databases are a class of database management
+systems that do NOT follow the traditional relational model. They are
+designed for distributed, large-scale data storage with flexible schemas,
+horizontal scalability, and high availability.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+NoSQL emerged in response to limitations of traditional RDBMS when
+dealing with:
+  • **Big Data** — petabytes of unstructured/semi-structured data.
+  • **High velocity** — millions of reads/writes per second.
+  • **Horizontal scalability** — scale by adding more servers, not
+    upgrading a single server.
+  • **Flexible schemas** — no predefined rigid schema (schema-less or
+    schema-on-read).
+  • **Distributed architectures** — data spread across many nodes.
+
+────────────────────────────────────────────────
+10.1.1  CHARACTERISTICS OF NoSQL
+────────────────────────────────────────────────
+
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Characteristic       │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Schema-less          │ No predefined schema. Documents/records can  │
+  │                      │ have different structures. Schema evolves.    │
+  │                      │                                              │
+  │ Horizontally         │ Scale OUT by adding more servers (nodes).     │
+  │ Scalable             │ Data is automatically distributed/sharded.   │
+  │                      │                                              │
+  │ High Availability    │ Built-in replication. No single point of     │
+  │                      │ failure. Automatic failover.                 │
+  │                      │                                              │
+  │ Eventual Consistency │ Instead of strict ACID, many NoSQL use       │
+  │                      │ BASE: Basically Available, Soft-state,       │
+  │                      │ Eventually consistent.                       │
+  │                      │                                              │
+  │ Distributed          │ Data is partitioned across multiple servers. │
+  │                      │ Designed for clusters and cloud.             │
+  │                      │                                              │
+  │ Non-Relational       │ No tables with fixed rows/columns. Uses     │
+  │ Data Model           │ key-value, documents, columns, or graphs.   │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ CAP THEOREM (BREWER'S THEOREM)
+──────────────────────────────────
+In a distributed system, you can have AT MOST TWO of these three:
+
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                        C A P                                     │
+  │                                                                  │
+  │  C = Consistency   — Every read gets the most recent write.      │
+  │  A = Availability  — Every request gets a response.              │
+  │  P = Partition     — System works despite network failures        │
+  │      Tolerance       between nodes.                              │
+  └──────────────────────────────────────────────────────────────────┘
+
+  In practice, P (partition tolerance) is always required in distributed
+  systems, so the real choice is between C and A:
+    • **CP systems**: Consistent + Partition Tolerant (e.g., MongoDB,
+      HBase). May sacrifice availability during network partitions.
+    • **AP systems**: Available + Partition Tolerant (e.g., Cassandra,
+      DynamoDB). May sacrifice consistency (eventual consistency).
+    • **CA systems**: Consistent + Available (e.g., traditional RDBMS).
+      But cannot handle network partitions (single node only).
+
+■ ACID vs BASE
+────────────────
+  ┌──────────────────┬─────────────────────┬────────────────────────┐
+  │ Property         │ ACID (RDBMS)        │ BASE (NoSQL)           │
+  ├──────────────────┼─────────────────────┼────────────────────────┤
+  │ Focus            │ Strong consistency  │ Availability           │
+  │ Consistency      │ Immediate           │ Eventual               │
+  │ Isolation        │ Full isolation      │ Relaxed                │
+  │ Durability       │ Guaranteed          │ Best effort            │
+  │ Trade-off        │ Reduced availability│ Reduced consistency    │
+  │ Use case         │ Banking, financial  │ Social media, IoT,     │
+  │                  │                     │ real-time analytics    │
+  └──────────────────┴─────────────────────┴────────────────────────┘
+
+────────────────────────────────────────────────
+10.1.2  CATEGORIES OF NoSQL DATABASES
+────────────────────────────────────────────────
+
+**1. KEY-VALUE STORES**
+
+  The simplest NoSQL model. Each data item is stored as a
+  (key, value) pair, where the value is opaque (any data type).
+
+  Structure:
+    ┌───────────────┬────────────────────────────────────────┐
+    │ Key           │ Value                                  │
+    ├───────────────┼────────────────────────────────────────┤
+    │ user:1001     │ {"name":"Alice","age":25}              │
+    │ session:abc   │ {"login_time":"2024-01-01","ip":"..."}│
+    │ config:theme  │ "dark"                                 │
+    └───────────────┴────────────────────────────────────────┘
+
+  Operations: GET(key), PUT(key, value), DELETE(key).
+  No queries on values — lookup by key ONLY.
+
+  Examples: **Redis**, **Amazon DynamoDB**, **Riak**, Memcached.
+  Use cases: Caching, session management, user preferences.
+
+**2. DOCUMENT STORES**
+
+  Store data as **documents** (typically JSON/BSON). Each document is a
+  self-contained unit with a flexible schema. Documents can have nested
+  structures, arrays, and varying fields.
+
+  Example document:
+    {
+      "_id": "1001",
+      "name": "Alice",
+      "courses": ["DBMS", "OS", "AI"],
+      "address": {
+        "city": "Kathmandu",
+        "zip": "44600"
+      }
+    }
+
+  Unlike key-value stores, you CAN query by field values:
+    db.students.find({"address.city": "Kathmandu"})
+
+  Examples: **MongoDB**, **CouchDB**, **Amazon DocumentDB**.
+  Use cases: Content management, user profiles, catalogs, real-time
+  analytics, IoT data.
+
+**3. COLUMN-FAMILY (WIDE-COLUMN) STORES**
+
+  Store data in COLUMNS rather than rows. Data is organized into
+  **column families** — groups of related columns stored together.
+
+  Structure:
+    Row Key │ Column Family: Personal   │ Column Family: Academic
+    ────────┼───────────────────────────┼──────────────────────────
+    1001    │ name=Alice, age=25        │ GPA=3.8, major=CS
+    1002    │ name=Bob                  │ GPA=3.5, major=IT, minor=Math
+
+  Each row can have DIFFERENT columns — very flexible.
+
+  Examples: **Apache Cassandra**, **Apache HBase**, Google Bigtable.
+  Use cases: Time-series data, event logging, recommendation engines,
+  large-scale analytics.
+
+**4. GRAPH DATABASES**
+
+  Store data as **nodes** (entities) and **edges** (relationships).
+  Optimized for traversing relationships between data.
+
+  Structure:
+    (Alice)──[FRIENDS_WITH]──>(Bob)
+       │                        │
+    [ENROLLED_IN]          [ENROLLED_IN]
+       │                        │
+       ▼                        ▼
+    (DBMS Course)          (OS Course)
+
+  Query (Cypher — Neo4j's query language):
+    MATCH (a:Person)-[:FRIENDS_WITH]->(b:Person)
+    WHERE a.name = "Alice"
+    RETURN b.name
+
+  Examples: **Neo4j**, **Amazon Neptune**, **ArangoDB**, **JanusGraph**.
+  Use cases: Social networks, fraud detection, recommendation systems,
+  knowledge graphs, network topology.
+
+■ COMPARISON OF NoSQL CATEGORIES
+──────────────────────────────────
+
+  ┌──────────────┬──────────────┬──────────────┬──────────────┬──────────────┐
+  │ Feature      │ Key-Value    │ Document     │ Column-Family│ Graph        │
+  ├──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤
+  │ Data model   │ (key, value) │ JSON docs    │ Column groups│ Nodes+Edges  │
+  │ Schema       │ None         │ Flexible     │ Flexible     │ Flexible     │
+  │ Query        │ By key only  │ By any field │ By column    │ Graph traver.│
+  │ Scalability  │ Very high    │ High         │ Very high    │ Moderate     │
+  │ Best for     │ Caching      │ General      │ Analytics    │ Relationships│
+  │ Example      │ Redis        │ MongoDB      │ Cassandra    │ Neo4j        │
+  └──────────────┴──────────────┴──────────────┴──────────────┴──────────────┘
+
+────────────────────────────────────────────────
+10.1.3  NoSQL vs RDBMS
+────────────────────────────────────────────────
+
+  ┌──────────────────────┬──────────────────────┬──────────────────────┐
+  │ Aspect               │ RDBMS                │ NoSQL                │
+  ├──────────────────────┼──────────────────────┼──────────────────────┤
+  │ Schema               │ Fixed, predefined    │ Dynamic, flexible    │
+  │ Data model           │ Tables (relational)  │ Key-value, document, │
+  │                      │                      │ column, graph        │
+  │ Query language       │ SQL (standardized)   │ Varies by database   │
+  │ Scaling              │ Vertical (scale up)  │ Horizontal (scale out│
+  │ Transactions         │ ACID                 │ BASE (mostly)        │
+  │ Joins                │ Supported (efficient)│ Limited or none      │
+  │ Consistency          │ Strong               │ Eventual (usually)   │
+  │ Best for             │ Structured data,     │ Unstructured/semi,   │
+  │                      │ complex queries,     │ big data, high       │
+  │                      │ ACID requirements    │ throughput, flexible  │
+  │                      │                      │ schema               │
+  │ Examples             │ MySQL, PostgreSQL,   │ MongoDB, Redis,      │
+  │                      │ Oracle, SQL Server   │ Cassandra, Neo4j     │
+  └──────────────────────┴──────────────────────┴──────────────────────┘
+
+
+================================================================================
+10.2  OBJECT-ORIENTED DATABASES (OODB)
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+An **Object-Oriented Database (OODB)** stores data as **objects**
+(similar to objects in OOP languages like Java, C++, Python). Each
+object has attributes (data) and methods (behavior), and supports OOP
+concepts like inheritance, encapsulation, and polymorphism.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Traditional RDBMS stores data in tables (rows/columns), which doesn't
+naturally represent complex objects. OODB bridges the gap between
+object-oriented programming and database storage.
+
+■ KEY CONCEPTS
+───────────────
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Concept              │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Object               │ An instance of a class with attributes and   │
+  │                      │ methods. Each object has a unique OID.       │
+  │                      │                                              │
+  │ Object Identity (OID)│ A unique, system-generated identifier for    │
+  │                      │ each object. Unlike primary keys, OIDs are   │
+  │                      │ immutable and independent of attribute values.│
+  │                      │                                              │
+  │ Class                │ A template/blueprint defining the structure  │
+  │                      │ and behavior of objects. Equivalent to a     │
+  │                      │ "table" in RDBMS.                            │
+  │                      │                                              │
+  │ Inheritance          │ A class can inherit attributes and methods   │
+  │                      │ from a parent class. Supports IS-A           │
+  │                      │ relationships naturally.                     │
+  │                      │                                              │
+  │ Encapsulation        │ Object's internal state is hidden. Accessed  │
+  │                      │ only through defined methods.                │
+  │                      │                                              │
+  │ Polymorphism         │ Different classes can respond to the same    │
+  │                      │ method call differently.                     │
+  │                      │                                              │
+  │ Complex Objects      │ Objects can contain other objects (nested    │
+  │                      │ structures, collections, references).        │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ ADVANTAGES AND DISADVANTAGES
+────────────────────────────────
+  ✓ Natural mapping from OOP to database (no impedance mismatch).
+  ✓ Supports complex data types (multimedia, spatial, nested objects).
+  ✓ Inheritance and polymorphism built-in.
+  ✓ No need for complex JOIN operations.
+  ✓ Better for CAD/CAM, multimedia, GIS, scientific applications.
+
+  ✗ Lack of standardized query language (unlike SQL).
+  ✗ Steep learning curve.
+  ✗ Less mature than RDBMS (fewer tools, smaller community).
+  ✗ Poor support for ad-hoc queries.
+  ✗ Limited adoption in mainstream business applications.
+
+  Examples: **ObjectDB**, **db4o**, **Versant**, **GemStone**.
+
+
+================================================================================
+10.3  OBJECT-RELATIONAL MODEL
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+The **Object-Relational Model** extends the traditional relational model
+with object-oriented features such as user-defined types, inheritance,
+complex types, methods, and references. It combines the reliability of
+RDBMS with the richness of OOP.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Object-Relational databases are sometimes called **SQL:1999 databases**
+because the SQL:1999 standard introduced object-relational extensions.
+
+■ KEY FEATURES
+───────────────
+
+  1. **User-Defined Types (UDTs)**:
+     CREATE TYPE address_t AS (
+       street VARCHAR(100),
+       city VARCHAR(50),
+       zip VARCHAR(10)
+     );
+
+     CREATE TABLE employee (
+       emp_id INT PRIMARY KEY,
+       name VARCHAR(100),
+       home_addr address_t    -- Using UDT as column type
+     );
+
+  2. **Type Inheritance**:
+     CREATE TYPE person_t AS (
+       name VARCHAR(100),
+       age INT
+     );
+     CREATE TYPE student_t UNDER person_t AS (
+       gpa FLOAT,
+       major VARCHAR(50)
+     );
+
+  3. **Collection Types (Arrays, Multisets)**:
+     CREATE TABLE student (
+       name VARCHAR(100),
+       phone_numbers VARCHAR(15) ARRAY[3]   -- Array of phone numbers
+     );
+
+  4. **Reference Types**:
+     Objects can reference other objects using REFs:
+     CREATE TYPE dept_t AS (
+       dept_name VARCHAR(50)
+     );
+     CREATE TABLE department OF dept_t;
+
+     CREATE TABLE employee (
+       name VARCHAR(100),
+       dept REF(dept_t) SCOPE department   -- Reference to department
+     );
+
+  5. **Methods on Types**:
+     CREATE TYPE circle_t AS (
+       radius FLOAT
+     ) METHOD area() RETURNS FLOAT;
+
+     CREATE METHOD area() FOR circle_t
+       RETURN 3.14159 * self.radius * self.radius;
+
+■ OBJECT-RELATIONAL vs PURE RELATIONAL vs PURE OO
+───────────────────────────────────────────────────
+  ┌──────────────────┬──────────────────┬──────────────────┬───────────────────┐
+  │ Feature          │ Relational       │ Object-Relational│ Object-Oriented   │
+  ├──────────────────┼──────────────────┼──────────────────┼───────────────────┤
+  │ Data model       │ Tables only      │ Tables + Objects │ Objects only      │
+  │ Query language   │ SQL              │ Extended SQL     │ OQL / native      │
+  │ UDTs             │ No               │ Yes              │ Yes (classes)     │
+  │ Inheritance      │ No               │ Yes              │ Yes               │
+  │ Complex types    │ No               │ Yes              │ Yes               │
+  │ Encapsulation    │ No               │ Partial          │ Yes               │
+  │ Standards        │ Well established │ SQL:1999+        │ ODMG              │
+  │ Examples         │ MySQL, SQLite    │ PostgreSQL,      │ ObjectDB, db4o   │
+  │                  │                  │ Oracle, DB2      │                   │
+  └──────────────────┴──────────────────┴──────────────────┴───────────────────┘
+
+  **PostgreSQL** is a leading object-relational database. It supports
+  table inheritance, composite types, arrays, and user-defined functions
+  written in multiple languages.
+
+
+================================================================================
+10.4  OBJECT-RELATIONAL MAPPING (ORM)
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Object-Relational Mapping (ORM)** is a programming technique that
+converts data between incompatible type systems — specifically between
+**object-oriented programming languages** and **relational databases**.
+ORM acts as a bridge (middleware) that maps objects in code to tables
+in a database.
+
+■ THE IMPEDANCE MISMATCH PROBLEM
+──────────────────────────────────
+OOP and relational databases represent data differently:
+  • OOP: Objects with methods, inheritance, references, collections.
+  • RDBMS: Tables with rows, columns, foreign keys, joins.
+
+This mismatch (called **impedance mismatch**) makes it tedious to
+manually convert between the two. ORM automates this conversion.
+
+■ HOW ORM WORKS
+─────────────────
+  Python Class (OOP)              Database Table (RDBMS)
+  ┌──────────────────────┐       ┌──────────────────────────┐
+  │ class Student:       │       │ TABLE students           │
+  │   id: int            │  ←→   │   id INT PRIMARY KEY     │
+  │   name: str          │       │   name VARCHAR(100)      │
+  │   gpa: float         │       │   gpa FLOAT              │
+  │   courses: List      │       │   (separate join table)  │
+  └──────────────────────┘       └──────────────────────────┘
+
+  ORM maps:
+  • Class ↔ Table
+  • Object instance ↔ Row
+  • Attribute ↔ Column
+  • Reference ↔ Foreign Key
+  • Collection ↔ Join Table
+
+■ POPULAR ORM FRAMEWORKS
+──────────────────────────
+  ┌──────────────────────┬──────────────────┬──────────────────────────┐
+  │ Language             │ ORM Framework    │ Database Support         │
+  ├──────────────────────┼──────────────────┼──────────────────────────┤
+  │ Python               │ SQLAlchemy       │ All major RDBMS          │
+  │ Python               │ Django ORM       │ PostgreSQL, MySQL, etc.  │
+  │ Java                 │ Hibernate        │ All major RDBMS          │
+  │ Java                 │ JPA (standard)   │ All major RDBMS          │
+  │ JavaScript/TypeScript│ Sequelize        │ MySQL, PostgreSQL, etc.  │
+  │ JavaScript/TypeScript│ Prisma           │ PostgreSQL, MySQL, etc.  │
+  │ C# / .NET            │ Entity Framework │ SQL Server, PostgreSQL   │
+  │ Ruby                 │ ActiveRecord     │ All major RDBMS          │
+  └──────────────────────┴──────────────────┴──────────────────────────┘
+
+■ ADVANTAGES AND DISADVANTAGES
+────────────────────────────────
+  ✓ Eliminates repetitive SQL boilerplate code.
+  ✓ Database-agnostic (switch databases easily).
+  ✓ Automatic schema migrations.
+  ✓ Protection against SQL injection.
+  ✓ Object-oriented API — more natural for developers.
+
+  ✗ Performance overhead (generated SQL may not be optimal).
+  ✗ Complex queries can be harder to express than raw SQL.
+  ✗ Learning curve for the ORM framework itself.
+  ✗ "Leaky abstraction" — sometimes you must drop to raw SQL.
+  ✗ Debugging generated SQL can be difficult.
+
+
+================================================================================
+10.5  QUERY BY EXAMPLE (QBE)
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Query By Example (QBE)** is a visual, graphical query language
+developed by Moshe Zloof at IBM in the 1970s. Instead of writing SQL
+statements, users fill in a template (skeleton table) to specify the
+query conditions.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+QBE presents the user with blank table templates. The user enters
+**example elements** (variables starting with underscore) and
+conditions into the cells. The system translates the visual
+specification into an internal query.
+
+■ QBE EXAMPLE
+──────────────
+
+  Find all employees in the "CS" department with salary > 50000:
+
+  SQL:
+    SELECT name, salary FROM employee WHERE dept = 'CS' AND salary > 50000;
+
+  QBE:
+    ┌───────────┬──────────┬──────────┬──────────┐
+    │ employee  │ name     │ salary   │ dept     │
+    ├───────────┼──────────┼──────────┼──────────┤
+    │           │ P._n     │ P._s     │ CS       │
+    │           │          │ > 50000  │          │
+    └───────────┴──────────┴──────────┴──────────┘
+
+  • "P." prefix means PRINT (project/display) this column.
+  • "_n" and "_s" are example variables.
+  • "CS" is a constant condition.
+  • "> 50000" is a comparison condition.
+
+■ QBE OPERATIONS
+─────────────────
+  • **P.** — Print (SELECT/project) a column.
+  • **I.** — Insert a new row.
+  • **D.** — Delete rows.
+  • **U.** — Update rows.
+  • Conditions placed directly in cells (=, >, <, LIKE, etc.).
+  • Aggregates: CNT., SUM., AVG., MAX., MIN.
+  • Linking tables: Use same example variable in different tables.
+
+■ JOIN IN QBE
+──────────────
+  Find names of employees and their department names:
+
+  employee table:
+    ┌───────────┬──────────┬──────────┐
+    │ employee  │ name     │ dept_id  │
+    ├───────────┼──────────┼──────────┤
+    │           │ P._n     │ _d       │
+    └───────────┴──────────┴──────────┘
+
+  department table:
+    ┌────────────┬──────────┬──────────┐
+    │ department │ dept_id  │ dept_name│
+    ├────────────┼──────────┼──────────┤
+    │            │ _d       │ P._dn    │
+    └────────────┴──────────┴──────────┘
+
+  The shared variable "_d" links the two tables (equivalent to JOIN ON
+  employee.dept_id = department.dept_id).
+
+■ ADVANTAGES AND DISADVANTAGES
+────────────────────────────────
+  ✓ Very intuitive — no SQL syntax to learn.
+  ✓ Visual — suitable for end users and non-programmers.
+  ✓ Used in Microsoft Access (Query Design View).
+  ✓ Easy for simple queries.
+
+  ✗ Limited for complex queries (subqueries, recursive).
+  ✗ No standardization (varies between implementations).
+  ✗ Not suitable for programmers who prefer text-based queries.
+
+
+================================================================================
+10.6  DISTRIBUTED DATABASES
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **Distributed Database** is a database that is NOT stored entirely at
+a single physical location. Instead, the data is spread across multiple
+sites (nodes) connected by a network, but appears to the user as a
+single, unified database.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Each site in a distributed database has its own local DBMS, and a
+**Distributed DBMS (DDBMS)** coordinates data across all sites.
+
+  ┌──────────────────────────────────────────────────────────────────┐
+  │                   User Application                               │
+  │                        │                                         │
+  │                   DDBMS Layer                                    │
+  │               (Distributed Query                                 │
+  │                Processing)                                       │
+  │            ╱         │         ╲                                  │
+  │     ┌──────────┐ ┌──────────┐ ┌──────────┐                      │
+  │     │ Site 1   │ │ Site 2   │ │ Site 3   │                      │
+  │     │ (Delhi)  │ │(Kathmandu│ │ (Mumbai) │                      │
+  │     │ Local DB │ │ Local DB │ │ Local DB │                      │
+  │     │ Local DBMS│ │Local DBMS│ │Local DBMS│                     │
+  │     └──────────┘ └──────────┘ └──────────┘                      │
+  └──────────────────────────────────────────────────────────────────┘
+
+■ TRANSPARENCY IN DISTRIBUTED DATABASES
+─────────────────────────────────────────
+  The distributed nature should be invisible to the user:
+
+  ┌────────────────────────┬──────────────────────────────────────────┐
+  │ Transparency Type      │ Description                              │
+  ├────────────────────────┼──────────────────────────────────────────┤
+  │ Location Transparency  │ User doesn't need to know WHERE the data│
+  │                        │ is physically stored.                    │
+  │ Fragmentation          │ User doesn't need to know HOW the data  │
+  │ Transparency           │ is divided among sites.                  │
+  │ Replication            │ User doesn't need to know that data has │
+  │ Transparency           │ multiple copies at different sites.      │
+  │ Network Transparency   │ User doesn't need to know the network   │
+  │                        │ details connecting the sites.            │
+  └────────────────────────┴──────────────────────────────────────────┘
+
+────────────────────────────────────────────────
+10.6.1  ARCHITECTURE
+────────────────────────────────────────────────
+
+**Homogeneous Distributed DB:**
+  • All sites run the SAME DBMS software.
+  • Same data model, query language, schema structure.
+  • Easier to manage and coordinate.
+  • Example: Multiple PostgreSQL instances.
+
+**Heterogeneous Distributed DB:**
+  • Sites run DIFFERENT DBMS software.
+  • Different data models, query languages, schemas.
+  • Requires middleware/gateways for translation.
+  • Example: Site 1 has Oracle, Site 2 has MySQL, Site 3 has MongoDB.
+
+────────────────────────────────────────────────
+10.6.2  DATA FRAGMENTATION
+────────────────────────────────────────────────
+
+**Data Fragmentation** is the process of dividing a relation (table)
+into smaller pieces and distributing them across sites.
+
+  **1. Horizontal Fragmentation:**
+    Divides by ROWS. Each fragment has all columns but a subset of rows.
+
+    employee table:
+      Fragment 1 (Delhi site):   employees WHERE city = 'Delhi'
+      Fragment 2 (Mumbai site):  employees WHERE city = 'Mumbai'
+
+  **2. Vertical Fragmentation:**
+    Divides by COLUMNS. Each fragment has all rows but a subset of
+    columns (must include the primary key for reconstruction).
+
+    employee table:
+      Fragment 1: (emp_id, name, dept)      -- at Site 1
+      Fragment 2: (emp_id, salary, address) -- at Site 2
+
+  **3. Mixed (Hybrid) Fragmentation:**
+    Combination of horizontal and vertical fragmentation.
+    First fragment horizontally, then vertically (or vice versa).
+
+■ RECONSTRUCTION
+─────────────────
+  • Horizontal fragments: UNION all fragments.
+  • Vertical fragments: NATURAL JOIN on the primary key.
+
+────────────────────────────────────────────────
+10.6.3  DATA REPLICATION
+────────────────────────────────────────────────
+
+**Data Replication** maintains copies of data at multiple sites.
+
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Replication Type     │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Full Replication     │ Complete copy of the ENTIRE database at     │
+  │                      │ every site. Maximum availability and read   │
+  │                      │ performance. Very expensive for writes.     │
+  │                      │                                              │
+  │ Partial Replication  │ Some fragments are replicated at some sites.│
+  │                      │ Balance between availability and cost.      │
+  │                      │                                              │
+  │ No Replication       │ Each fragment is stored at exactly ONE site.│
+  │                      │ Minimum storage, but single point of        │
+  │                      │ failure for each fragment.                   │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ ADVANTAGES OF REPLICATION
+────────────────────────────
+  ✓ **High Availability**: If one site fails, data is available at
+    another site.
+  ✓ **Faster Reads**: Read from the nearest replica.
+  ✓ **Reduced network traffic**: Local reads avoid network access.
+  ✓ **Fault tolerance**: No data loss if a site fails.
+
+■ DISADVANTAGES OF REPLICATION
+───────────────────────────────
+  ✗ **Write complexity**: Updates must be propagated to ALL replicas.
+  ✗ **Consistency challenges**: Keeping all replicas synchronized.
+  ✗ **Storage overhead**: Multiple copies consume more space.
+  ✗ **Concurrency control complexity**: Need distributed locking or
+    consensus protocols.
+
+■ ADVANTAGES AND DISADVANTAGES OF DISTRIBUTED DATABASES
+────────────────────────────────────────────────────────
+  ✓ Improved reliability and availability (no single point of failure).
+  ✓ Improved performance (local data access).
+  ✓ Easier geographic scaling.
+  ✓ Organizational autonomy (each site manages its own data).
+
+  ✗ Increased complexity (distributed transactions, concurrency).
+  ✗ Network dependency and latency.
+  ✗ Distributed deadlock detection is complex.
+  ✗ Data consistency is harder to maintain.
+  ✗ Higher cost (hardware, network, administration).
+
+
+================================================================================
+10.7  DISTRIBUTED LEDGER TECHNOLOGY
+================================================================================
+
+────────────────────────────────────────────────
+10.7.1  BLOCKCHAIN
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **Blockchain** is a distributed, decentralized, immutable ledger that
+records transactions across multiple computers (nodes) in a way that
+no single node can alter the record retroactively without altering all
+subsequent blocks — which requires consensus of the majority.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+A blockchain is a chain of **blocks**, where each block contains:
+  1. A set of transactions.
+  2. A timestamp.
+  3. A **hash of the previous block** (linking blocks together).
+  4. A nonce (for proof-of-work).
+  5. The block's own hash.
+
+  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+  │ Block 0     │    │ Block 1     │    │ Block 2     │
+  │ (Genesis)   │    │             │    │             │
+  │ Prev: 0000  │◄───│ Prev: a3f2  │◄───│ Prev: 7bc1  │
+  │ Hash: a3f2  │    │ Hash: 7bc1  │    │ Hash: d4e8  │
+  │ Data: ...   │    │ Data: ...   │    │ Data: ...   │
+  │ Timestamp   │    │ Timestamp   │    │ Timestamp   │
+  └─────────────┘    └─────────────┘    └─────────────┘
+
+  If Block 1's data is tampered with, its hash changes → Block 2's
+  "Prev Hash" no longer matches → the chain is broken → tampering
+  detected!
+
+■ KEY PROPERTIES OF BLOCKCHAIN
+────────────────────────────────
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Property             │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Decentralized        │ No central authority. All nodes are equal.  │
+  │                      │ Data is distributed across all participants.│
+  │                      │                                              │
+  │ Immutable            │ Once a block is added, it cannot be modified│
+  │                      │ or deleted. The chain is append-only.       │
+  │                      │                                              │
+  │ Transparent          │ All participants can view the entire ledger.│
+  │                      │ Every transaction is publicly verifiable.   │
+  │                      │                                              │
+  │ Consensus-Based      │ New blocks are added only when the network  │
+  │                      │ agrees (consensus mechanisms like PoW, PoS).│
+  │                      │                                              │
+  │ Cryptographic        │ Uses hash functions and digital signatures  │
+  │                      │ to ensure integrity and authenticity.       │
+  │                      │                                              │
+  │ Trustless            │ Participants don't need to trust each other.│
+  │                      │ Trust is established by the protocol.       │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ CONSENSUS MECHANISMS
+───────────────────────
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Mechanism            │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Proof of Work (PoW)  │ Miners solve complex mathematical puzzles.  │
+  │                      │ First to solve adds the block. Very energy-  │
+  │                      │ intensive. Used by Bitcoin.                  │
+  │                      │                                              │
+  │ Proof of Stake (PoS) │ Validators are chosen based on their stake  │
+  │                      │ (cryptocurrency held). Less energy-intensive.│
+  │                      │ Used by Ethereum (post-merge).               │
+  │                      │                                              │
+  │ Practical Byzantine  │ Nodes reach consensus through multiple       │
+  │ Fault Tolerance      │ rounds of voting. Used in permissioned      │
+  │ (PBFT)               │ blockchains (Hyperledger Fabric).            │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ TYPES OF BLOCKCHAINS
+───────────────────────
+  • **Public Blockchain**: Open to everyone. Anyone can read, write,
+    and participate. (Bitcoin, Ethereum)
+  • **Private Blockchain**: Restricted access. Controlled by a single
+    organization. (Hyperledger Fabric, R3 Corda)
+  • **Consortium Blockchain**: Governed by a group of organizations.
+    Partially decentralized. (Hyperledger, Quorum)
+
+■ APPLICATIONS OF BLOCKCHAIN
+──────────────────────────────
+  • Cryptocurrency (Bitcoin, Ethereum)
+  • Supply chain management
+  • Digital identity verification
+  • Smart contracts (self-executing contracts on blockchain)
+  • Healthcare records
+  • Voting systems
+  • Land registry / property records
+  • Decentralized Finance (DeFi)
+
+■ BLOCKCHAIN AS A DATABASE
+───────────────────────────
+  ┌──────────────────────┬──────────────────────┬──────────────────────┐
+  │ Aspect               │ Traditional Database │ Blockchain           │
+  ├──────────────────────┼──────────────────────┼──────────────────────┤
+  │ Authority            │ Centralized admin    │ Decentralized        │
+  │ Data modification    │ CRUD (Create, Read,  │ Append-only (no      │
+  │                      │ Update, Delete)      │ update/delete)       │
+  │ Trust                │ Trust the admin      │ Trust the protocol   │
+  │ Performance          │ Very fast            │ Slower (consensus)   │
+  │ Transparency         │ Controlled access    │ Fully transparent    │
+  │ Use case             │ General data mgmt    │ Trust, immutability  │
+  │ Scalability          │ High                 │ Limited              │
+  └──────────────────────┴──────────────────────┴──────────────────────┘
+
+────────────────────────────────────────────────
+10.7.2  CRYPTOCURRENCY
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **Cryptocurrency** is a digital or virtual currency that uses
+**cryptography** for security and operates on a **decentralized network**
+(typically a blockchain). It enables peer-to-peer transactions without
+intermediaries (banks, governments).
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Cryptocurrencies use blockchain as the underlying technology to record
+all transactions in a transparent, immutable, decentralized ledger.
+
+  How a cryptocurrency transaction works:
+  1. Alice wants to send 1 BTC to Bob.
+  2. The transaction is broadcast to the peer-to-peer network.
+  3. Validators (miners/stakers) verify the transaction.
+  4. The verified transaction is added to a new block.
+  5. The block is added to the blockchain (permanent record).
+  6. Bob receives 1 BTC.
+
+■ KEY CONCEPTS
+───────────────
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Concept              │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Digital Wallet       │ Software that stores private/public keys.    │
+  │                      │ Used to send/receive cryptocurrency.         │
+  │                      │                                              │
+  │ Private Key          │ Secret key known only to the owner. Used to │
+  │                      │ sign transactions (prove ownership).         │
+  │                      │                                              │
+  │ Public Key           │ Shared publicly. Used as the "address" to   │
+  │                      │ receive cryptocurrency.                      │
+  │                      │                                              │
+  │ Mining               │ Process of validating transactions and       │
+  │                      │ adding blocks using computational power      │
+  │                      │ (Proof of Work). Miners earn rewards.       │
+  │                      │                                              │
+  │ Smart Contracts      │ Self-executing code stored on the blockchain.│
+  │                      │ Automatically enforces contract terms.       │
+  │                      │ (Ethereum's key innovation)                  │
+  │                      │                                              │
+  │ Token                │ A digital asset created on an existing       │
+  │                      │ blockchain (e.g., ERC-20 tokens on Ethereum).│
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ NOTABLE CRYPTOCURRENCIES
+───────────────────────────
+  ┌──────────────────┬──────────────────────────────────────────────────┐
+  │ Cryptocurrency   │ Key Features                                     │
+  ├──────────────────┼──────────────────────────────────────────────────┤
+  │ Bitcoin (BTC)    │ First cryptocurrency (2009, Satoshi Nakamoto).  │
+  │                  │ PoW consensus. Digital gold / store of value.    │
+  │                  │ Limited supply: 21 million BTC.                  │
+  │                  │                                                  │
+  │ Ethereum (ETH)   │ Programmable blockchain with smart contracts.   │
+  │                  │ PoS consensus (after 2022 merge).                │
+  │                  │ Powers DeFi, NFTs, DAOs.                         │
+  │                  │                                                  │
+  │ Ripple (XRP)     │ Designed for fast, cheap cross-border payments. │
+  │                  │ Used by financial institutions.                  │
+  └──────────────────┴──────────────────────────────────────────────────┘
+
+■ ADVANTAGES AND DISADVANTAGES
+────────────────────────────────
+  ✓ Decentralized — no central authority, censorship-resistant.
+  ✓ Transparent — all transactions publicly verifiable.
+  ✓ Secure — cryptographic protection against fraud.
+  ✓ Lower transaction fees (no intermediaries).
+  ✓ Accessible globally (no bank account needed).
+  ✓ Programmable money (smart contracts).
+
+  ✗ Price volatility (speculative markets).
+  ✗ Energy consumption (PoW mining).
+  ✗ Regulatory uncertainty.
+  ✗ Irreversible transactions (mistakes cannot be corrected).
+  ✗ Scalability limitations (low transactions per second).
+  ✗ Used for illicit activities (anonymity).
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is NoSQL? Name the four categories.
+  A: NoSQL (Not Only SQL) databases are non-relational databases designed
+     for distributed, large-scale data. Four categories: (1) Key-Value
+     (Redis), (2) Document (MongoDB), (3) Column-Family (Cassandra),
+     (4) Graph (Neo4j).
+
+  Q: What is the CAP theorem?
+  A: In a distributed system, you can guarantee at most two of three:
+     Consistency, Availability, Partition Tolerance. Since partition
+     tolerance is necessary, the choice is between CP and AP systems.
+
+  Q: What is blockchain and how does it ensure data integrity?
+  A: Blockchain is a decentralized, immutable ledger of blocks linked
+     by cryptographic hashes. Each block contains a hash of the previous
+     block, so tampering with any block invalidates the entire
+     subsequent chain. Consensus mechanisms ensure all nodes agree.
+
+  Q: What is the difference between horizontal and vertical fragmentation?
+  A: Horizontal fragmentation divides a table by rows (each fragment has
+     all columns but a subset of rows). Vertical fragmentation divides
+     by columns (each fragment has all rows but a subset of columns,
+     always including the primary key). Reconstruction uses UNION for
+     horizontal and NATURAL JOIN for vertical.
+
+  Q: What is ORM? Why is it useful?
+  A: ORM (Object-Relational Mapping) is a technique that maps objects
+     in code (classes, instances) to tables in a relational database.
+     It eliminates the impedance mismatch between OOP and RDBMS, reduces
+     boilerplate SQL, provides database abstraction, and protects
+     against SQL injection.
+
+
+================================================================================
+                     END OF CHAPTER 10 NOTES
+================================================================================

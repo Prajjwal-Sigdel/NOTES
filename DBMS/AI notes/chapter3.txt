@@ -1,0 +1,1009 @@
+================================================================================
+          CHAPTER 3: STRUCTURED QUERY LANGUAGE (SQL)
+                            [5 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  3.1  Structured Query Language (SQL) — DDL & DML
+  3.2  Basic Structure of SQL Queries
+       3.2.1  DDL Queries (CREATE, ALTER, DROP, TRUNCATE)
+       3.2.2  Basic Operations (Rename, String, Select clause, ORDER BY, WHERE)
+       3.2.3  Set Operations (UNION, INTERSECT, EXCEPT)
+       3.2.4  Null Values
+       3.2.5  Aggregate Functions (COUNT, SUM, AVG, MAX, MIN, GROUP BY, HAVING)
+  3.3  Nested Queries (Subqueries)
+  3.4  Join Expressions
+       3.4.1  Natural Join
+       3.4.2  Join Conditions (INNER JOIN, Equi Join, Theta Join)
+       3.4.3  Outer Joins (LEFT, RIGHT, FULL)
+  3.5  Modification of Database (DELETE, INSERT, UPDATE)
+  3.6  Views
+  3.7  Stored Procedures
+
+================================================================================
+3.1  STRUCTURED QUERY LANGUAGE (SQL) — OVERVIEW
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**SQL (Structured Query Language)** is a domain-specific, declarative
+language used for managing and manipulating relational databases. It was
+developed at IBM in the early 1970s (originally called SEQUEL) and became
+an ISO/ANSI standard. SQL combines features of both **relational algebra**
+and **relational calculus**.
+
+SQL is **declarative**: you specify WHAT data you want, NOT how to get it.
+The DBMS query optimizer decides the execution strategy.
+
+■ SQL SUB-LANGUAGES
+────────────────────
+  ┌──────┬─────────────────────────┬───────────────────────────────────┐
+  │ Type │ Full Name               │ Commands                          │
+  ├──────┼─────────────────────────┼───────────────────────────────────┤
+  │ DDL  │ Data Definition Lang.   │ CREATE, ALTER, DROP, TRUNCATE     │
+  │ DML  │ Data Manipulation Lang. │ SELECT, INSERT, UPDATE, DELETE    │
+  │ DCL  │ Data Control Language   │ GRANT, REVOKE                     │
+  │ TCL  │ Transaction Control     │ COMMIT, ROLLBACK, SAVEPOINT       │
+  └──────┴─────────────────────────┴───────────────────────────────────┘
+
+
+================================================================================
+3.2  BASIC STRUCTURE OF SQL QUERIES
+================================================================================
+
+The fundamental form of an SQL query:
+
+  SELECT   A₁, A₂, ..., Aₙ       -- Projection (π)
+  FROM     R₁, R₂, ..., Rₘ       -- Cartesian Product (×) / Relations
+  WHERE    predicate;             -- Selection (σ)
+
+This is equivalent to the relational algebra expression:
+  $\pi_{A_1, A_2, \ldots, A_n}(\sigma_{predicate}(R_1 \times R_2 \times \ldots \times R_m))$
+
+────────────────────────────────────────────────
+3.2.1  DDL QUERIES
+────────────────────────────────────────────────
+
+■ CREATE TABLE
+───────────────
+Creates a new table with specified columns, data types, and constraints.
+
+Syntax:
+  CREATE TABLE table_name (
+    column1  data_type  [constraints],
+    column2  data_type  [constraints],
+    ...
+    [table_level_constraints]
+  );
+
+Example:
+  CREATE TABLE orders (
+    order_id     INT           PRIMARY KEY,
+    cust_id      INT           NOT NULL,
+    prod_id      INT           NOT NULL,
+    quantity     INT           CHECK (quantity > 0),
+    order_date   DATE          DEFAULT CURRENT_DATE,
+    FOREIGN KEY (cust_id) REFERENCES customers(cust_id),
+    FOREIGN KEY (prod_id) REFERENCES products(prod_id)
+  );
+
+Common Data Types:
+  ┌─────────────────┬──────────────────────────────────────────────────┐
+  │ Data Type       │ Description                                      │
+  ├─────────────────┼──────────────────────────────────────────────────┤
+  │ INT / INTEGER   │ Integer numbers                                  │
+  │ FLOAT / REAL    │ Floating-point numbers                           │
+  │ DECIMAL(p, s)   │ Fixed-point (precision p, scale s)               │
+  │ CHAR(n)         │ Fixed-length string of n characters              │
+  │ VARCHAR(n)      │ Variable-length string up to n characters        │
+  │ DATE            │ Date (YYYY-MM-DD)                                │
+  │ TIME            │ Time (HH:MM:SS)                                  │
+  │ TIMESTAMP       │ Date + Time                                      │
+  │ BOOLEAN         │ TRUE / FALSE                                     │
+  │ BLOB            │ Binary Large Object                              │
+  │ TEXT            │ Variable-length text (unlimited)                  │
+  └─────────────────┴──────────────────────────────────────────────────┘
+
+Common Constraints:
+  • PRIMARY KEY — Uniquely identifies each row; NOT NULL + UNIQUE
+  • FOREIGN KEY — References primary key of another table
+  • NOT NULL — Column cannot contain NULL
+  • UNIQUE — All values in column must be distinct
+  • CHECK — Validates values against a condition
+  • DEFAULT — Sets a default value if none provided
+
+■ ALTER TABLE
+──────────────
+Modifies an existing table structure.
+
+  -- Add a column
+  ALTER TABLE employee ADD COLUMN email VARCHAR(100);
+
+  -- Drop a column
+  ALTER TABLE employee DROP COLUMN email;
+
+  -- Modify a column's data type
+  ALTER TABLE employee ALTER COLUMN salary SET DATA TYPE DECIMAL(12,2);
+
+  -- Add a constraint
+  ALTER TABLE employee ADD CONSTRAINT chk_sal CHECK (salary > 0);
+
+  -- Drop a constraint
+  ALTER TABLE employee DROP CONSTRAINT chk_sal;
+
+■ DROP TABLE
+─────────────
+Removes the ENTIRE table (structure + data + constraints + indices).
+
+  DROP TABLE employee;
+  DROP TABLE IF EXISTS employee;  -- avoids error if table doesn't exist
+
+■ TRUNCATE TABLE
+─────────────────
+Removes ALL rows from a table but KEEPS the structure (schema).
+
+  TRUNCATE TABLE employee;
+
+  ┌───────────────────┬──────────────────────┬──────────────────────┐
+  │ Feature           │ DELETE (all rows)    │ TRUNCATE              │
+  ├───────────────────┼──────────────────────┼──────────────────────┤
+  │ Removes data?     │ Yes                  │ Yes                  │
+  │ Removes structure?│ No                   │ No                   │
+  │ Can use WHERE?    │ Yes                  │ No                   │
+  │ Can rollback?     │ Yes (if in txn)      │ Usually No (DDL)     │
+  │ Speed             │ Slower (row by row)  │ Faster (deallocate)  │
+  │ Triggers fired?   │ Yes                  │ No                   │
+  │ Resets auto-inc?  │ No                   │ Yes                  │
+  └───────────────────┴──────────────────────┴──────────────────────┘
+
+────────────────────────────────────────────────
+3.2.2  BASIC DML OPERATIONS
+────────────────────────────────────────────────
+
+■ RENAME (AS)
+──────────────
+Renames columns or tables in query output (aliases).
+
+  SELECT name AS student_name, dept AS department
+  FROM student;
+
+  SELECT S.name, C.course_name
+  FROM student AS S, course AS C;
+
+■ STRING OPERATIONS
+────────────────────
+SQL supports pattern matching with LIKE:
+  • % — matches any sequence of characters (including empty)
+  • _ — matches exactly one character
+
+  -- Names starting with 'A'
+  SELECT * FROM student WHERE name LIKE 'A%';
+
+  -- Names with 'r' in the second position
+  SELECT * FROM student WHERE name LIKE '_r%';
+
+  -- Names ending with 'S'
+  SELECT * FROM student WHERE name LIKE '%S';
+
+String Functions:
+  • UPPER(str), LOWER(str) — case conversion
+  • LENGTH(str) — string length
+  • SUBSTRING(str, start, length) — extract substring
+  • CONCAT(str1, str2) — concatenate strings
+  • TRIM(str) — remove leading/trailing spaces
+
+■ ATTRIBUTE SPECIFICATION IN SELECT CLAUSE
+───────────────────────────────────────────
+  SELECT *          -- all columns
+  SELECT name       -- specific column
+  SELECT DISTINCT dept  -- unique values only
+  SELECT name, salary * 1.1 AS new_salary  -- computed columns
+
+■ ORDER BY CLAUSE
+──────────────────
+Sorts the result set by one or more columns.
+
+  SELECT * FROM student ORDER BY name ASC;          -- ascending (default)
+  SELECT * FROM student ORDER BY gpa DESC;          -- descending
+  SELECT * FROM student ORDER BY dept ASC, gpa DESC; -- multi-column sort
+
+  NOTE: ORDER BY is applied LAST, after all filtering and grouping.
+
+■ WHERE CLAUSE
+───────────────
+Filters rows based on conditions.
+
+  SELECT * FROM employee WHERE salary > 50000;
+  SELECT * FROM employee WHERE dept = 'IT' AND salary >= 40000;
+  SELECT * FROM employee WHERE city IN ('Kathmandu', 'Pokhara', 'Butwal');
+  SELECT * FROM employee WHERE salary BETWEEN 30000 AND 70000;
+  SELECT * FROM employee WHERE email IS NOT NULL;
+
+Operators in WHERE:
+  • Comparison: =, <>, <, >, <=, >=
+  • Logical: AND, OR, NOT
+  • Pattern: LIKE, NOT LIKE
+  • Range: BETWEEN ... AND ...
+  • Membership: IN (value_list)
+  • Null check: IS NULL, IS NOT NULL
+  • Existence: EXISTS (subquery)
+
+────────────────────────────────────────────────
+3.2.3  SET OPERATIONS
+────────────────────────────────────────────────
+
+Set operations combine results of two or more SELECT queries.
+Both queries MUST have the same number and type of columns.
+
+■ UNION
+────────
+Returns all DISTINCT rows from both queries.
+
+  (SELECT name FROM student WHERE dept = 'CS')
+  UNION
+  (SELECT name FROM student WHERE dept = 'IT');
+
+  UNION ALL — keeps duplicates (faster, no dedup).
+
+■ INTERSECT
+────────────
+Returns rows that appear in BOTH queries.
+
+  (SELECT name FROM cs_students)
+  INTERSECT
+  (SELECT name FROM honor_students);
+
+  Result: Students who are in CS AND on the honor roll.
+
+■ EXCEPT (or MINUS)
+────────────────────
+Returns rows in the first query that are NOT in the second.
+
+  (SELECT name FROM all_students)
+  EXCEPT
+  (SELECT name FROM graduated_students);
+
+  Result: Currently enrolled students (not yet graduated).
+
+■ REAL-WORLD EXAMPLE
+─────────────────────
+Find passengers who booked flights to BOTH Delhi AND Dubai:
+
+  (SELECT p.name FROM passenger p
+   JOIN booking b ON p.pass_id = b.pass_id
+   JOIN flight f ON b.flight_id = f.flight_id
+   WHERE f.destination = 'Delhi')
+  INTERSECT
+  (SELECT p.name FROM passenger p
+   JOIN booking b ON p.pass_id = b.pass_id
+   JOIN flight f ON b.flight_id = f.flight_id
+   WHERE f.destination = 'Dubai');
+
+────────────────────────────────────────────────
+3.2.4  NULL VALUES
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+**NULL** represents an UNKNOWN, MISSING, or INAPPLICABLE value. It is
+NOT zero, NOT an empty string, and NOT a space.
+
+■ THREE-VALUED LOGIC
+─────────────────────
+In SQL, comparisons involving NULL follow three-valued logic:
+TRUE, FALSE, and UNKNOWN.
+
+  ┌──────────────────┬───────────────────┐
+  │ Expression       │ Result            │
+  ├──────────────────┼───────────────────┤
+  │ NULL = NULL      │ UNKNOWN (not TRUE)│
+  │ NULL <> NULL     │ UNKNOWN           │
+  │ NULL > 5         │ UNKNOWN           │
+  │ NULL + 10        │ NULL              │
+  │ NULL AND TRUE    │ UNKNOWN           │
+  │ NULL OR TRUE     │ TRUE              │
+  │ NULL AND FALSE   │ FALSE             │
+  │ NOT NULL         │ UNKNOWN           │
+  └──────────────────┴───────────────────┘
+
+■ TESTING FOR NULL
+───────────────────
+  -- CORRECT:
+  SELECT * FROM employee WHERE phone IS NULL;
+  SELECT * FROM employee WHERE phone IS NOT NULL;
+
+  -- WRONG (will NOT work):
+  SELECT * FROM employee WHERE phone = NULL;   -- always UNKNOWN
+
+■ NULL IN AGGREGATE FUNCTIONS
+──────────────────────────────
+  • COUNT(*) — counts ALL rows (including NULLs)
+  • COUNT(column) — counts ONLY non-NULL values in column
+  • SUM, AVG, MAX, MIN — IGNORE NULL values
+  • If ALL values are NULL, aggregate returns NULL (except COUNT → 0)
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: Why can't you use = to compare with NULL?
+  A: Because NULL represents "unknown." Comparing anything with unknown
+     yields UNKNOWN, not TRUE or FALSE. Use IS NULL / IS NOT NULL instead.
+
+────────────────────────────────────────────────
+3.2.5  AGGREGATE FUNCTIONS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+**Aggregate functions** operate on a SET of values (a column) and return
+a SINGLE summary value.
+
+■ FIVE STANDARD AGGREGATE FUNCTIONS
+─────────────────────────────────────
+
+  ┌──────────┬─────────────────────────────────────────────────────────┐
+  │ Function │ Description                                             │
+  ├──────────┼─────────────────────────────────────────────────────────┤
+  │ COUNT()  │ Counts the number of rows/non-null values               │
+  │ SUM()    │ Returns the sum of numeric values                       │
+  │ AVG()    │ Returns the average of numeric values                   │
+  │ MAX()    │ Returns the maximum value                               │
+  │ MIN()    │ Returns the minimum value                               │
+  └──────────┴─────────────────────────────────────────────────────────┘
+
+Examples:
+  SELECT COUNT(*) FROM employee;                    -- total employees
+  SELECT COUNT(DISTINCT dept) FROM employee;        -- number of departments
+  SELECT SUM(salary) FROM employee WHERE dept = 'IT';
+  SELECT AVG(salary) FROM employee;
+  SELECT MAX(salary), MIN(salary) FROM employee;
+
+■ GROUP BY CLAUSE
+──────────────────
+Groups rows that have the same values in specified columns, allowing
+aggregate functions to operate on each group separately.
+
+  SELECT dept, COUNT(*) AS num_employees, AVG(salary) AS avg_salary
+  FROM employee
+  GROUP BY dept;
+
+  Result:
+  ┌──────┬────────────────┬────────────┐
+  │ dept │ num_employees  │ avg_salary │
+  ├──────┼────────────────┼────────────┤
+  │ CS   │ 15             │ 55000      │
+  │ IT   │ 12             │ 52000      │
+  │ HR   │ 8              │ 48000      │
+  └──────┴────────────────┴────────────┘
+
+RULE: Every column in SELECT that is NOT an aggregate function MUST
+appear in the GROUP BY clause.
+
+■ HAVING CLAUSE
+────────────────
+Filters GROUPS (after GROUP BY) based on aggregate conditions.
+HAVING is to groups what WHERE is to rows.
+
+  SELECT dept, AVG(salary) AS avg_salary
+  FROM employee
+  GROUP BY dept
+  HAVING AVG(salary) > 50000;
+
+  -- Shows only departments where average salary exceeds 50000.
+
+■ WHERE vs HAVING
+──────────────────
+  ┌─────────────┬────────────────────────┬─────────────────────────┐
+  │ Aspect      │ WHERE                  │ HAVING                   │
+  ├─────────────┼────────────────────────┼─────────────────────────┤
+  │ Filters     │ Individual ROWS        │ GROUPS of rows           │
+  │ Applied     │ BEFORE grouping        │ AFTER grouping           │
+  │ Can use     │ Column values          │ Aggregate functions      │
+  │   aggregates│ No                     │ Yes                      │
+  │ Example     │ WHERE salary > 50000   │ HAVING AVG(salary)>50000│
+  └─────────────┴────────────────────────┴─────────────────────────┘
+
+■ SQL QUERY EXECUTION ORDER (Logical)
+──────────────────────────────────────
+
+```mermaid
+graph TD
+    A[FROM: Identify source tables] --> B[WHERE: Filter rows]
+    B --> C[GROUP BY: Group remaining rows]
+    C --> D[HAVING: Filter groups]
+    D --> E[SELECT: Choose columns/compute]
+    E --> F[DISTINCT: Remove duplicates]
+    F --> G[ORDER BY: Sort results]
+    G --> H[LIMIT/OFFSET: Paginate]
+```
+
+  1. FROM     → Which tables?
+  2. WHERE    → Which rows?
+  3. GROUP BY → How to group?
+  4. HAVING   → Which groups?
+  5. SELECT   → Which columns?
+  6. DISTINCT → Remove duplicates
+  7. ORDER BY → Sort
+  8. LIMIT    → How many rows to return?
+
+
+================================================================================
+3.3  NESTED QUERIES (SUBQUERIES)
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **nested query** (or **subquery**) is a SELECT statement embedded
+INSIDE another SQL statement (in the WHERE, FROM, or SELECT clause).
+The inner query executes FIRST, and its result is used by the outer query.
+
+■ TYPES OF SUBQUERIES
+──────────────────────
+
+**1. Subquery in WHERE clause:**
+
+  -- Students enrolled in courses with > 3 credits
+  SELECT name FROM student
+  WHERE roll_no IN (
+    SELECT roll_no FROM enrollment
+    WHERE course_id IN (
+      SELECT course_id FROM course WHERE credits > 3
+    )
+  );
+
+**2. Subquery with comparison operators:**
+
+  -- Employee with the highest salary
+  SELECT name, salary FROM employee
+  WHERE salary = (SELECT MAX(salary) FROM employee);
+
+**3. Correlated Subquery:**
+  The inner query references a column from the outer query. It executes
+  ONCE for EACH row of the outer query.
+
+  -- Employees earning more than the average salary of their department
+  SELECT e1.name, e1.salary, e1.dept
+  FROM employee e1
+  WHERE e1.salary > (
+    SELECT AVG(e2.salary) FROM employee e2
+    WHERE e2.dept = e1.dept
+  );
+
+**4. Subquery with EXISTS:**
+  Tests whether the subquery returns ANY rows.
+
+  -- Departments that have at least one employee
+  SELECT dept_name FROM department d
+  WHERE EXISTS (
+    SELECT 1 FROM employee e WHERE e.dept_id = d.dept_id
+  );
+
+**5. Subquery with NOT EXISTS:**
+
+  -- Students NOT enrolled in any course
+  SELECT name FROM student s
+  WHERE NOT EXISTS (
+    SELECT 1 FROM enrollment e WHERE e.roll_no = s.roll_no
+  );
+
+**6. Subquery in FROM clause (Derived Table):**
+
+  SELECT dept, avg_sal
+  FROM (
+    SELECT dept, AVG(salary) AS avg_sal FROM employee GROUP BY dept
+  ) AS dept_avg
+  WHERE avg_sal > 50000;
+
+**7. Subquery in SELECT clause (Scalar Subquery):**
+
+  SELECT name,
+    (SELECT COUNT(*) FROM enrollment e WHERE e.roll_no = s.roll_no)
+    AS num_courses
+  FROM student s;
+
+■ SUBQUERY OPERATORS
+─────────────────────
+  • IN — value matches ANY value in the subquery result
+  • NOT IN — value matches NONE
+  • EXISTS — subquery returns at least one row
+  • NOT EXISTS — subquery returns no rows
+  • ANY / SOME — comparison is true for at least one value
+  • ALL — comparison is true for ALL values
+
+  -- Salary greater than ALL employees in IT dept
+  SELECT name FROM employee
+  WHERE salary > ALL (SELECT salary FROM employee WHERE dept = 'IT');
+
+  -- Salary greater than at least one employee in IT dept
+  SELECT name FROM employee
+  WHERE salary > ANY (SELECT salary FROM employee WHERE dept = 'IT');
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**Netflix Analytics**: Find users whose total watch duration exceeds
+the average watch duration across ALL users:
+
+  SELECT u.username, SUM(wh.duration_watched) AS total_watch
+  FROM users u
+  JOIN watch_history wh ON u.user_id = wh.user_id
+  GROUP BY u.user_id, u.username
+  HAVING SUM(wh.duration_watched) > (
+    SELECT AVG(total)
+    FROM (
+      SELECT SUM(duration_watched) AS total
+      FROM watch_history
+      GROUP BY user_id
+    ) AS user_totals
+  );
+
+
+================================================================================
+3.4  JOIN EXPRESSIONS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **JOIN** combines rows from two or more tables based on a related
+column between them. Joins are the primary mechanism for querying data
+spread across multiple tables.
+
+■ MERMAID DIAGRAM: JOIN TYPES OVERVIEW
+
+```mermaid
+graph TD
+    J[SQL JOINs] --> IJ[INNER JOIN]
+    J --> OJ[OUTER JOIN]
+    J --> CJ[CROSS JOIN]
+    J --> NJ[NATURAL JOIN]
+    OJ --> LJ[LEFT OUTER JOIN]
+    OJ --> RJ[RIGHT OUTER JOIN]
+    OJ --> FJ[FULL OUTER JOIN]
+    IJ --> EJ[Equi Join]
+    IJ --> TJ[Theta Join]
+```
+
+────────────────────────────────────────────────
+3.4.1  NATURAL JOIN
+────────────────────────────────────────────────
+
+Automatically joins on ALL columns with the SAME NAME in both tables.
+No duplicate columns in the result.
+
+  SELECT * FROM student NATURAL JOIN enrollment;
+
+  Equivalent to:
+  SELECT * FROM student s
+  JOIN enrollment e ON s.roll_no = e.roll_no;
+
+  CAUTION: Natural join can produce unexpected results if tables have
+  matching column names that shouldn't be used for joining.
+
+────────────────────────────────────────────────
+3.4.2  JOIN CONDITIONS (INNER JOIN)
+────────────────────────────────────────────────
+
+■ INNER JOIN (or simply JOIN)
+Returns only the rows where there is a MATCH in BOTH tables.
+
+  SELECT s.name, c.course_name, e.grade
+  FROM student s
+  INNER JOIN enrollment e ON s.roll_no = e.roll_no
+  INNER JOIN course c ON e.course_id = c.course_id;
+
+  Only students WITH enrollments are shown.
+  Students without enrollments are EXCLUDED.
+
+■ EQUI JOIN
+An inner join where the condition uses ONLY equality (=).
+
+  SELECT * FROM employee e
+  JOIN department d ON e.dept_id = d.dept_id;
+
+■ THETA JOIN (Non-Equi Join)
+An inner join with a condition other than equality (<, >, <=, >=, <>).
+
+  -- Find employees earning more than their department's minimum salary
+  SELECT e.name, e.salary, d.min_salary
+  FROM employee e
+  JOIN dept_salary d ON e.dept_id = d.dept_id AND e.salary > d.min_salary;
+
+■ SELF JOIN
+A table joined with ITSELF (using aliases).
+
+  -- Find employees and their managers
+  SELECT e1.name AS employee, e2.name AS manager
+  FROM employee e1
+  JOIN employee e2 ON e1.manager_id = e2.emp_id;
+
+────────────────────────────────────────────────
+3.4.3  OUTER JOINS
+────────────────────────────────────────────────
+
+Outer joins include rows that DON'T have matching rows in the other table,
+filling unmatched columns with NULL.
+
+■ LEFT OUTER JOIN (LEFT JOIN)
+Returns ALL rows from the LEFT table + matching rows from the right.
+Non-matching right-side columns are NULL.
+
+  SELECT s.name, e.course_id, e.grade
+  FROM student s
+  LEFT JOIN enrollment e ON s.roll_no = e.roll_no;
+
+  Result includes ALL students, even those not enrolled in any course
+  (their course_id and grade will be NULL).
+
+■ RIGHT OUTER JOIN (RIGHT JOIN)
+Returns ALL rows from the RIGHT table + matching rows from the left.
+
+  SELECT s.name, c.course_name
+  FROM student s
+  RIGHT JOIN course c ON s.course_id = c.course_id;
+
+  Result includes ALL courses, even those with no enrolled students.
+
+■ FULL OUTER JOIN (FULL JOIN)
+Returns ALL rows from BOTH tables. Non-matching rows on either side
+are filled with NULL.
+
+  SELECT s.name, c.course_name
+  FROM student s
+  FULL OUTER JOIN course c ON s.course_id = c.course_id;
+
+  Result includes ALL students and ALL courses, matched or not.
+
+■ CROSS JOIN
+Returns the Cartesian product (every combination) of rows from both tables.
+
+  SELECT * FROM colors CROSS JOIN sizes;
+  -- If colors has 3 rows and sizes has 4 rows, result has 12 rows.
+
+■ VISUAL REPRESENTATION OF JOINS
+
+  LEFT JOIN:
+    ┌─────────────┐
+    │ ┌─────┐     │
+    │ │  A  │ A∩B │
+    │ └─────┘     │
+    └─────────────┘
+    All of A + matching B
+
+  RIGHT JOIN:
+    ┌─────────────┐
+    │     ┌─────┐ │
+    │ A∩B │  B  │ │
+    │     └─────┘ │
+    └─────────────┘
+    All of B + matching A
+
+  INNER JOIN:
+       ┌───┐
+       │A∩B│
+       └───┘
+    Only matching rows
+
+  FULL JOIN:
+    ┌─────────────────┐
+    │ ┌───┐     ┌───┐ │
+    │ │ A │ A∩B │ B │ │
+    │ └───┘     └───┘ │
+    └─────────────────┘
+    All of A + All of B
+
+■ COMPREHENSIVE EXAMPLE
+─────────────────────────
+Schema:
+  warehouse(w_id, w_name, location, capacity)
+  shipment(ship_id, w_id, destination, ship_date, status)
+  driver(driver_id, driver_name, license_no, phone)
+  assignment(ship_id, driver_id, truck_no)
+
+  -- Natural Join: shipment with warehouse
+  SELECT * FROM shipment NATURAL JOIN warehouse;
+
+  -- Inner Join: assigned drivers with their shipments
+  SELECT d.driver_name, s.destination, s.status
+  FROM driver d
+  INNER JOIN assignment a ON d.driver_id = a.driver_id
+  INNER JOIN shipment s ON a.ship_id = s.ship_id;
+
+  -- Left Outer Join: ALL drivers, even unassigned ones
+  SELECT d.driver_name, a.ship_id
+  FROM driver d
+  LEFT JOIN assignment a ON d.driver_id = a.driver_id;
+
+  -- Right Outer Join: ALL shipments, even unassigned ones
+  SELECT a.driver_id, s.ship_id, s.destination
+  FROM assignment a
+  RIGHT JOIN shipment s ON a.ship_id = s.ship_id;
+
+  -- Full Outer Join
+  SELECT d.driver_name, s.destination
+  FROM driver d
+  FULL OUTER JOIN assignment a ON d.driver_id = a.driver_id
+  FULL OUTER JOIN shipment s ON a.ship_id = s.ship_id;
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is the difference between INNER JOIN and LEFT JOIN?
+  A: INNER JOIN returns only matching rows from both tables. LEFT JOIN
+     returns ALL rows from the left table and matching rows from the
+     right (NULL for non-matches).
+
+  Q: When would you use a FULL OUTER JOIN?
+  A: When you need to see ALL data from both tables, including rows
+     that don't have matches on either side. Useful for finding
+     discrepancies or orphaned records.
+
+
+================================================================================
+3.5  MODIFICATION OF DATABASE
+================================================================================
+
+■ DELETE
+─────────
+Removes rows from a table based on a condition.
+
+  DELETE FROM employee WHERE emp_id = 1001;
+  DELETE FROM orders WHERE order_date < '2024-01-01';
+  DELETE FROM employee;  -- DELETES ALL ROWS (use with caution!)
+
+  -- Delete with subquery
+  DELETE FROM employee
+  WHERE dept_id IN (SELECT dept_id FROM department WHERE building = 'Old Wing');
+
+■ INSERT INTO
+──────────────
+Adds new rows to a table.
+
+  -- Insert a single row (all columns)
+  INSERT INTO employee VALUES (1001, 'Hari', 55000, 3);
+
+  -- Insert with specified columns
+  INSERT INTO employee (emp_id, name, salary)
+  VALUES (1002, 'Sita', 60000);
+
+  -- Insert multiple rows
+  INSERT INTO employee (emp_id, name, salary, dept_id) VALUES
+    (1003, 'Gita', 48000, 2),
+    (1004, 'Ram', 52000, 1),
+    (1005, 'Shyam', 45000, 3);
+
+  -- Insert from another table
+  INSERT INTO cs_students (roll_no, name)
+  SELECT roll_no, name FROM student WHERE dept = 'CS';
+
+■ UPDATE
+─────────
+Modifies existing rows based on a condition.
+
+  UPDATE employee SET salary = salary * 1.10 WHERE dept_id = 5;
+  UPDATE products SET price = price * 1.15 WHERE category = 'Clothing';
+
+  -- Update with subquery
+  UPDATE employee
+  SET salary = salary * 1.20
+  WHERE dept_id = (SELECT dept_id FROM department WHERE dept_name = 'IT');
+
+  -- Update multiple columns
+  UPDATE employee
+  SET salary = 70000, dept_id = 2
+  WHERE emp_id = 1001;
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is the difference between DELETE and TRUNCATE?
+  A: DELETE removes specific rows (can use WHERE), is logged per row,
+     can be rolled back, fires triggers. TRUNCATE removes ALL rows,
+     deallocates pages, is faster, usually can't be rolled back, and
+     doesn't fire triggers.
+
+
+================================================================================
+3.6  VIEWS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **View** is a VIRTUAL TABLE defined by a query. It does not store
+data physically — it is a named query that is executed each time the
+view is referenced. Views provide abstraction, security, and simplicity.
+
+■ CREATING A VIEW
+──────────────────
+  CREATE VIEW view_name AS
+  SELECT column1, column2, ...
+  FROM table
+  WHERE condition;
+
+Example:
+  CREATE VIEW cs_students AS
+  SELECT roll_no, name, gpa
+  FROM student
+  WHERE dept = 'CS';
+
+  -- Using the view (just like a table)
+  SELECT * FROM cs_students WHERE gpa > 3.5;
+
+  CREATE VIEW sales_summary AS
+  SELECT p.prod_name, SUM(o.quantity) AS total_sold, SUM(o.quantity * p.price) AS revenue
+  FROM products p
+  JOIN orders o ON p.prod_id = o.prod_id
+  GROUP BY p.prod_name;
+
+■ ADVANTAGES OF VIEWS
+──────────────────────
+  1. **Security**: Restrict access to sensitive columns/rows. Users see
+     only what's in the view, not the full table.
+  2. **Simplicity**: Complex joins/queries can be encapsulated in a view,
+     providing a simple interface.
+  3. **Data Independence**: If underlying tables change, only the view
+     definition needs updating; applications using the view are unaffected.
+  4. **Consistency**: Same query logic reused across applications.
+
+■ UPDATABLE VIEWS
+──────────────────
+A view is **updatable** (can be used with INSERT, UPDATE, DELETE) if:
+  • It is based on a SINGLE table.
+  • It does NOT contain: DISTINCT, GROUP BY, HAVING, aggregate functions,
+    UNION, subqueries in SELECT, or computed columns.
+  • All NOT NULL columns of the base table are included.
+
+Non-updatable views can only be used for SELECT operations.
+
+■ DROPPING A VIEW
+──────────────────
+  DROP VIEW cs_students;
+
+■ MATERIALIZED VIEW
+─────────────────────
+A **materialized view** physically stores the query result and must be
+periodically refreshed. It improves read performance but may have stale
+data.
+
+  CREATE MATERIALIZED VIEW mv_sales AS
+  SELECT prod_name, SUM(quantity) FROM orders GROUP BY prod_name;
+
+  REFRESH MATERIALIZED VIEW mv_sales;
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**Hospital Database Security**:
+  - Doctors should see patient names, diagnoses, and prescriptions.
+  - Billing staff should see patient names and insurance/payment info.
+  - Create DIFFERENT views for each role:
+
+  CREATE VIEW doctor_view AS
+  SELECT patient_name, diagnosis, prescription FROM patient_records;
+
+  CREATE VIEW billing_view AS
+  SELECT patient_name, insurance_id, amount_due FROM patient_records;
+
+
+================================================================================
+3.7  STORED PROCEDURES
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **Stored Procedure** is a precompiled collection of SQL statements
+(and optional control-flow logic) stored in the database and executed
+as a single unit. It can accept parameters, perform operations, and
+return results.
+
+■ WHY USE STORED PROCEDURES?
+──────────────────────────────
+  1. **Performance**: Precompiled and cached — faster execution than
+     ad-hoc queries.
+  2. **Reusability**: Write once, call many times from different apps.
+  3. **Security**: Users can be granted EXECUTE permission on the procedure
+     without direct access to underlying tables.
+  4. **Reduced Network Traffic**: A single call replaces multiple queries.
+  5. **Maintainability**: Business logic centralized in the database.
+
+■ CREATING A STORED PROCEDURE
+───────────────────────────────
+
+Syntax (PostgreSQL / Standard):
+  CREATE OR REPLACE PROCEDURE procedure_name(param1 TYPE, param2 TYPE)
+  LANGUAGE plpgsql
+  AS $$
+  BEGIN
+    -- SQL statements
+  END;
+  $$;
+
+MySQL Syntax:
+  DELIMITER //
+  CREATE PROCEDURE procedure_name(IN param1 INT, OUT param2 VARCHAR(100))
+  BEGIN
+    -- SQL statements
+    SELECT name INTO param2 FROM employee WHERE emp_id = param1;
+  END //
+  DELIMITER ;
+
+■ EXAMPLES
+───────────
+
+  -- Procedure to add a new user
+  CREATE PROCEDURE add_user(
+    IN p_user_id INT,
+    IN p_username VARCHAR(50),
+    IN p_email VARCHAR(100),
+    IN p_sub_type VARCHAR(20)
+  )
+  BEGIN
+    INSERT INTO users (user_id, username, email, subscription_type, join_date)
+    VALUES (p_user_id, p_username, p_email, p_sub_type, CURDATE());
+  END;
+
+  -- Calling the procedure
+  CALL add_user(1001, 'hari123', 'hari@email.com', 'Premium');
+
+  -- Procedure to get supplier's parts
+  CREATE PROCEDURE get_supplier_parts(IN p_supplier_id INT)
+  BEGIN
+    SELECT p.part_name, p.color, p.weight, s.quantity
+    FROM parts p
+    JOIN supply s ON p.part_id = s.part_id
+    WHERE s.supplier_id = p_supplier_id;
+  END;
+
+  CALL get_supplier_parts(101);
+
+  -- Procedure with output parameter
+  CREATE PROCEDURE get_stock_info(
+    IN p_med_id INT,
+    OUT p_stock INT,
+    OUT p_expiry DATE
+  )
+  BEGIN
+    SELECT stock_qty, expiry_date INTO p_stock, p_expiry
+    FROM medicine
+    WHERE med_id = p_med_id;
+  END;
+
+■ STORED PROCEDURES vs VIEWS
+──────────────────────────────
+  ┌─────────────────────┬────────────────────┬────────────────────────┐
+  │ Aspect              │ View               │ Stored Procedure       │
+  ├─────────────────────┼────────────────────┼────────────────────────┤
+  │ Contains            │ Single SELECT query│ Multiple SQL + logic   │
+  │ Parameters          │ No                 │ Yes (IN, OUT, INOUT)   │
+  │ Can modify data?    │ Limited            │ Yes (INSERT/UPDATE/DEL)│
+  │ Control flow        │ No                 │ Yes (IF, LOOP, WHILE)  │
+  │ Precompiled?        │ No                 │ Yes                    │
+  │ Used as table?      │ Yes (in FROM)      │ No (called with CALL)  │
+  └─────────────────────┴────────────────────┴────────────────────────┘
+
+■ STORED FUNCTIONS vs STORED PROCEDURES
+─────────────────────────────────────────
+  • A **function** MUST return a value and can be used in SELECT.
+  • A **procedure** may or may not return values and is called with CALL.
+
+  CREATE FUNCTION get_dept_name(p_dept_id INT) RETURNS VARCHAR(50)
+  BEGIN
+    DECLARE v_name VARCHAR(50);
+    SELECT dept_name INTO v_name FROM department WHERE dept_id = p_dept_id;
+    RETURN v_name;
+  END;
+
+  -- Usage:
+  SELECT emp_name, get_dept_name(dept_id) AS department FROM employee;
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is a stored procedure?
+  A: A stored procedure is a precompiled set of SQL statements stored in
+     the database that can accept parameters, perform operations
+     (queries, updates, logic), and return results. Benefits include
+     performance, reusability, security, and reduced network traffic.
+
+  Q: What is the advantage of stored procedures?
+  A: Precompilation for speed, code reuse, centralized business logic,
+     reduced network traffic, and enhanced security via controlled access.
+
+
+================================================================================
+                     END OF CHAPTER 3 NOTES
+================================================================================

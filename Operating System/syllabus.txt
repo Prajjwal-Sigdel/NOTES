@@ -1,0 +1,291 @@
+================================================================================
+                         POKHARA UNIVERSITY
+               BE COMPUTER ENGINEERING - OPERATING SYSTEM
+                         COURSE SYLLABUS
+================================================================================
+
+COURSE CONTENTS IN DETAIL
+
+================================================================================
+UNIT 1: INTRODUCTION                                            [4 Hours]
+================================================================================
+
+Specific Objectives:
+    - Familiarize with basic concepts of Operating Systems and its architecture
+    - Understanding the successive evolution of operating system
+
+Contents:
+    1.1 Concept and Function of Operating Systems
+
+    1.2 Operating Systems Concept and Functionality
+        - Processes
+        - Files
+        - System Calls
+        - The Shell
+
+    1.3 Operating System Structure
+        - Monolithic System
+        - Layered
+        - Virtual Machines
+        - Client-Server
+        - Microkernel and Exokernel
+
+    1.4 Types and Evolution of Operating Systems
+
+
+================================================================================
+UNIT 2: PROCESSES AND THREADS                                  [10 Hours]
+================================================================================
+
+Specific Objectives:
+    - Familiarize with Task, Process and Threads
+    - Implement resource allocation techniques
+    - Understanding the mutual exclusion for resource utilization
+
+Contents:
+    2.1 Process
+        - Definition, states and transition diagram
+        - Process Control Block (PCB)
+        - Concurrent and Parallel processes
+
+    2.2 Interprocess Communication and Synchronization
+        - Introduction, Race Condition, Critical Regions and condition
+        - Avoiding critical region: Mutual Exclusion and Serializability
+        - Mutual exclusion conditions, mutual exclusion: disabling 
+          interrupts, lock variable, strict alteration (Dekker's algorithms,
+          Peterson's algorithms), The TSL instruction, sleep and wakeup, 
+          producer and consumer problem
+        - Types of mutual exclusion (Semaphore, Monitors, Bounded buffer, 
+          Message passing)
+        - Classical IPC Problems:
+            * The Dining Philosophers Problem
+            * The Readers and Writers Problem
+            * The Sleeping Barber Problem
+        - Serializability: Locking Protocols and Time Stamp Protocols
+
+    2.3 Process Scheduling
+        - Basic Concept, Type of scheduling:
+            * Preemptive scheduling
+            * Non-preemptive scheduling
+            * Batch
+            * Interactive
+            * Real time scheduling
+        - Scheduling criteria and performance analysis
+        - Scheduling algorithms with examples:
+            * First Come First Served
+            * Shortest-Job-First
+            * Round-Robin
+            * Shortest Process Next
+            * Shortest Remaining Time Next
+            * Real Time
+            * Priority Fair Share
+            * Guaranteed
+            * Lottery Scheduling
+
+    2.4 Threads
+        - Definitions of Threads
+        - Types of thread process (Single and Multithreaded process)
+        - Benefits of Multithreading
+        - Thread Models:
+            * Many-to-One Model
+            * One-to-One Model
+            * Many-to-Many Model
+        - User Space and Kernel Space Threads
+        - Difference between Processes and Threads
+
+
+================================================================================
+UNIT 3: MEMORY MANAGEMENT                                      [10 Hours]
+================================================================================
+
+Specific Objectives:
+    - Conceptualize the role and working procedure of memory
+    - Familiarizing with virtual memory management
+    - Understanding the page replacement algorithms
+
+Contents:
+    3.1 Introduction
+        - Storage organization
+        - Memory hierarchy
+
+    3.2 Storage Allocation
+        - Contiguous versus non-contiguous store allocation
+        - Logical and physical memory
+        - Fragmentation
+        - Fixed partition and variable partition for multiprogramming
+        - Logical versus physical address space
+
+    3.3 Relocation and Protection
+
+    3.4 Memory Management with Swapping
+        - Memory management with bitmaps and linked list
+        - Memory management without swapping
+
+    3.5 Contiguous-Memory Allocation
+        - Memory protection
+        - Memory allocation
+        - Fragmentation (Internal fragmentation and external fragmentation)
+
+    3.6 Paging
+        - Structure of page table:
+            * Hierarchical page table
+            * Hashed page table
+            * Inverted page table
+            * Shared page table
+
+    3.7 Virtual Memory
+        - Introduction
+        - Paging
+        - Page Table
+        - Block mapping
+        - Direct mapping
+        - Translation Look Aside Buffers (TLB)
+        - Demand paging
+        - Thrashing
+
+    3.8 Page Replacement
+        - Page replacement algorithms:
+            * First-In-First-Out (FIFO)
+            * Not Recently Used (NRU)
+            * Optimal Page Replacement
+            * Second Chance Page Replacement
+            * Least Recently Used (LRU)
+            * Clock Page Replacement
+            * Working Set Page Replacement
+            * WS Clock Page Replacement
+
+    3.9 Segmentation
+        - Segmentation with paging
+
+    3.10 Coalescing and Compaction
+
+
+================================================================================
+UNIT 4: KERNEL                                                  [2 Hours]
+================================================================================
+
+Specific Objectives:
+    - Conceptualization of Kernel and its role in system software
+
+Contents:
+    4.1 Introduction
+
+    4.2 Architecture of the Kernel
+
+    4.3 Types of Kernels
+
+    4.4 Context Switching
+        - Kernel and User mode
+        - Kernel implementation processes
+
+
+================================================================================
+UNIT 5: INPUT/OUTPUT MANAGEMENT                                 [5 Hours]
+================================================================================
+
+Specific Objectives:
+    - Understand the role of input/output devices
+    - Understand the different approaches for optimal output
+
+Contents:
+    5.1 Introduction
+
+    5.2 Interrupts Handlers
+
+    5.3 Principles of I/O Hardware
+        - I/O Device
+        - Device Controller
+        - Memory Mapped I/O
+        - Direct Memory Access (DMA)
+
+    5.4 Principles of I/O Software
+        - Goals of I/O Software
+        - Polled I/O versus Interrupt Driven I/O
+        - Character User Interface and Graphical User Interface
+        - Device Driver
+        - Device Independent I/O Software
+        - User-space I/O Software
+
+    5.5 System Resources
+        - Preemptable and Non-preemptable
+        - Method of handling Deadlocks
+        - Deadlock prevention
+        - Deadlock avoidance: Banker's Algorithm
+        - Deadlock detection: Resource allocation graph
+        - Recovery from Deadlock
+
+    5.6 Redundant Array of Inexpensive Disks (RAID)
+
+    5.7 RAM Disks
+
+
+================================================================================
+UNIT 6: FILE SYSTEMS                                            [3 Hours]
+================================================================================
+
+Specific Objectives:
+    - Understand the file and filing mechanism
+    - Familiarize with directory and its management techniques
+
+Contents:
+    6.1 File and File Organization
+        - Blocking and Buffering
+        - File Descriptor
+        - File Naming
+        - File Structure
+        - File Types
+        - File Attributes
+        - File Operations
+        - File Access Methods
+
+    6.2 Directories Management
+        - Single-level directory systems
+        - Hierarchical directory systems
+        - Path names
+        - Directory operation
+
+    6.3 Access Methods
+        - Sequential
+        - Direct
+        - Other access methods
+
+    6.4 Protection
+        - Types of access
+        - Access Control List
+
+    6.5 File System Implementation
+        - Contiguous allocation
+        - Linked list allocation
+        - Linked list allocation using Index nodes
+
+    6.6 Security and Multi-media Files
+
+
+================================================================================
+UNIT 7: NEW TRENDS IN OPERATING SYSTEM                          [5 Hours]
+================================================================================
+
+Specific Objectives:
+    - Familiarize with current trends of operating systems
+
+Contents:
+    7.1 Real-time Operating System
+        - Concept, character and role
+
+    7.2 Distributed Operating System
+        - Concept, character and role
+
+    7.3 Cloud Operating System
+        - Concept, character and role
+
+    7.4 Mobile Operating System
+        - Concept, character and role
+
+    7.5 Security Issues and Method of Deployment
+
+    7.6 Memory Wall and Bottleneck for Operating System
+
+
+================================================================================
+                            TOTAL: 39 HOURS
+================================================================================

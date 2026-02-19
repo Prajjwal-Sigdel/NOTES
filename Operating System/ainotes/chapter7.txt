@@ -1,0 +1,1098 @@
+================================================================================
+  CHAPTER 7: NEW TRENDS IN OPERATING SYSTEM                    [5 Hours]
+  Pokhara University — BE Computer Engineering
+  Encyclopedic Study Notes
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  7.1  Real-Time Operating System (RTOS)
+       7.1.1  Concept
+       7.1.2  Characteristics
+       7.1.3  Role and Applications
+  7.2  Distributed Operating System
+       7.2.1  Concept
+       7.2.2  Characteristics
+       7.2.3  Role and Applications
+  7.3  Cloud Operating System
+       7.3.1  Concept
+       7.3.2  Characteristics
+       7.3.3  Role and Applications
+  7.4  Mobile Operating System
+       7.4.1  Concept
+       7.4.2  Characteristics
+       7.4.3  Role and Applications
+  7.5  Security Issues and Methods of Deployment
+  7.6  Memory Wall and Bottleneck for Operating System
+  ── Arch Linux: Hands-on Implementation ──
+
+================================================================================
+7.1  REAL-TIME OPERATING SYSTEM (RTOS)
+================================================================================
+
+────────────────────────────────────────────────────
+7.1.1  Concept
+────────────────────────────────────────────────────
+
+A Real-Time Operating System (RTOS) is an operating system that guarantees
+processing within a defined time constraint (deadline). The correctness of
+the system depends not only on the logical result of computation but also on
+the TIME at which the result is produced. A correct answer delivered too late
+is as bad as a wrong answer.
+
+In a general-purpose OS (like standard Linux), the scheduler optimizes for
+throughput and average response time — there is no guarantee that any specific
+task will complete by a specific deadline. An RTOS provides deterministic
+timing behavior: worst-case response times are bounded and known.
+
+REAL-TIME ≠ FAST. A real-time system is not necessarily faster than a
+general-purpose system. It is PREDICTABLE. An RTOS with a guaranteed worst-
+case response time of 100 μs is "better" (more real-time) than a general-
+purpose OS that usually responds in 10 μs but occasionally takes 50 ms.
+
+TYPES OF REAL-TIME SYSTEMS:
+
+  1. HARD REAL-TIME: Missing a deadline is catastrophic. The system fails if
+     any deadline is missed.
+     Examples:
+       - Automotive antilock braking system (ABS): Must respond within
+         milliseconds or the car crashes.
+       - Aircraft flight control: Control surfaces must be adjusted within
+         strict time bounds.
+       - Cardiac pacemaker: Must deliver electrical pulses at exact intervals.
+       - Industrial robot controller: Must coordinate motors precisely.
+       - Nuclear reactor control: Overshoot in response time is unacceptable.
+
+  2. FIRM REAL-TIME: Missing a deadline makes the result useless (the
+     result is discarded) but does not cause catastrophic failure. Occasional
+     misses are tolerated.
+     Examples:
+       - Video frame decoding: A frame delivered after its display deadline
+         is dropped. Occasional dropped frames are acceptable.
+       - Sensor data acquisition: A late sample is discarded; the next
+         sample will be used instead.
+
+  3. SOFT REAL-TIME: Missing a deadline degrades performance but the result
+     is still useful. The system continues to function, albeit with reduced
+     quality.
+     Examples:
+       - Audio/video streaming: Late packets cause quality degradation
+         (stuttering) but the stream continues.
+       - Online gaming: High latency degrades the experience but the game
+         still works.
+       - Desktop interactivity: A laggy UI is annoying but not dangerous.
+       - Linux with CFS scheduler provides soft real-time characteristics.
+
+────────────────────────────────────────────────────
+7.1.2  Characteristics
+────────────────────────────────────────────────────
+
+An RTOS has the following key characteristics:
+
+  1. DETERMINISTIC BEHAVIOR: The worst-case execution time (WCET) and
+     worst-case response time are bounded and computable. There are no
+     unbounded delays.
+
+  2. PRIORITY-BASED PREEMPTIVE SCHEDULING: The highest-priority ready
+     task always runs. The scheduler preempts lower-priority tasks
+     immediately when a higher-priority task becomes ready.
+     Common algorithms:
+       - Rate Monotonic Scheduling (RMS): Static priority assignment.
+         Tasks with shorter periods get higher priority. Optimal among
+         fixed-priority algorithms. Schedulable if:
+         $$ U = \sum_{i=1}^{n} \frac{C_i}{T_i} \leq n(2^{1/n} - 1) $$
+         where $C_i$ = execution time, $T_i$ = period, n = number of tasks.
+         For large n, the bound approaches $\ln 2 \approx 0.693$ (69.3%).
+
+       - Earliest Deadline First (EDF): Dynamic priority. The task with
+         the nearest deadline gets the highest priority. Optimal among all
+         uniprocessor scheduling algorithms. Schedulable if:
+         $$ U = \sum_{i=1}^{n} \frac{C_i}{T_i} \leq 1.0 $$
+         (100% CPU utilization is achievable, unlike RMS).
+
+  3. MINIMAL AND BOUNDED INTERRUPT LATENCY: The time from interrupt
+     occurrence to the start of the ISR is bounded and minimal
+     (typically < 10 μs for hard RTOS, often < 1 μs).
+
+  4. MINIMAL AND BOUNDED DISPATCH LATENCY: The time to switch from one
+     task to another is bounded (context switch time is deterministic).
+
+  5. SMALL FOOTPRINT: RTOS kernels are typically small (tens to hundreds
+     of KB), suitable for embedded systems with limited memory.
+     FreeRTOS kernel: ~10 KB code.
+     Zephyr: ~10-100 KB depending on configuration.
+
+  6. PREDICTABLE MEMORY MANAGEMENT: Dynamic memory allocation (malloc) is
+     often avoided or replaced with static allocation or fixed-size pool
+     allocators, because malloc has unpredictable execution time (due to
+     fragmentation, searching free lists, etc.).
+
+  7. PRIORITY INVERSION HANDLING: Mechanisms to handle priority inversion
+     (when a high-priority task waits for a low-priority task):
+       - Priority Inheritance: The low-priority task temporarily inherits
+         the high-priority task's priority.
+       - Priority Ceiling: Each resource has a ceiling priority; any task
+         locking the resource runs at the ceiling priority.
+     Famous example: Mars Pathfinder (1997) experienced priority inversion
+     causing repeated system resets. Fixed via priority inheritance.
+
+    Micro-topic: PREEMPT_RT — Making Linux Real-Time
+    ─────────────────────────────────────────────────
+    The PREEMPT_RT patch (maintained by Thomas Gleixner et al.) converts
+    the Linux kernel into a hard real-time OS by:
+      - Converting spinlocks to RT-mutexes (sleeping locks with priority
+        inheritance).
+      - Making nearly all interrupt handlers threaded (schedulable).
+      - Implementing high-resolution timers.
+      - Reducing non-preemptible code sections to < 100 μs.
+
+    As of 2024, much of PREEMPT_RT has been merged into mainline Linux.
+    The linux-rt kernel on Arch Linux provides full PREEMPT_RT support.
+
+    Achievable worst-case latency: ~20-100 μs on commodity hardware.
+    This is sufficient for many industrial and audio applications.
+
+        Deeper: Kernel Preemption Models
+        ─────────────────────────────────
+        Linux supports several preemption models (selected at compile time):
+
+        1. PREEMPT_NONE: No kernel preemption. Tasks in kernel space run
+           to completion (or until they explicitly yield). Highest
+           throughput, worst latency. For servers.
+
+        2. PREEMPT_VOLUNTARY: Explicit preemption points added throughout
+           the kernel. A compromise. Default on Arch's stock kernel.
+
+        3. PREEMPT (Full Preemption): Kernel code is preemptible at almost
+           any point (except when holding a spinlock or when preemption
+           is explicitly disabled). Better latency. Used by linux-zen.
+
+        4. PREEMPT_RT (Real-Time): Full preemption including converting
+           spinlocks to sleeping locks. Best latency (< 100 μs). For
+           audio production, industrial control.
+
+────────────────────────────────────────────────────
+7.1.3  Role and Applications
+────────────────────────────────────────────────────
+
+RTOS ROLE:
+  - Provides the runtime environment for time-critical embedded systems.
+  - Manages task scheduling, inter-task communication, and hardware access
+    with guaranteed timing.
+  - Abstracts hardware differences, allowing portable application code.
+
+APPLICATIONS:
+  ┌────────────────────────┬──────────────────────────────────────────┐
+  │ Domain                 │ Examples                                 │
+  ├────────────────────────┼──────────────────────────────────────────┤
+  │ Automotive             │ Engine control, ABS, ADAS, infotainment  │
+  │ Aerospace/Defense      │ Flight control, missile guidance, radar  │
+  │ Medical                │ Pacemakers, imaging systems, patient     │
+  │                        │ monitors, surgical robots                │
+  │ Industrial             │ PLC, CNC machines, robotics              │
+  │ Telecommunications     │ Base stations, routers, switches         │
+  │ Consumer Electronics   │ Washing machines, microwave ovens        │
+  │ Audio/Music Production │ Digital audio workstations (DAWs)        │
+  └────────────────────────┴──────────────────────────────────────────┘
+
+POPULAR RTOS:
+  - FreeRTOS: Open-source, dominant in IoT/embedded (AWS-backed).
+  - Zephyr: Open-source, Linux Foundation project, for IoT.
+  - VxWorks: Commercial, used in Mars rovers, Boeing 787.
+  - QNX: Commercial microkernel RTOS, used in cars (BlackBerry QNX).
+  - RTEMS: Open-source, used by ESA and NASA.
+  - ThreadX (Azure RTOS): Used in billions of deployed devices.
+  - PREEMPT_RT Linux: For soft/firm real-time on commodity hardware.
+
+    Micro-topic: Safety-Critical Certifications
+    ─────────────────────────────────────────────
+    RTOSes used in safety-critical systems must meet standards:
+      - DO-178C: Software for airborne systems (aviation).
+      - ISO 26262 (ASIL): Automotive functional safety.
+      - IEC 62304: Medical device software.
+      - IEC 61508 (SIL): Functional safety of E/E/PE systems.
+    Certified RTOSes include: VxWorks (DO-178C), QNX (ISO 26262),
+    INTEGRITY (Green Hills, DO-178C/ISO 26262).
+
+
+================================================================================
+7.2  DISTRIBUTED OPERATING SYSTEM
+================================================================================
+
+────────────────────────────────────────────────────
+7.2.1  Concept
+────────────────────────────────────────────────────
+
+A Distributed Operating System (DOS) manages a collection of independent
+computers (nodes) interconnected by a network, making them appear to users
+as a single coherent system. The distribution of resources, processing, and
+data across multiple nodes is transparent to the user — they see one unified
+system, not individual machines.
+
+Key distinction:
+  - Network OS: Each machine has its own OS; users are aware of multiple
+    machines and must explicitly access remote resources (e.g., SSH to
+    another machine, NFS mount). Examples: Linux, Windows Server.
+  - Distributed OS: The OS spans multiple machines; distribution is
+    transparent. A process can run on any node, files can be on any node,
+    and the user doesn't know (or care) where. Examples: Amoeba (Tanenbaum),
+    Plan 9 (Bell Labs), Sprite.
+
+TRANSPARENCY: A distributed OS provides several types of transparency:
+  - Access transparency: Local and remote resources are accessed the same way.
+  - Location transparency: Resources can be accessed without knowing their
+    physical location.
+  - Migration transparency: Resources can move between nodes without affecting
+    access.
+  - Replication transparency: Multiple copies of a resource exist for
+    reliability/performance; users see one resource.
+  - Concurrency transparency: Multiple users/processes access shared resources
+    simultaneously without interference.
+  - Failure transparency: The system continues to operate despite partial
+    failures.
+  - Scalability transparency: The system can grow without changing its
+    structure or application code.
+
+────────────────────────────────────────────────────
+7.2.2  Characteristics
+────────────────────────────────────────────────────
+
+  1. RESOURCE SHARING: Hardware (CPUs, storage, printers) and software
+     (files, databases, services) are shared across the network.
+
+  2. OPENNESS: The system uses standard protocols and interfaces, allowing
+     heterogeneous hardware and software to interoperate.
+
+  3. CONCURRENCY: Multiple processes run simultaneously on multiple nodes.
+
+  4. SCALABILITY: The system can be expanded by adding more nodes without
+     redesigning the architecture.
+
+  5. FAULT TOLERANCE: The system is designed to continue operating despite
+     node failures (through replication, redundancy, and failover).
+     Techniques: replication (state machines), checkpointing, consensus
+     protocols (Paxos, Raft).
+
+  6. CONSISTENCY: Maintaining data consistency across nodes is a fundamental
+     challenge. Trade-offs captured by the CAP Theorem:
+       - Consistency: All nodes see the same data at the same time.
+       - Availability: Every request receives a response (not an error).
+       - Partition Tolerance: The system operates despite network partitions.
+     The CAP theorem states that a distributed system can provide at most
+     TWO of these three guarantees simultaneously.
+
+  7. CLOCK SYNCHRONIZATION: No single global clock; nodes have independent
+     clocks. Logical clocks (Lamport timestamps, vector clocks) are used
+     to establish event ordering.
+
+    Micro-topic: Consensus Algorithms
+    ──────────────────────────────────
+    How do distributed nodes agree on a value (e.g., who is the leader,
+    what is the committed transaction)?
+
+      - Paxos (Lamport, 1998): The foundational consensus algorithm.
+        Complex but proven correct. Used in Google's Chubby lock service.
+
+      - Raft (Ongaro & Ousterhout, 2014): Designed for understandability
+        (equivalent to Paxos but easier to implement). Uses leader
+        election, log replication, and safety. Used in etcd (Kubernetes),
+        CockroachDB, Consul.
+
+      - PBFT (Practical Byzantine Fault Tolerance): Handles Byzantine
+        (malicious) failures. Used in some blockchain systems.
+
+        Deeper: The Two Generals' Problem and FLP Impossibility
+        ────────────────────────────────────────────────────────
+        The Two Generals' Problem proves that achieving consensus over
+        an unreliable channel is IMPOSSIBLE with deterministic algorithms
+        (you can never be sure the last acknowledgment was received).
+
+        The FLP Impossibility Result (Fischer, Lynch, Paterson, 1985):
+        In an asynchronous distributed system where even one process can
+        crash, there is NO deterministic algorithm that guarantees
+        consensus in bounded time. This is why practical consensus
+        algorithms (Paxos, Raft) use timeouts and randomization.
+
+────────────────────────────────────────────────────
+7.2.3  Role and Applications
+────────────────────────────────────────────────────
+
+ROLE:
+  - Enable resource sharing and collaboration across networked computers.
+  - Provide fault tolerance through redundancy.
+  - Enable parallel and distributed computing for large-scale problems.
+  - Support geographically distributed organizations.
+
+APPLICATIONS:
+  - World Wide Web: The most ubiquitous distributed system.
+  - Cloud computing infrastructure (AWS, Azure, GCP).
+  - Distributed databases: Cassandra, CockroachDB, Google Spanner.
+  - Distributed file systems: HDFS (Hadoop), Ceph, GlusterFS, Google File
+    System (GFS), Lustre.
+  - Distributed computing: MapReduce, Apache Spark, MPI for HPC.
+  - Blockchain and cryptocurrency: Bitcoin, Ethereum.
+  - CDNs (Content Delivery Networks): Cloudflare, Akamai.
+  - Messaging systems: Apache Kafka, RabbitMQ.
+
+NOTABLE DISTRIBUTED OS PROJECTS:
+  - Plan 9 from Bell Labs: Designed by the creators of UNIX (Rob Pike,
+    Ken Thompson). Everything is a file (taken further than UNIX). The
+    concept of per-process namespaces. Influenced Linux namespaces and
+    containers. Its fork, 9front, is still actively maintained.
+  - Amoeba (Tanenbaum): Research distributed OS. Processes could migrate
+    between nodes. Object-based capability system.
+  - Inferno (Bell Labs): Successor to Plan 9, with a virtual machine
+    (Dis) for portability. Can run as a hosted OS.
+
+    Micro-topic: Kubernetes — De Facto Distributed OS for the Cloud
+    ────────────────────────────────────────────────────────────────
+    While not a traditional OS, Kubernetes (K8s) functions as a
+    "distributed operating system" for containerized applications:
+      - Scheduler: Places containers on nodes (like process scheduling).
+      - Service discovery: DNS-based (like name resolution).
+      - Storage orchestration: Attaches storage to containers.
+      - Self-healing: Restarts failed containers, replaces nodes.
+      - Scaling: Horizontal auto-scaling based on load.
+      - Networking: Virtual overlay networks between pods.
+
+    Kubernetes builds on Linux kernel features: cgroups (resource limits),
+    namespaces (isolation), and overlay filesystems (container images).
+
+
+================================================================================
+7.3  CLOUD OPERATING SYSTEM
+================================================================================
+
+────────────────────────────────────────────────────
+7.3.1  Concept
+────────────────────────────────────────────────────
+
+A Cloud Operating System (Cloud OS) is the software layer that manages the
+resources of a cloud computing infrastructure, providing on-demand,
+self-service access to computing resources (servers, storage, networking)
+over the internet. It abstracts the underlying physical hardware and presents
+it as a pool of virtual resources that can be provisioned and scaled
+programmatically.
+
+A Cloud OS can be understood at two levels:
+
+  1. INFRASTRUCTURE LEVEL (IaaS management): The software that manages the
+     physical data center infrastructure — provisioning VMs, managing
+     networks, allocating storage. This is what runs "the cloud."
+     Examples: OpenStack, VMware vSphere, Apache CloudStack.
+
+  2. USER-FACING LEVEL: The cloud platform as experienced by users —
+     a web-based OS-like environment with storage, applications, and
+     compute accessible from any device via a browser.
+     Examples: ChromeOS (Google), iPadOS (to some extent).
+
+CLOUD COMPUTING SERVICE MODELS:
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │  SaaS (Software as a Service)                               │
+  │  User manages: Nothing (just uses the application)          │
+  │  Examples: Gmail, Google Docs, Salesforce, Office 365       │
+  ├─────────────────────────────────────────────────────────────┤
+  │  PaaS (Platform as a Service)                               │
+  │  User manages: Application code and data                    │
+  │  Examples: Heroku, Google App Engine, AWS Elastic Beanstalk │
+  ├─────────────────────────────────────────────────────────────┤
+  │  IaaS (Infrastructure as a Service)                         │
+  │  User manages: OS, middleware, applications, data           │
+  │  Examples: AWS EC2, Azure VMs, Google Compute Engine        │
+  ├─────────────────────────────────────────────────────────────┤
+  │  Physical Infrastructure (managed by cloud provider)        │
+  │  Servers, storage, networking, data center facilities       │
+  └─────────────────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────────
+7.3.2  Characteristics
+────────────────────────────────────────────────────
+
+  1. VIRTUALIZATION: The foundation of cloud computing. Physical resources
+     are abstracted into virtual resources using hypervisors.
+       - Type 1 (Bare-metal) Hypervisor: Runs directly on hardware.
+         Examples: KVM (Linux kernel), Xen, VMware ESXi, Hyper-V.
+       - Type 2 (Hosted) Hypervisor: Runs on top of a host OS.
+         Examples: VirtualBox, VMware Workstation, QEMU.
+
+     KVM (Kernel-based Virtual Machine) is part of the Linux kernel. It
+     turns Linux into a Type 1 hypervisor. Each VM is a regular Linux
+     process, scheduled by the kernel's CFS scheduler. KVM leverages
+     hardware virtualization (Intel VT-x, AMD-V) for near-native
+     performance.
+
+  2. ON-DEMAND SELF-SERVICE: Users can provision resources (VMs, storage,
+     networks) automatically through APIs or web portals without human
+     intervention from the provider.
+
+  3. BROAD NETWORK ACCESS: Resources are accessible over the network from
+     any device (laptop, phone, tablet) via standard protocols (HTTPS,
+     SSH, API).
+
+  4. RESOURCE POOLING: The provider's resources are pooled to serve
+     multiple customers (multi-tenancy). Resources are dynamically assigned
+     based on demand. Customers generally don't know the physical location
+     of their resources.
+
+  5. RAPID ELASTICITY: Resources can be scaled up or down rapidly (often
+     automatically) based on demand. From the user's perspective, resources
+     appear unlimited.
+
+  6. MEASURED SERVICE: Resource usage is monitored, controlled, and billed
+     on a pay-per-use basis (CPU hours, GB stored, GB transferred).
+
+    Micro-topic: Containers vs. Virtual Machines
+    ─────────────────────────────────────────────
+    VMs and containers are both virtualization technologies but at
+    different levels:
+
+    VIRTUAL MACHINES:
+      - Full hardware virtualization.
+      - Each VM has its own kernel, OS, and user space.
+      - Isolation at the hardware level (separate page tables, etc.).
+      - Overhead: ~2-5% CPU, ~256 MB+ memory per VM.
+      - Boot time: ~10-60 seconds.
+
+    CONTAINERS (Docker, Podman, LXC):
+      - OS-level virtualization using Linux kernel features:
+        * Namespaces: Isolate PID, network, mount, user, IPC, UTS.
+        * cgroups: Limit CPU, memory, I/O per container.
+        * Overlay filesystems: Layered images (UnionFS, OverlayFS).
+      - Share the host kernel. No separate OS per container.
+      - Overhead: Near zero CPU, ~10 MB memory.
+      - Boot time: < 1 second.
+      - Less isolation than VMs (shared kernel = shared attack surface).
+
+    MODERN TREND: Kata Containers, Firecracker (AWS Lambda), and gVisor
+    (Google) combine container-like agility with VM-like isolation by
+    running each container in a lightweight VM.
+
+        Deeper: Firecracker — MicroVMs
+        ────────────────────────────────
+        Firecracker (developed by AWS for Lambda and Fargate) creates
+        lightweight micro-VMs that boot in ~125 ms and consume ~5 MB
+        of memory. It uses KVM but with a minimal device model (no BIOS,
+        no PCI bus, no USB). Each micro-VM has strong hardware-level
+        isolation like a traditional VM but with the speed and density
+        approaching containers.
+
+────────────────────────────────────────────────────
+7.3.3  Role and Applications
+────────────────────────────────────────────────────
+
+ROLE:
+  - Democratize access to computing resources (no upfront hardware cost).
+  - Enable rapid development, testing, and deployment of applications.
+  - Provide global infrastructure for distributed applications.
+  - Reduce operational burden (patching, hardware maintenance) for users.
+
+APPLICATIONS:
+  - Web applications and microservices (Netflix on AWS, Spotify on GCP).
+  - Big data processing (EMR, BigQuery, Dataflow).
+  - Machine learning and AI (SageMaker, Vertex AI, Azure ML).
+  - IoT data processing and analytics.
+  - Disaster recovery and backup.
+  - Development and testing environments.
+  - Content delivery (CloudFront, Cloud CDN).
+
+CLOUD OS PLATFORMS:
+  - OpenStack: Open-source cloud platform. Modular architecture:
+    Nova (compute), Neutron (networking), Cinder (block storage),
+    Swift (object storage), Keystone (identity), Glance (images).
+  - Apache CloudStack: Alternative open-source IaaS platform.
+  - VMware vSphere/vCloud: Commercial cloud infrastructure.
+  - Proxmox VE: Open-source hypervisor management (KVM + LXC).
+    Popular for self-hosted cloud on Arch Linux enthusiast hardware.
+
+
+================================================================================
+7.4  MOBILE OPERATING SYSTEM
+================================================================================
+
+────────────────────────────────────────────────────
+7.4.1  Concept
+────────────────────────────────────────────────────
+
+A Mobile Operating System is an OS designed specifically for mobile devices
+(smartphones, tablets, smartwatches, wearables). Mobile OSes are optimized
+for:
+  - Battery efficiency (aggressive power management).
+  - Touchscreen interaction (gesture-based UI).
+  - Wireless connectivity (cellular, Wi-Fi, Bluetooth, NFC, GPS).
+  - Sensor integration (accelerometer, gyroscope, proximity, ambient light).
+  - Application sandboxing (security through isolation).
+  - Resource constraints (limited RAM, storage, thermal envelope).
+
+────────────────────────────────────────────────────
+7.4.2  Characteristics
+────────────────────────────────────────────────────
+
+  1. POWER MANAGEMENT: Aggressive sleep states, CPU frequency scaling
+     (DVFS — Dynamic Voltage and Frequency Scaling), display power
+     management, radio power management. The OS suspends (sleeps) whenever
+     possible and uses wakelocks/alarms to wake up for tasks.
+
+     Android: Uses suspend-to-RAM aggressively. Applications request
+     "wakelocks" to keep the CPU running. Framework power management
+     (Doze mode, App Standby, Adaptive Battery).
+
+  2. APPLICATION SANDBOXING: Each application runs in its own isolated
+     environment:
+     - Android: Each app gets its own Linux UID. Apps run in separate
+       processes with separate file systems (using SELinux and seccomp).
+       Apps communicate through Intents (IPC framework).
+     - iOS: Each app runs in its own sandbox with no access to other
+       apps' data. Entitlements grant specific capabilities.
+
+  3. PERMISSION MODEL: Apps must request permissions from the user:
+     - Camera, microphone, location, contacts, storage, etc.
+     - Android 6.0+: Runtime permissions (requested when needed).
+     - iOS: Always runtime, per-resource permissions.
+
+  4. APPLICATION LIFECYCLE: Mobile OSes actively manage application lifecycle
+     to conserve resources:
+     - Background apps may be suspended (frozen) or killed.
+     - Apps must save state for seamless resume.
+     - Background tasks are limited (background services, work managers).
+
+  5. TOUCHSCREEN UI: Event-driven UI frameworks optimized for touch:
+     - Gestures: tap, long press, swipe, pinch, rotate.
+     - 60/90/120 Hz rendering for smooth animations.
+     - Virtual keyboard management.
+
+  6. CONNECTIVITY: Built-in support for diverse communication:
+     - Cellular (4G/5G), Wi-Fi, Bluetooth, NFC, GPS, UWB.
+     - Automatic network switching, VPN support.
+
+  7. SECURITY:
+     - Verified/Secure Boot: Ensures only trusted OS code runs.
+     - Full Disk Encryption (FDE) or File-Based Encryption (FBE).
+     - Hardware-backed keystore (ARM TrustZone, Secure Enclave).
+     - App signing: All apps must be cryptographically signed.
+
+    Micro-topic: Android's Linux Kernel Modifications
+    ──────────────────────────────────────────────────
+    Android uses a modified Linux kernel with several additions:
+      - Binder IPC: A high-performance IPC mechanism for Android's
+        component model (Activity, Service, Content Provider, Broadcast
+        Receiver). More efficient than traditional UNIX IPC.
+      - Ashmem (Anonymous Shared Memory): A simplified shared memory
+        allocator that allows the kernel to reclaim pages under memory
+        pressure. Being replaced by standard memfd.
+      - ION / DMA-BUF Heap: Memory allocator for sharing buffers between
+        CPU and hardware (camera, GPU, video codec).
+      - Low Memory Killer (LMK → lmkd): Kills background apps when
+        memory is low (more aggressive than OOM killer).
+      - Wakelocks (wakeup sources): Prevent the system from entering
+        deep sleep when background work is needed.
+
+    Most of these Android-specific patches have been upstreamed to
+    mainline Linux over the years (binder was merged in Linux 3.19,
+    wakelocks in 3.5).
+
+        Deeper: Google Fuchsia
+        ──────────────────────
+        Google's Fuchsia is a new OS built from scratch (NOT based on
+        Linux). It uses the Zircon microkernel (based on Little Kernel).
+        Key features:
+          - Capability-based security model.
+          - Component-based architecture.
+          - Flutter-based UI (Dart language).
+          - Designed for IoT, smart displays, and potentially phones.
+        Currently shipping on Nest Hub and Nest Hub Max.
+        Represents Google's hedge against Linux kernel GPL requirements.
+
+────────────────────────────────────────────────────
+7.4.3  Role and Applications
+────────────────────────────────────────────────────
+
+ROLE:
+  - Primary computing platform for billions of users worldwide.
+  - Gateway to internet, communication, entertainment, commerce.
+  - Platform for IoT device management and control.
+
+MOBILE OS MARKET (2024):
+  - Android: ~72% global market share. Based on Linux kernel. Open-source
+    (AOSP). Used by Samsung, Google Pixel, Xiaomi, OnePlus, etc.
+  - iOS: ~27% global market share. Based on XNU kernel (Darwin).
+    Proprietary. Apple only.
+  - Others (<1%): HarmonyOS (Huawei), KaiOS (feature phones), Sailfish OS
+    (Jolla, based on Linux), postmarketOS (Linux on phones), Mobian
+    (Debian on phones).
+
+    Micro-topic: Linux-Based Mobile OSes
+    ─────────────────────────────────────
+    The Linux mobile ecosystem is growing:
+      - postmarketOS: Alpine Linux-based, runs on 300+ devices.
+      - Mobian: Debian-based, for Pinephone and Librem 5.
+      - Ubuntu Touch (UBports): Unity-based mobile Ubuntu.
+      - Phosh (GNOME Phone Shell): GNOME's mobile interface.
+      - Plasma Mobile (KDE): KDE's mobile interface.
+    These run the full mainline Linux kernel (not Android's modified fork),
+    offering a true Linux desktop experience on a phone.
+
+
+================================================================================
+7.5  SECURITY ISSUES AND METHODS OF DEPLOYMENT
+================================================================================
+
+SECURITY ISSUES IN MODERN OPERATING SYSTEMS:
+
+  1. MALWARE:
+     - Viruses: Self-replicating code attached to legitimate programs.
+     - Worms: Self-propagating across networks (no host needed).
+       Example: WannaCry (2017) exploited SMBv1 vulnerability.
+     - Trojans: Disguised as legitimate software.
+     - Ransomware: Encrypts user data, demands payment.
+     - Rootkits: Hide malicious activity by modifying the OS kernel.
+       Kernel-level rootkits modify system call table, VFS hooks, etc.
+     - Spyware/Adware: Monitors user activity, displays unwanted ads.
+
+  2. PRIVILEGE ESCALATION:
+     - Exploiting bugs to gain higher privileges (user → root).
+     - Buffer overflow exploits (stack smashing, heap overflow, ROP).
+     - Kernel exploits (dirty COW, Dirty Pipe, StackRot).
+     - Setuid exploitation.
+
+  3. SIDE-CHANNEL ATTACKS:
+     - Spectre (2018): Exploits speculative execution to read other
+       processes' memory. Affects all modern CPUs. Mitigation: retpoline,
+       IBRS, STIBP.
+     - Meltdown (2018): Allows user-space to read kernel memory on Intel
+       CPUs. Mitigation: KPTI (covered in Chapter 4).
+     - Rowhammer: Repeatedly accessing DRAM rows to flip bits in adjacent
+       rows. Can corrupt page tables to gain root.
+     - Cache timing attacks: Inferring secrets by measuring cache access
+       times.
+
+  4. NETWORK ATTACKS:
+     - Man-in-the-middle (MITM): Intercepting network traffic.
+     - DNS spoofing, ARP spoofing.
+     - DDoS (Distributed Denial of Service).
+     - Port scanning, service exploitation.
+
+  5. SUPPLY CHAIN ATTACKS:
+     - Compromised software packages (e.g., SolarWinds, xz backdoor 2024).
+     - Malicious updates to open-source dependencies.
+
+METHODS OF DEPLOYMENT (Security Measures):
+
+  1. DEFENSE IN DEPTH: Multiple layers of security; no single point of
+     failure.
+
+  2. PRINCIPLE OF LEAST PRIVILEGE: Each process, user, and service runs
+     with the minimum privileges necessary.
+     Linux implementation: capabilities, namespaces, seccomp, SELinux.
+
+  3. ADDRESS SPACE LAYOUT RANDOMIZATION (ASLR):
+     Randomizes memory layout (stack, heap, libraries, executable) on each
+     execution, making exploit development harder.
+       $ cat /proc/sys/kernel/randomize_va_space
+       # 0 = disabled, 1 = partial, 2 = full
+
+  4. DATA EXECUTION PREVENTION (DEP / NX / W^X):
+     Memory pages are either writable OR executable, never both (W^X).
+     Prevents executing injected shellcode.
+
+  5. STACK PROTECTION:
+     - Stack canaries (-fstack-protector-strong): Detect buffer overflows.
+     - Shadow stacks (Intel CET): Hardware-backed return address protection.
+
+  6. SANDBOXING AND ISOLATION:
+     - Namespaces: Isolate PID, network, mount, user, IPC per process.
+     - cgroups: Limit resource usage (CPU, memory, I/O).
+     - seccomp: Restrict system calls available to a process.
+     - Containers (Docker, Podman): Combine namespaces + cgroups.
+     - VMs: Full hardware isolation.
+
+  7. MANDATORY ACCESS CONTROL:
+     - SELinux, AppArmor (covered in Chapter 6).
+
+  8. CRYPTOGRAPHY:
+     - Full disk encryption (LUKS).
+     - TLS/SSL for network communication.
+     - Code signing for package verification.
+
+  9. UPDATE AND PATCH MANAGEMENT:
+     - Regular security updates (Arch Linux: rolling release with
+       frequent updates).
+     - Livepatch/kpatch: Apply kernel security patches without rebooting.
+
+  10. INTRUSION DETECTION:
+      - Host-based IDS (OSSEC, AIDE — file integrity monitoring).
+      - Network-based IDS (Snort, Suricata).
+      - Log monitoring (journalctl, auditd, fail2ban).
+
+    Micro-topic: Secure Boot and Trusted Boot
+    ──────────────────────────────────────────
+    UEFI Secure Boot ensures that only cryptographically signed bootloaders
+    and kernels can run on the system:
+      1. UEFI firmware verifies the bootloader's digital signature.
+      2. Bootloader verifies the kernel's signature.
+      3. Kernel can verify loaded modules (CONFIG_MODULE_SIG).
+
+    On Arch Linux, Secure Boot can be configured with:
+      - sbctl: A Secure Boot key management tool.
+      - PreLoader or shim: Signed bootloaders for third-party OSes.
+      - Self-signed keys enrolled in UEFI firmware.
+
+        Deeper: The xz Backdoor (CVE-2024-3094)
+        ─────────────────────────────────────────
+        In March 2024, a backdoor was discovered in xz-utils 5.6.0-5.6.1
+        (a critical compression library used by sshd via systemd). A
+        maintainer ("Jia Tan") spent two years gaining trust, then
+        inserted obfuscated malicious code that modified sshd behavior
+        to allow unauthorized remote access.
+
+        The backdoor was discovered by Andres Freund (Microsoft/PostgreSQL
+        developer) who noticed unusual CPU usage during SSH connections.
+        This highlighted supply chain attack risks in open-source software.
+        Arch Linux was briefly affected (caught within hours and reverted).
+
+
+================================================================================
+7.6  MEMORY WALL AND BOTTLENECK FOR OPERATING SYSTEM
+================================================================================
+
+THE MEMORY WALL:
+
+The "memory wall" is the growing disparity between CPU speed and memory
+access speed. Since approximately 1980, CPU performance has improved at
+roughly 50-60% per year, while DRAM access latency has improved at only
+about 7% per year. This gap — the memory wall — means that modern CPUs
+spend an increasing fraction of their time waiting for data from memory.
+
+  Historical data:
+    Year     CPU cycle time    DRAM access time    Ratio
+    ────────────────────────────────────────────────────
+    1980     ~100 ns           ~100 ns             1:1
+    1990     ~10 ns            ~70 ns              1:7
+    2000     ~1 ns             ~50 ns              1:50
+    2010     ~0.3 ns           ~40 ns              1:130
+    2020     ~0.2 ns           ~30 ns              1:150
+
+  A modern CPU running at 5 GHz (0.2 ns cycle time) waits ~150 cycles for
+  a single main memory access. During a cache miss, the CPU is essentially
+  idle (or can work on other instructions if it has sufficient instruction-
+  level parallelism).
+
+IMPLICATIONS FOR OS DESIGN:
+
+  1. CACHE-AWARE ALGORITHMS: The OS scheduler, memory allocator, and file
+     system must be designed for cache efficiency. Data structures should
+     be cache-line aligned (64 bytes on modern CPUs). The kernel uses
+     per-CPU data structures to avoid cache bouncing between cores.
+
+  2. TLB OPTIMIZATION: TLB misses are expensive (page table walk through
+     multiple levels). The OS uses:
+     - Huge pages (2 MB, 1 GB on x86-64) to reduce TLB misses.
+     - THP (Transparent Huge Pages) — automatic promotion to huge pages.
+     - PCID (avoid TLB flush on context switch).
+
+  3. NUMA-AWARE SCHEDULING: On multi-socket systems (NUMA — Non-Uniform
+     Memory Access), memory attached to a remote socket has higher latency
+     (~100 ns local vs. ~200 ns remote). The Linux scheduler tries to keep
+     processes on the same NUMA node as their memory (NUMA balancing,
+     AutoNUMA).
+
+  4. PREFETCHING: The OS and hardware prefetch data before it's needed:
+     - Hardware prefetchers in the CPU detect access patterns and prefetch
+       cache lines.
+     - Software prefetching: Compiler inserts prefetch instructions.
+     - Kernel read-ahead for file I/O.
+
+OTHER BOTTLENECKS:
+
+  VON NEUMANN BOTTLENECK: The fundamental limitation of the von Neumann
+  architecture — both instructions and data must pass through the same
+  memory bus (the "von Neumann bottleneck"). The CPU can only process data
+  as fast as it can be fetched from memory.
+
+  I/O BOTTLENECK: Despite NVMe SSDs (7 GB/s), storage access is still
+  orders of magnitude slower than RAM. The OS mitigates this with the page
+  cache, but applications with working sets exceeding RAM size are limited
+  by storage speed.
+
+  INTERCONNECT BOTTLENECK: In multi-core and multi-socket systems, the
+  interconnect (Intel UPI, AMD Infinity Fabric) becomes a bottleneck for
+  cache coherency traffic. Each core's cache snoop/invalidation must
+  traverse the interconnect.
+
+  POWER WALL: Increasing CPU frequency increases power consumption (and
+  heat) cubically: $P \propto f \times V^2$, and $V$ must increase with
+  $f$. This is why CPU frequencies have plateaued around 5 GHz since ~2005.
+  Modern performance improvements come from:
+    - More cores (parallelism).
+    - Wider execution units (SIMD: AVX, AVX-512).
+    - Better branch prediction and out-of-order execution.
+    - Specialized accelerators (GPU, NPU, TPU, DSP).
+
+    Micro-topic: Emerging Solutions to the Memory Wall
+    ──────────────────────────────────────────────────
+    - HBM (High Bandwidth Memory): 3D-stacked DRAM used in GPUs and
+      accelerators. HBM3: ~819 GB/s bandwidth per stack (vs. ~50 GB/s
+      for DDR5).
+
+    - CXL (Compute Express Link): A new interconnect standard over PCIe
+      that allows memory expansion and sharing between CPU and
+      accelerators. CXL 3.0 enables memory pooling across multiple hosts.
+
+    - Processing-in-Memory (PIM): Embedding processing logic directly
+      in DRAM chips. Samsung's HBM-PIM adds simple arithmetic units to
+      HBM stacks for AI workloads.
+
+    - Persistent Memory (PMEM): Intel Optane (now discontinued, but the
+      concept continues). Byte-addressable, persistent storage at near-
+      DRAM speeds. The OS must support DAX (Direct Access) to bypass the
+      page cache for PMEM.
+
+    - Chiplet Architecture: AMD's chiplet design (Ryzen/EPYC) connects
+      multiple CPU dies via Infinity Fabric, with a separate I/O die for
+      memory controllers. This allows scaling core count without the
+      constraints of monolithic dies.
+
+        Deeper: Cache Coherency and the MOESI Protocol
+        ────────────────────────────────────────────────
+        In multi-core systems, each core has private L1/L2 caches. When
+        one core modifies a cache line, all other cores' copies must be
+        invalidated or updated — this is cache coherency. The MOESI
+        protocol (Modified, Owned, Exclusive, Shared, Invalid) is used
+        by AMD; Intel uses MESIF.
+
+        Coherency traffic increases with core count. For N cores, the
+        worst case is O(N²) invalidation messages. This is a fundamental
+        scalability bottleneck for shared-memory multiprocessors.
+
+        Directory-based coherency (used in NUMA systems) reduces traffic
+        by maintaining a directory that tracks which caches hold copies
+        of each line, avoiding broadcast invalidations.
+
+
+================================================================================
+  ARCH LINUX: HANDS-ON IMPLEMENTATION
+================================================================================
+
+────────────────────────────────────────
+Lab 7.1: Real-Time Capabilities
+────────────────────────────────────────
+
+# Check kernel preemption model
+    $ zcat /proc/config.gz | grep PREEMPT
+    # CONFIG_PREEMPT_VOLUNTARY=y (stock kernel)
+
+# Install real-time kernel (if needed for audio production, etc.)
+    $ sudo pacman -S linux-rt linux-rt-headers   # (if available)
+    # Or: linux-zen provides PREEMPT (full preemption, not RT)
+    $ sudo pacman -S linux-zen linux-zen-headers
+
+# Measure system latency with cyclictest
+    $ sudo pacman -S rt-tests
+    $ sudo cyclictest -m -p99 -t4 -l 10000
+    # Reports min/avg/max latency per CPU
+    # Stock kernel: max ~50-200 μs
+    # RT kernel: max ~20-50 μs
+
+# Set real-time scheduling for a process
+    $ sudo chrt -f 99 ./my_realtime_app   # SCHED_FIFO, priority 99
+    $ chrt -p $$                            # View current scheduling
+
+# View timer resolution
+    $ cat /proc/timer_list | grep resolution
+    # 1 nsecs for high-resolution timers
+
+────────────────────────────────────────
+Lab 7.2: Distributed Systems Tools
+────────────────────────────────────────
+
+# Install and explore distributed tools
+    $ sudo pacman -S etcd
+    $ etcd &    # Start etcd (distributed key-value store)
+    $ etcdctl put key1 "value1"
+    $ etcdctl get key1
+
+# Explore distributed file systems
+    $ sudo pacman -S nfs-utils
+    # NFS server setup (example):
+    # $ echo "/shared 192.168.1.0/24(rw,sync)" >> /etc/exports
+    # $ sudo systemctl start nfs-server
+    # On client: mount -t nfs server:/shared /mnt/nfs
+
+# SSH — the foundation of distributed computing on Linux
+    $ ssh-keygen -t ed25519
+    $ ssh-copy-id user@remote-host
+    $ ssh user@remote-host 'uname -a'
+
+# Cluster management exploration
+    $ sudo pacman -S ansible   # Configuration management
+    $ sudo pacman -S terraform # Infrastructure as code (AUR)
+
+────────────────────────────────────────
+Lab 7.3: Virtualization and Cloud
+────────────────────────────────────────
+
+# Check virtualization support
+    $ grep -E "vmx|svm" /proc/cpuinfo | head -1
+    # vmx (Intel VT-x) or svm (AMD-V)
+
+# Check KVM module
+    $ lsmod | grep kvm
+    # kvm_intel or kvm_amd
+
+# Install QEMU/KVM
+    $ sudo pacman -S qemu-full virt-manager libvirt edk2-ovmf
+    $ sudo systemctl enable --now libvirtd
+    $ sudo usermod -aG libvirt $USER
+
+# Create a VM with QEMU
+    $ qemu-img create -f qcow2 test_vm.qcow2 10G
+    $ qemu-system-x86_64 -enable-kvm -m 2G -cpu host \
+        -drive file=test_vm.qcow2 -cdrom archlinux.iso \
+        -boot d -vnc :0
+
+# Container exploration
+    $ sudo pacman -S podman
+    $ podman run --rm -it archlinux:latest bash
+    # You're now inside an Arch Linux container!
+    $ podman ps    # List running containers
+
+# Explore namespaces
+    $ sudo unshare --pid --fork --mount-proc bash
+    $ ps aux    # Only see processes in this PID namespace!
+    $ exit
+
+────────────────────────────────────────
+Lab 7.4: Mobile / ARM Exploration
+────────────────────────────────────────
+
+# Cross-compile for ARM (useful for embedded/mobile)
+    $ sudo pacman -S aarch64-linux-gnu-gcc
+    $ aarch64-linux-gnu-gcc -o hello_arm hello.c
+    $ file hello_arm
+    # "ELF 64-bit LSB executable, ARM aarch64..."
+
+# Android debugging (if Android device available)
+    $ sudo pacman -S android-tools
+    $ adb devices
+    $ adb shell "uname -a"    # Shows Android's Linux kernel
+    $ adb shell "cat /proc/cpuinfo"
+
+# Explore Waydroid (Android in a Linux container)
+    $ yay -S waydroid    # From AUR
+    # Runs Android apps natively on Linux using LXC containers
+
+────────────────────────────────────────
+Lab 7.5: Security Hardening
+────────────────────────────────────────
+
+# Check ASLR status
+    $ cat /proc/sys/kernel/randomize_va_space
+    # 2 = full randomization
+
+# Check CPU vulnerability mitigations
+    $ grep -r . /sys/devices/system/cpu/vulnerabilities/
+    # Shows Spectre, Meltdown, L1TF, MDS, etc. status
+
+# Check Secure Boot status
+    $ mokutil --sb-state
+    # Or: bootctl status
+
+# View security modules
+    $ cat /sys/kernel/security/lsm
+    # e.g., "lockdown,capability,landlock,yama,apparmor"
+
+# Explore namespaces and cgroups
+    $ ls /proc/$$/ns/
+    # cgroup, ipc, mnt, net, pid, pid_for_children, time, user, uts
+
+    $ systemd-cgtop
+    # Real-time cgroup resource usage (like top for cgroups)
+
+# Firewall setup
+    $ sudo pacman -S nftables
+    $ sudo nft list ruleset
+
+# Fail2ban (brute-force protection)
+    $ sudo pacman -S fail2ban
+    $ sudo systemctl enable --now fail2ban
+
+────────────────────────────────────────
+Lab 7.6: Memory Wall Investigation
+────────────────────────────────────────
+
+# Measure memory latency
+    $ sudo pacman -S lmbench   # (from AUR: yay -S lmbench)
+    $ lat_mem_rd 256m 512
+    # Shows latency at different memory sizes
+    # L1 hit: ~1 ns, L2: ~3-5 ns, L3: ~10-20 ns, DRAM: ~50-100 ns
+
+# Cache hierarchy info
+    $ lscpu | grep -i cache
+    #  L1d cache: 48 KiB (per core)
+    #  L1i cache: 32 KiB (per core)
+    #  L2 cache:  1.25 MiB (per core)
+    #  L3 cache:  30 MiB (shared)
+
+    $ cat /sys/devices/system/cpu/cpu0/cache/index*/size
+    $ cat /sys/devices/system/cpu/cpu0/cache/index*/coherency_line_size
+    # 64 bytes per cache line
+
+# Measure cache effects with perf
+    $ sudo perf stat -e cache-misses,cache-references,L1-dcache-load-misses \
+        dd if=/dev/zero of=/dev/null bs=1M count=1000
+    # Shows cache miss rate during the operation
+
+# NUMA topology
+    $ numactl --hardware
+    # node 0 cpus: 0-7, node 0 size: 16384 MB
+    # node distances: 10 (local) 21 (remote)
+
+# Check THP (Transparent Huge Pages) status
+    $ cat /sys/kernel/mm/transparent_hugepage/enabled
+    # [always] madvise never
+
+# View huge page usage
+    $ cat /proc/meminfo | grep -i huge
+    # AnonHugePages, HugePages_Total, HugePages_Free, Hugepagesize
+
+# Simple memory bandwidth test
+    $ dd if=/dev/zero of=/dev/null bs=1G count=10
+    # Tests memory copy bandwidth (~10-30 GB/s depending on CPU)
+
+
+================================================================================
+  CHAPTER 7 SUMMARY
+================================================================================
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  Key Takeaways:                                                        │
+  │                                                                        │
+  │  1. RTOS: Guarantees timing (deadlines). Hard/firm/soft types.         │
+  │     Priority-based preemptive scheduling (RMS, EDF). Deterministic.    │
+  │     PREEMPT_RT makes Linux real-time. Priority inversion handling.     │
+  │                                                                        │
+  │  2. DISTRIBUTED OS: Multiple nodes appear as one system.               │
+  │     Transparency (access, location, failure). CAP theorem.             │
+  │     Consensus (Paxos, Raft). Plan 9, Kubernetes.                      │
+  │                                                                        │
+  │  3. CLOUD OS: Manages cloud infrastructure. Virtualization (KVM,       │
+  │     Xen). IaaS/PaaS/SaaS. On-demand, elastic, measured.              │
+  │     Containers (Docker/Podman) vs VMs. OpenStack.                     │
+  │                                                                        │
+  │  4. MOBILE OS: Battery-optimized, sandboxed apps, permission model.    │
+  │     Android (Linux-based), iOS (XNU-based). Binder IPC, wakelocks.    │
+  │     Security: verified boot, encryption, hardware keystore.            │
+  │                                                                        │
+  │  5. SECURITY: Malware, privilege escalation, side-channels (Spectre,   │
+  │     Meltdown), supply chain attacks (xz). Mitigations: ASLR, DEP,     │
+  │     sandboxing, MAC, encryption, Secure Boot.                         │
+  │                                                                        │
+  │  6. MEMORY WALL: CPU speed >> memory speed (150:1 ratio). CPU waits    │
+  │     ~150 cycles per cache miss. Solutions: caches, prefetching, huge   │
+  │     pages, NUMA-aware scheduling, HBM, CXL, PIM.                     │
+  │     Power wall: frequency plateau → more cores, SIMD, accelerators.   │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+  END OF CHAPTER 7
+================================================================================

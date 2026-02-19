@@ -1,0 +1,1053 @@
+================================================================================
+              CHAPTER 4: RELATIONAL DATABASE DESIGN
+                            [6 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  4.1  Integrity Constraints
+       4.1.1  Domain Constraints
+       4.1.2  Entity Integrity Constraints
+       4.1.3  Referential Integrity Constraints
+       4.1.4  Assertions
+       4.1.5  Triggers
+  4.2  Features of Good Relational Designs
+  4.3  Functional Dependencies and Armstrong's Axioms
+  4.4  Closure of a Set of Functional Dependencies and Closure of Attribute Sets
+  4.5  Database Normalization and Normal Forms
+       4.5.1  1NF (First Normal Form)
+       4.5.2  2NF (Second Normal Form)
+       4.5.3  3NF (Third Normal Form)
+       4.5.4  BCNF (Boyce-Codd Normal Form)
+  4.6  Denormalization for Performance
+
+================================================================================
+4.1  INTEGRITY CONSTRAINTS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Integrity Constraints** are rules defined on a database schema that
+restrict the values that can be stored in the database. They ensure the
+**accuracy**, **consistency**, and **reliability** of data. The DBMS
+automatically enforces these constraints on every data modification.
+
+────────────────────────────────────────────────
+4.1.1  DOMAIN CONSTRAINTS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **Domain Constraint** specifies the set of PERMISSIBLE VALUES for an
+attribute. Every value in a column must belong to the defined domain
+(data type, range, format).
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Domain constraints are the most fundamental form of integrity. They
+ensure that the data stored in each column is of the correct type and
+within an acceptable range.
+
+■ IMPLEMENTATION IN SQL
+─────────────────────────
+  -- Data type constraint (implicit domain)
+  salary DECIMAL(10,2)     -- must be a decimal number
+
+  -- CHECK constraint (explicit domain)
+  age INT CHECK (age >= 0 AND age <= 150)
+
+  -- ENUM-like domain
+  gender CHAR(1) CHECK (gender IN ('M', 'F', 'O'))
+
+  -- CREATE DOMAIN (SQL standard, supported in PostgreSQL)
+  CREATE DOMAIN salary_domain AS DECIMAL(10,2)
+    CHECK (VALUE >= 0 AND VALUE <= 10000000);
+
+  CREATE TABLE employee (
+    emp_id    INT PRIMARY KEY,
+    name      VARCHAR(100) NOT NULL,
+    salary    salary_domain       -- uses the custom domain
+  );
+
+■ EXAMPLE
+──────────
+  ┌────────────┬──────────────────┬────────────────────────────────────┐
+  │ Attribute  │ Domain           │ Constraint                         │
+  ├────────────┼──────────────────┼────────────────────────────────────┤
+  │ emp_id     │ INT              │ Positive integers only             │
+  │ name       │ VARCHAR(100)     │ Non-null, alphabetic               │
+  │ salary     │ DECIMAL(10,2)    │ >= 0                               │
+  │ dept       │ VARCHAR(50)      │ Must be a valid department name    │
+  │ join_date  │ DATE             │ Cannot be in the future            │
+  └────────────┴──────────────────┴────────────────────────────────────┘
+
+────────────────────────────────────────────────
+4.1.2  ENTITY INTEGRITY CONSTRAINTS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+The **Entity Integrity Constraint** states that the PRIMARY KEY of a
+relation CANNOT be NULL. Every tuple must be uniquely identifiable.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+WHY?
+  • The primary key is the IDENTITY of a tuple.
+  • If a PK is NULL, we cannot distinguish that tuple from others.
+  • NULL means "unknown" — how can the identity of an entity be unknown?
+
+Rules:
+  1. No attribute of a primary key can be NULL.
+  2. No two tuples can have the same primary key value.
+  3. This applies to ALL relations in the database.
+
+■ EXAMPLE
+──────────
+  CREATE TABLE student (
+    roll_no  INT  PRIMARY KEY,   -- CANNOT be NULL, must be unique
+    name     VARCHAR(100),
+    dept     VARCHAR(50)
+  );
+
+  -- This will FAIL:
+  INSERT INTO student VALUES (NULL, 'Aarav', 'CS');
+  -- Error: PRIMARY KEY cannot be NULL
+
+  -- This will FAIL:
+  INSERT INTO student VALUES (101, 'Aarav', 'CS');
+  INSERT INTO student VALUES (101, 'Bipana', 'IT');  -- duplicate PK
+  -- Error: Duplicate entry '101' for key PRIMARY
+
+────────────────────────────────────────────────
+4.1.3  REFERENTIAL INTEGRITY CONSTRAINTS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+The **Referential Integrity Constraint** states that if a foreign key
+in a relation references a primary key in another relation, then the
+foreign key value must EITHER:
+  (a) Match an existing primary key value in the referenced table, OR
+  (b) Be NULL (if the FK column allows NULL).
+
+Formally: For every tuple $t_1$ in relation $R_1$, if $t_1[FK]$ is not
+NULL, then there MUST exist a tuple $t_2$ in relation $R_2$ such that
+$t_1[FK] = t_2[PK]$.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Referential integrity ensures that relationships between tables remain
+CONSISTENT. It prevents "orphan" records — rows that reference
+non-existent parent records.
+
+■ WHAT HAPPENS ON VIOLATION?
+──────────────────────────────
+When an operation would violate referential integrity, the DBMS can take
+one of several actions:
+
+  ┌───────────────┬──────────────────────────────────────────────────────┐
+  │ Action        │ Description                                          │
+  ├───────────────┼──────────────────────────────────────────────────────┤
+  │ RESTRICT      │ REJECT the operation (default). Prevent the          │
+  │ (NO ACTION)   │   deletion/update that would cause a violation.      │
+  │ CASCADE       │ Propagate the operation. If parent is deleted/updated│
+  │               │   all matching child rows are also deleted/updated.  │
+  │ SET NULL      │ Set the FK column in child rows to NULL.             │
+  │ SET DEFAULT   │ Set the FK column in child rows to a default value.  │
+  └───────────────┴──────────────────────────────────────────────────────┘
+
+■ SQL IMPLEMENTATION
+─────────────────────
+  CREATE TABLE enrollment (
+    roll_no    INT,
+    course_id  INT,
+    grade      CHAR(2),
+    PRIMARY KEY (roll_no, course_id),
+    FOREIGN KEY (roll_no) REFERENCES student(roll_no)
+      ON DELETE CASCADE
+      ON UPDATE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES course(course_id)
+      ON DELETE RESTRICT
+      ON UPDATE CASCADE
+  );
+
+■ EXAMPLE SCENARIO
+────────────────────
+  student table:  101-Aarav, 102-Bipana
+  enrollment:     (101, CS101, 'A'), (102, CS101, 'B')
+
+  DELETE FROM student WHERE roll_no = 101;
+
+  With ON DELETE CASCADE:
+    → enrollment row (101, CS101, 'A') is ALSO deleted.
+
+  With ON DELETE RESTRICT:
+    → DELETE is REJECTED because enrollment references roll_no 101.
+
+  With ON DELETE SET NULL:
+    → enrollment row becomes (NULL, CS101, 'A').
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**E-Commerce System (Amazon):**
+  - If a product is deleted from the catalog, what happens to order
+    records that reference it?
+  - CASCADE: Delete all order records for that product (bad! lose history)
+  - SET NULL: Keep orders, but product reference becomes NULL
+  - RESTRICT: Don't allow product deletion while orders exist (safest)
+  - Best practice: Mark product as "inactive" instead of deleting.
+
+────────────────────────────────────────────────
+4.1.4  ASSERTIONS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+An **Assertion** is a declarative constraint defined over the ENTIRE
+database (not just a single table). It specifies a condition that must
+ALWAYS be true. If any database modification violates the assertion,
+the modification is REJECTED.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Assertions are more powerful than CHECK constraints because they can
+span MULTIPLE tables. However, they are expensive to evaluate and NOT
+supported by most commercial DBMS (MySQL, PostgreSQL don't support them).
+
+■ SYNTAX
+─────────
+  CREATE ASSERTION assertion_name
+  CHECK (condition);
+
+■ EXAMPLE
+──────────
+  -- Every department must have at least one employee
+  CREATE ASSERTION at_least_one_employee
+  CHECK (
+    NOT EXISTS (
+      SELECT dept_id FROM department
+      WHERE dept_id NOT IN (SELECT DISTINCT dept_id FROM employee)
+    )
+  );
+
+  -- Total salary expense must not exceed 10 million
+  CREATE ASSERTION total_salary_limit
+  CHECK (
+    (SELECT SUM(salary) FROM employee) <= 10000000
+  );
+
+NOTE: Since most DBMS don't support assertions, they are typically
+implemented using TRIGGERS instead.
+
+────────────────────────────────────────────────
+4.1.5  TRIGGERS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **Trigger** is a procedural database object that automatically executes
+(fires) a specified set of SQL statements in response to certain events
+(INSERT, UPDATE, DELETE) on a table. Triggers implement the
+**Event-Condition-Action (ECA) model**.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Trigger Components (ECA Model):
+  1. **Event**: The database operation that activates the trigger
+     (INSERT, UPDATE, DELETE).
+  2. **Condition**: An optional predicate that is checked. If false,
+     the action is NOT executed.
+  3. **Action**: The SQL statements to execute when the event occurs
+     and the condition is true.
+
+Trigger Timing:
+  • **BEFORE**: Executes BEFORE the triggering operation.
+  • **AFTER**: Executes AFTER the triggering operation.
+  • **INSTEAD OF**: Replaces the triggering operation (used with views).
+
+Trigger Granularity:
+  • **FOR EACH ROW**: Fires once for each affected row (row-level).
+  • **FOR EACH STATEMENT**: Fires once per statement (statement-level).
+
+■ SYNTAX
+─────────
+  CREATE TRIGGER trigger_name
+  {BEFORE | AFTER} {INSERT | UPDATE | DELETE}
+  ON table_name
+  FOR EACH ROW
+  BEGIN
+    -- trigger body (SQL statements)
+  END;
+
+■ EXAMPLES
+───────────
+
+Example 1: Auto-update stock on new order
+
+  CREATE TRIGGER update_stock
+  AFTER INSERT ON orders
+  FOR EACH ROW
+  BEGIN
+    UPDATE products
+    SET stock_qty = stock_qty - NEW.quantity
+    WHERE prod_id = NEW.prod_id;
+  END;
+
+Example 2: Audit log for deletions
+
+  CREATE TRIGGER log_employee_deletion
+  AFTER DELETE ON employee
+  FOR EACH ROW
+  BEGIN
+    INSERT INTO audit_log (emp_id, emp_name, action, action_time)
+    VALUES (OLD.emp_id, OLD.name, 'DELETE', NOW());
+  END;
+
+Example 3: Account balance check on delete
+
+  CREATE TRIGGER check_account_on_delete
+  BEFORE DELETE ON account
+  FOR EACH ROW
+  BEGIN
+    -- Check if the account owner has remaining deposits
+    IF NOT EXISTS (
+      SELECT 1 FROM depositor
+      WHERE customer_id = OLD.customer_id
+      AND account_id <> OLD.account_id
+    ) THEN
+      DELETE FROM depositor WHERE customer_id = OLD.customer_id;
+    END IF;
+  END;
+
+Example 4: Grade validation trigger
+
+  CREATE TRIGGER validate_grade
+  BEFORE UPDATE ON enrollment
+  FOR EACH ROW
+  BEGIN
+    IF NEW.grade < 0 OR NEW.grade > 100 THEN
+      SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Grade must be between 0 and 100';
+    END IF;
+    INSERT INTO grade_change_log (roll_no, old_grade, new_grade, changed_at)
+    VALUES (NEW.roll_no, OLD.grade, NEW.grade, NOW());
+  END;
+
+■ OLD and NEW REFERENCES
+──────────────────────────
+  • **NEW**: Refers to the new row being inserted or the updated values.
+  • **OLD**: Refers to the row being deleted or the old values before update.
+
+  ┌───────────┬──────────────┬──────────────┐
+  │ Operation │ OLD available │ NEW available │
+  ├───────────┼──────────────┼──────────────┤
+  │ INSERT    │ No           │ Yes          │
+  │ UPDATE    │ Yes          │ Yes          │
+  │ DELETE    │ Yes          │ No           │
+  └───────────┴──────────────┴──────────────┘
+
+■ TRIGGERS vs ASSERTIONS vs CHECK CONSTRAINTS
+───────────────────────────────────────────────
+  ┌──────────────┬────────────────┬──────────────┬──────────────────┐
+  │ Feature      │ CHECK          │ Assertion    │ Trigger          │
+  ├──────────────┼────────────────┼──────────────┼──────────────────┤
+  │ Scope        │ Single column  │ Entire DB    │ Single table     │
+  │              │ or row         │              │   (but can       │
+  │              │                │              │    affect others)│
+  │ Declarative? │ Yes            │ Yes          │ No (procedural)  │
+  │ Can reference│ No             │ Yes          │ Yes (via queries)│
+  │ other tables │                │              │                  │
+  │ Supported?   │ Yes (all DBMS) │ Rarely       │ Yes (all DBMS)   │
+  │ Performance  │ Minimal        │ Expensive    │ Moderate         │
+  └──────────────┴────────────────┴──────────────┴──────────────────┘
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: When do you use triggers?
+  A: Triggers are used for: enforcing complex business rules that can't
+     be expressed with CHECK constraints, maintaining audit trails,
+     automatically updating derived data, synchronizing tables, and
+     implementing custom referential actions.
+
+  Q: What are the differences between BEFORE and AFTER triggers?
+  A: BEFORE triggers fire before the data modification — useful for
+     validation and data transformation. AFTER triggers fire after the
+     modification — useful for logging, cascading changes, and
+     notifications.
+
+
+================================================================================
+4.2  FEATURES OF GOOD RELATIONAL DESIGNS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **good relational design** minimizes data redundancy while preserving
+information and ensuring efficient query processing. The quality of a
+relational schema is measured by its resistance to anomalies and its
+adherence to normal forms.
+
+■ PROBLEMS OF BAD DATABASE DESIGN
+───────────────────────────────────
+
+Consider a POORLY DESIGNED table:
+  student_course(roll_no, name, address, course_id, course_name, instructor, grade)
+
+  ┌─────────┬───────┬──────────┬──────────┬─────────────┬─────────────┬───────┐
+  │ roll_no │ name  │ address  │course_id │ course_name │ instructor  │ grade │
+  ├─────────┼───────┼──────────┼──────────┼─────────────┼─────────────┼───────┤
+  │ 101     │ Aarav │ KTM      │ C01      │ DBMS        │ Dr. Sharma  │ A     │
+  │ 101     │ Aarav │ KTM      │ C02      │ Networks    │ Dr. Poudel  │ B+    │
+  │ 102     │ Bipana│ PKR      │ C01      │ DBMS        │ Dr. Sharma  │ A-    │
+  │ 103     │ Chetan│ BWL      │ C03      │ DSA         │ Dr. Thapa   │ B     │
+  └─────────┴───────┴──────────┴──────────┴─────────────┴─────────────┴───────┘
+
+**Problem 1: Data Redundancy**
+  "Aarav" and his address "KTM" are stored TWICE (once per course).
+  "DBMS" and "Dr. Sharma" are stored for EVERY student in DBMS.
+  → Wastes storage and increases risk of inconsistency.
+
+**Problem 2: Update Anomaly**
+  If Dr. Sharma changes to Dr. Sharma II, we must update EVERY row
+  where Dr. Sharma appears. If we miss one, data becomes INCONSISTENT.
+
+**Problem 3: Insertion Anomaly**
+  If a new course "AI" is introduced but no student has enrolled yet,
+  we CANNOT insert it because roll_no (PK part) would be NULL.
+  → Can't store information about courses without students.
+
+**Problem 4: Deletion Anomaly**
+  If Chetan (103) drops the only course he's enrolled in (C03-DSA),
+  deleting his enrollment also DELETES all information about DSA course
+  and Dr. Thapa.
+  → Losing information about an entity due to deletion of another.
+
+■ FEATURES OF A GOOD DESIGN
+─────────────────────────────
+  1. **Minimal Redundancy**: Each fact stored ONCE.
+  2. **No Update Anomalies**: Changing a fact requires updating ONE place.
+  3. **No Insertion Anomalies**: Can insert any entity independently.
+  4. **No Deletion Anomalies**: Deleting one entity doesn't lose another.
+  5. **Lossless Decomposition**: Splitting tables preserves all data
+     (can be reconstructed via joins).
+  6. **Dependency Preservation**: All functional dependencies are
+     enforced by individual table constraints.
+
+■ SOLUTION: NORMALIZATION
+──────────────────────────
+Decompose the bad table into well-structured tables:
+  student(roll_no PK, name, address)
+  course(course_id PK, course_name, instructor)
+  enrollment(roll_no FK, course_id FK, grade)  PK = (roll_no, course_id)
+
+Now: no redundancy, no anomalies, all information preserved.
+
+
+================================================================================
+4.3  FUNCTIONAL DEPENDENCIES AND ARMSTRONG'S AXIOMS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **Functional Dependency (FD)** is a constraint between two sets of
+attributes in a relation. We say attribute set $B$ is **functionally
+dependent** on attribute set $A$ (written $A \rightarrow B$) if and only
+if for every valid instance of the relation, whenever two tuples agree
+on the values of $A$, they must also agree on the values of $B$.
+
+Formally: $A \rightarrow B$ means:
+  $\forall t_1, t_2 \in r: t_1[A] = t_2[A] \Rightarrow t_1[B] = t_2[B]$
+
+In other words: $A$ **determines** $B$, or knowing $A$ uniquely determines $B$.
+
+■ EXAMPLES
+───────────
+  • roll_no → name   (roll_no determines name)
+  • emp_id → {name, salary, dept}   (emp_id determines all employee info)
+  • {course_id, roll_no} → grade   (course + student determines grade)
+
+■ TRIVIAL vs NON-TRIVIAL FD
+─────────────────────────────
+  • **Trivial FD**: $A \rightarrow B$ where $B \subseteq A$
+    Example: {roll_no, name} → roll_no   (always true, useless)
+
+  • **Non-Trivial FD**: $A \rightarrow B$ where $B \not\subseteq A$
+    Example: roll_no → name   (meaningful constraint)
+
+  • **Completely Non-Trivial**: $A \rightarrow B$ where $A \cap B = \emptyset$
+    Example: roll_no → name (no overlap between LHS and RHS)
+
+■ ARMSTRONG'S AXIOMS
+─────────────────────
+Armstrong's Axioms are a set of sound and complete inference rules for
+deriving ALL functional dependencies implied by a given set of FDs $F$.
+
+**Primary Axioms (Sound and Complete):**
+
+  1. **Reflexivity (Trivial FD Rule)**:
+     If $B \subseteq A$, then $A \rightarrow B$.
+     Example: {roll_no, name} → roll_no
+
+  2. **Augmentation**:
+     If $A \rightarrow B$, then $AC \rightarrow BC$ (for any attribute set $C$).
+     Example: If roll_no → name, then {roll_no, dept} → {name, dept}
+
+  3. **Transitivity**:
+     If $A \rightarrow B$ and $B \rightarrow C$, then $A \rightarrow C$.
+     Example: If roll_no → dept_id and dept_id → dept_name,
+              then roll_no → dept_name
+
+**Derived Rules (from the above three):**
+
+  4. **Union**:
+     If $A \rightarrow B$ and $A \rightarrow C$, then $A \rightarrow BC$.
+     Example: If emp_id → name and emp_id → salary,
+              then emp_id → {name, salary}
+
+  5. **Decomposition**:
+     If $A \rightarrow BC$, then $A \rightarrow B$ and $A \rightarrow C$.
+     Example: If emp_id → {name, salary},
+              then emp_id → name and emp_id → salary
+
+  6. **Pseudo-Transitivity**:
+     If $A \rightarrow B$ and $CB \rightarrow D$, then $CA \rightarrow D$.
+
+■ WHY ARMSTRONG'S AXIOMS?
+──────────────────────────
+  • **Soundness**: Every FD derived using these axioms is actually valid.
+  • **Completeness**: Every valid FD can be derived using these axioms.
+  • Used to compute the CLOSURE of FD sets and attribute sets.
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is a functional dependency?
+  A: FD A → B means whenever two tuples have the same value for A,
+     they must have the same value for B. A determines B.
+
+  Q: State Armstrong's Axioms.
+  A: Reflexivity (if B ⊆ A, then A → B), Augmentation (if A → B,
+     then AC → BC), Transitivity (if A → B and B → C, then A → C).
+
+
+================================================================================
+4.4  CLOSURE OF FD SET AND CLOSURE OF ATTRIBUTE SETS
+================================================================================
+
+■ CLOSURE OF A SET OF FUNCTIONAL DEPENDENCIES (F⁺)
+────────────────────────────────────────────────────
+
+**Definition**: The **closure of F**, denoted $F^+$, is the set of ALL
+functional dependencies that can be logically implied (derived) from $F$
+using Armstrong's Axioms.
+
+$F^+ = \{A \rightarrow B \mid F \text{ logically implies } A \rightarrow B\}$
+
+Computing $F^+$ directly is expensive (exponential). Instead, we compute
+the **closure of attribute sets**.
+
+■ CLOSURE OF ATTRIBUTE SET (A⁺)
+─────────────────────────────────
+
+**Definition**: The **closure of an attribute set** $A$ under FD set $F$,
+denoted $A^+$, is the set of ALL attributes that are functionally
+determined by $A$.
+
+**Algorithm to compute $A^+$:**
+  1. Initialize $A^+ = A$
+  2. Repeat:
+       For each FD $X \rightarrow Y$ in $F$:
+         If $X \subseteq A^+$, then $A^+ = A^+ \cup Y$
+  3. Until $A^+$ doesn't change (fixed point).
+
+■ COMPREHENSIVE EXAMPLE
+─────────────────────────
+Given: $R(A, B, C, D, E)$ with
+       $F = \{A \rightarrow BC, B \rightarrow D, CD \rightarrow E, A \rightarrow D\}$
+
+Find $A^+$ (closure of A):
+
+  Step 1: $A^+ = \{A\}$
+
+  Step 2: Apply $A \rightarrow BC$:
+          $A \subseteq A^+$? Yes → $A^+ = \{A, B, C\}$
+
+  Step 3: Apply $B \rightarrow D$:
+          $B \subseteq A^+$? Yes → $A^+ = \{A, B, C, D\}$
+
+  Step 4: Apply $CD \rightarrow E$:
+          $\{C, D\} \subseteq A^+$? Yes → $A^+ = \{A, B, C, D, E\}$
+
+  Step 5: No more changes. Done.
+
+  Result: $A^+ = \{A, B, C, D, E\} = R$
+
+  Since $A^+ = R$, attribute A determines ALL attributes → A is a
+  **candidate key** (and also a super key).
+
+■ ANOTHER EXAMPLE
+──────────────────
+Given: $R(A, B, C, D, E, F)$ with
+       $F = \{AB \rightarrow C, C \rightarrow D, D \rightarrow E, E \rightarrow F, B \rightarrow D\}$
+
+Find $(AB)^+$:
+  Step 1: $(AB)^+ = \{A, B\}$
+  Step 2: $AB \rightarrow C$: AB ⊆ {A,B}? Yes → $(AB)^+ = \{A, B, C\}$
+  Step 3: $C \rightarrow D$: C ⊆ {A,B,C}? Yes → $(AB)^+ = \{A, B, C, D\}$
+  Step 4: $D \rightarrow E$: D ⊆ {A,B,C,D}? Yes → $(AB)^+ = \{A, B, C, D, E\}$
+  Step 5: $E \rightarrow F$: E ⊆ {A,B,C,D,E}? Yes → $(AB)^+ = \{A, B, C, D, E, F\}$
+  Step 6: $B \rightarrow D$: already have D. No change.
+
+  Result: $(AB)^+ = \{A, B, C, D, E, F\} = R$
+  → AB is a candidate key.
+
+■ USING CLOSURE TO FIND CANDIDATE KEYS
+────────────────────────────────────────
+  1. An attribute set $K$ is a **super key** if $K^+ = R$ (all attributes).
+  2. $K$ is a **candidate key** if it is a MINIMAL super key (removing
+     any attribute from K makes it no longer a super key).
+
+Algorithm to find candidate keys:
+  1. Identify attributes that appear ONLY on the LEFT side of FDs →
+     they MUST be in every candidate key.
+  2. Identify attributes that appear ONLY on the RIGHT side → they
+     can NEVER be in any candidate key.
+  3. Start with must-have attributes, compute closure.
+  4. If closure = R, that's a candidate key.
+  5. If not, try adding other attributes one by one.
+
+■ FINDING CANDIDATE KEYS EXAMPLE
+──────────────────────────────────
+Given: $R(A, B, C, D, E, F)$
+       $F = \{A \rightarrow B, A \rightarrow C, BC \rightarrow D, D \rightarrow E, CF \rightarrow A\}$
+
+  Analysis:
+  - F appears ONLY on the LEFT side of CF → A → F must be in every key
+  - E appears ONLY on the RIGHT side → never in a key
+
+  Try $\{A, F\}$:
+  $(AF)^+ = \{A, F\}$
+  → $A \rightarrow B$: $\{A,F,B\}$
+  → $A \rightarrow C$: $\{A,F,B,C\}$
+  → $BC \rightarrow D$: $\{A,F,B,C,D\}$
+  → $D \rightarrow E$: $\{A,F,B,C,D,E\} = R$ ✓
+
+  Is AF minimal?
+  → $A^+ = \{A,B,C,D,E\} \neq R$ (missing F)
+  → $F^+ = \{F\} \neq R$
+  → So AF is minimal → AF is a candidate key.
+
+  Try $\{C, F\}$:
+  $(CF)^+ = \{C, F\}$
+  → $CF \rightarrow A$: $\{C,F,A\}$
+  → $A \rightarrow B$: $\{C,F,A,B\}$
+  → $BC \rightarrow D$: $\{C,F,A,B,D\}$
+  → $D \rightarrow E$: $\{C,F,A,B,D,E\} = R$ ✓
+
+  Is CF minimal?
+  → $C^+ = \{C\} \neq R$, $F^+ = \{F\} \neq R$
+  → CF is minimal → CF is also a candidate key.
+
+  **Candidate keys: {AF, CF}**
+
+
+================================================================================
+4.5  DATABASE NORMALIZATION AND NORMAL FORMS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Database Normalization** is a systematic process of organizing a
+relational database to minimize data redundancy and eliminate
+undesirable characteristics like insertion, update, and deletion
+anomalies. It involves decomposing relations into smaller, well-
+structured relations according to **normal forms**.
+
+■ NORMALIZATION HIERARCHY
+
+```mermaid
+graph TD
+    A[Unnormalized Form UNF] --> B[1NF: Atomic Values]
+    B --> C[2NF: No Partial Dependencies]
+    C --> D[3NF: No Transitive Dependencies]
+    D --> E[BCNF: Every Determinant is a Candidate Key]
+    E --> F[4NF: No Multi-valued Dependencies]
+    F --> G[5NF: No Join Dependencies]
+```
+
+────────────────────────────────────────────────
+4.5.1  FIRST NORMAL FORM (1NF)
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A relation is in **1NF** if and only if:
+  1. All attributes contain only **atomic** (indivisible) values.
+  2. There are no **repeating groups** or multi-valued attributes.
+  3. Each column contains values of a single type.
+  4. Each row is unique (has a primary key).
+
+■ EXAMPLE: VIOLATION AND FIX
+
+  UNNORMALIZED (violates 1NF — multi-valued attribute):
+  ┌─────────┬────────┬───────────────────────┐
+  │ emp_id  │ name   │ phone_numbers          │
+  ├─────────┼────────┼───────────────────────┤
+  │ 1       │ Hari   │ 9841000001, 9851000002│
+  │ 2       │ Sita   │ 9861000003            │
+  └─────────┴────────┴───────────────────────┘
+
+  CONVERTED TO 1NF (separate table for multi-valued attribute):
+
+  employee:                       emp_phone:
+  ┌─────────┬────────┐            ┌─────────┬──────────────┐
+  │ emp_id  │ name   │            │ emp_id  │ phone        │
+  ├─────────┼────────┤            ├─────────┼──────────────┤
+  │ 1       │ Hari   │            │ 1       │ 9841000001   │
+  │ 2       │ Sita   │            │ 1       │ 9851000002   │
+  └─────────┴────────┘            │ 2       │ 9861000003   │
+                                  └─────────┴──────────────┘
+
+────────────────────────────────────────────────
+4.5.2  SECOND NORMAL FORM (2NF)
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A relation is in **2NF** if and only if:
+  1. It is in 1NF, AND
+  2. Every **non-prime attribute** is **fully functionally dependent**
+     on the ENTIRE primary key (no **partial dependencies**).
+
+A **partial dependency** exists when a non-prime attribute depends on
+only a PART (proper subset) of the primary key.
+
+NOTE: 2NF issues arise ONLY with COMPOSITE primary keys. If the PK is
+a single attribute, the relation is automatically in 2NF (if in 1NF).
+
+**Non-prime attribute**: An attribute that is NOT part of any candidate key.
+**Prime attribute**: An attribute that IS part of some candidate key.
+
+■ EXAMPLE: VIOLATION AND FIX
+
+  student_course(roll_no, course_id, student_name, course_name, grade)
+  PK = (roll_no, course_id)
+
+  FDs:
+    {roll_no, course_id} → grade         (full dependency ✓)
+    roll_no → student_name               (PARTIAL dependency ✗)
+    course_id → course_name              (PARTIAL dependency ✗)
+
+  student_name depends on roll_no ALONE (not the full PK).
+  course_name depends on course_id ALONE (not the full PK).
+
+  DECOMPOSE INTO 2NF:
+    student(roll_no PK, student_name)
+    course(course_id PK, course_name)
+    enrollment(roll_no FK, course_id FK, grade)  PK = (roll_no, course_id)
+
+────────────────────────────────────────────────
+4.5.3  THIRD NORMAL FORM (3NF)
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A relation is in **3NF** if and only if:
+  1. It is in 2NF, AND
+  2. No **non-prime attribute** is **transitively dependent** on the
+     primary key.
+
+Alternatively (more precise definition):
+For every non-trivial FD $X \rightarrow A$ in $F^+$:
+  EITHER $X$ is a superkey of $R$,
+  OR $A$ is a prime attribute (part of some candidate key).
+
+A **transitive dependency** exists when:
+  $A \rightarrow B$ and $B \rightarrow C$ (where B is not a superkey),
+  resulting in $A \rightarrow C$ transitively.
+
+■ EXAMPLE: VIOLATION AND FIX
+
+  employee(emp_id PK, name, dept_id, dept_name, dept_head)
+
+  FDs:
+    emp_id → {name, dept_id, dept_name, dept_head}
+    dept_id → {dept_name, dept_head}
+
+  Transitive dependency:
+    emp_id → dept_id → dept_name  (dept_name transitively depends on emp_id)
+    emp_id → dept_id → dept_head  (dept_head transitively depends on emp_id)
+
+  DECOMPOSE INTO 3NF:
+    employee(emp_id PK, name, dept_id FK)
+    department(dept_id PK, dept_name, dept_head)
+
+■ COMPREHENSIVE NORMALIZATION EXAMPLE
+───────────────────────────────────────
+Given table (from questions):
+  ┌────────────┬──────────────┬───────────┬─────────────────┬───────────────┬────────────┐
+  │ Student_ID │ Student_Name │ Course_ID │ Course_Name     │ Instructor    │ Dept       │
+  ├────────────┼──────────────┼───────────┼─────────────────┼───────────────┼────────────┤
+  │ S101       │ Aarav        │ C01       │ DBMS            │ Dr. Sharma    │ CS         │
+  │ S101       │ Aarav        │ C02       │ Networks        │ Dr. Poudel    │ CS         │
+  │ S102       │ Bipana       │ C01       │ DBMS            │ Dr. Sharma    │ CS         │
+  │ S103       │ Chetan       │ C03       │ Data Structures │ Dr. Thapa     │ IT         │
+  │ S103       │ Chetan       │ C01       │ DBMS            │ Dr. Sharma    │ CS         │
+  └────────────┴──────────────┴───────────┴─────────────────┴───────────────┴────────────┘
+
+  PK = (Student_ID, Course_ID)
+
+  Step 1 — Check 1NF: All values atomic ✓. Has PK ✓. → IN 1NF.
+
+  Step 2 — Identify FDs:
+    Student_ID → Student_Name               (partial dep on PK)
+    Course_ID → Course_Name, Instructor, Dept (partial dep on PK)
+
+  Step 3 — Convert to 2NF:
+    student(Student_ID PK, Student_Name)
+    course(Course_ID PK, Course_Name, Instructor, Dept)
+    enrollment(Student_ID FK, Course_ID FK)  PK = (Student_ID, Course_ID)
+
+  Step 4 — Check 3NF on course table:
+    Course_ID → Instructor, Course_ID → Dept
+    If Instructor → Dept (transitive), then NOT in 3NF.
+
+    Assuming Instructor → Dept:
+    course(Course_ID PK, Course_Name, Instructor FK)
+    instructor_dept(Instructor PK, Dept)
+
+  Final 3NF Schema:
+    student(Student_ID PK, Student_Name)
+    instructor_dept(Instructor PK, Dept)
+    course(Course_ID PK, Course_Name, Instructor FK)
+    enrollment(Student_ID FK, Course_ID FK)  PK = (Student_ID, Course_ID)
+
+────────────────────────────────────────────────
+4.5.4  BCNF (BOYCE-CODD NORMAL FORM)
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A relation is in **BCNF** if and only if:
+For every non-trivial FD $X \rightarrow A$ in $F^+$:
+  $X$ is a **superkey** of $R$.
+
+In other words: the LEFT side of EVERY non-trivial FD must be a superkey.
+
+■ BCNF vs 3NF
+───────────────
+BCNF is STRICTER than 3NF. The difference:
+  - 3NF allows $X \rightarrow A$ if $A$ is a prime attribute (even if X
+    is not a superkey).
+  - BCNF does NOT allow this exception.
+
+A relation in BCNF is automatically in 3NF.
+A relation in 3NF is NOT necessarily in BCNF.
+
+■ EXAMPLE: 3NF but NOT BCNF
+
+  R(Student, Course, Instructor)
+  FDs: {Student, Course} → Instructor
+       Instructor → Course
+
+  Candidate key: {Student, Course}
+
+  Check 3NF:
+    Instructor → Course: Instructor is NOT a superkey.
+    But Course IS a prime attribute (part of candidate key).
+    → Satisfies 3NF condition.
+
+  Check BCNF:
+    Instructor → Course: Instructor is NOT a superkey.
+    → VIOLATES BCNF!
+
+  DECOMPOSE INTO BCNF:
+    R₁(Instructor PK, Course)
+    R₂(Student, Instructor FK)  PK = (Student, Instructor)
+
+■ BCNF DECOMPOSITION ALGORITHM
+────────────────────────────────
+  1. If R is already in BCNF, done.
+  2. Find a non-trivial FD $X \rightarrow Y$ that violates BCNF
+     (i.e., X is not a superkey).
+  3. Decompose R into:
+       R₁ = X ∪ Y (the violating FD becomes the table)
+       R₂ = R − (Y − X) (everything else, keeping X)
+  4. Repeat for R₁ and R₂ until all are in BCNF.
+
+■ COMPREHENSIVE BCNF EXAMPLE
+──────────────────────────────
+Given from questions:
+  R(Emp_ID, Emp_Name, Project_ID, Project_Name, Hours, Dept_Name, Dept_Head)
+  PK = (Emp_ID, Project_ID)
+
+  FDs:
+    Emp_ID → Emp_Name, Dept_Name, Dept_Head    (partial dependency)
+    Project_ID → Project_Name                   (partial dependency)
+    Dept_Name → Dept_Head                       (transitive dependency)
+    {Emp_ID, Project_ID} → Hours               (full dependency)
+
+  Step 1 → 2NF: Remove partial dependencies
+    employee(Emp_ID PK, Emp_Name, Dept_Name, Dept_Head)
+    project(Project_ID PK, Project_Name)
+    assignment(Emp_ID FK, Project_ID FK, Hours) PK=(Emp_ID, Project_ID)
+
+  Step 2 → 3NF: Remove transitive dependencies in employee
+    Emp_ID → Dept_Name → Dept_Head  (transitive!)
+    employee(Emp_ID PK, Emp_Name, Dept_Name FK)
+    department(Dept_Name PK, Dept_Head)
+
+  Step 3 → Check BCNF:
+    All FDs have superkeys on LHS ✓ → Already in BCNF.
+
+  Final BCNF Schema:
+    employee(Emp_ID PK, Emp_Name, Dept_Name FK)
+    department(Dept_Name PK, Dept_Head)
+    project(Project_ID PK, Project_Name)
+    assignment(Emp_ID FK, Project_ID FK, Hours) PK=(Emp_ID, Project_ID)
+
+■ TRADE-OFFS: 3NF vs BCNF
+───────────────────────────
+  ┌─────────────────────┬──────────────────────┬──────────────────────┐
+  │ Property            │ 3NF                  │ BCNF                 │
+  ├─────────────────────┼──────────────────────┼──────────────────────┤
+  │ Strictness          │ Less strict          │ Stricter             │
+  │ Redundancy          │ May have some        │ Minimal              │
+  │ Dependency Preserv. │ Always achievable    │ Not always achievable│
+  │ Lossless decomp.    │ Always achievable    │ Always achievable    │
+  │ Practical use       │ More common          │ Preferred when poss. │
+  └─────────────────────┴──────────────────────┴──────────────────────┘
+
+■ NORMAL FORMS SUMMARY TABLE
+──────────────────────────────
+  ┌──────┬──────────────────────────────────────────────────────────────┐
+  │ NF   │ Condition                                                    │
+  ├──────┼──────────────────────────────────────────────────────────────┤
+  │ 1NF  │ All attributes atomic; no repeating groups; has PK           │
+  │ 2NF  │ 1NF + No partial dependencies (non-prime → part of PK)      │
+  │ 3NF  │ 2NF + No transitive dependencies (non-prime → non-prime)    │
+  │      │ OR for every X→A: X is superkey OR A is prime               │
+  │ BCNF │ For every non-trivial X→A: X must be a superkey             │
+  │ 4NF  │ BCNF + No non-trivial multi-valued dependencies             │
+  │ 5NF  │ 4NF + No join dependencies that aren't implied by keys      │
+  └──────┴──────────────────────────────────────────────────────────────┘
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is normalization?
+  A: Normalization is the process of organizing a database to reduce
+     redundancy and eliminate anomalies by decomposing relations into
+     normal forms (1NF, 2NF, 3NF, BCNF).
+
+  Q: What is a partial dependency?
+  A: When a non-prime attribute depends on only a part of a composite
+     primary key (violates 2NF).
+
+  Q: What is a transitive dependency?
+  A: When A → B and B → C, so A → C transitively. If B is not a
+     superkey, this violates 3NF.
+
+  Q: What is the difference between 3NF and BCNF?
+  A: 3NF allows a non-trivial FD X → A if A is a prime attribute.
+     BCNF requires X to be a superkey for EVERY non-trivial FD,
+     with no exceptions.
+
+
+================================================================================
+4.6  DENORMALIZATION FOR PERFORMANCE
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Denormalization** is the deliberate process of introducing controlled
+redundancy into a normalized database design to IMPROVE READ PERFORMANCE.
+It involves combining tables or adding redundant data to reduce the
+number of joins required for frequently executed queries.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+WHY denormalize?
+  Normalization reduces redundancy but increases the number of TABLES.
+  Complex queries that need data from many tables require many JOINS.
+  Joins are computationally expensive, especially on large datasets.
+
+  In read-heavy applications (e.g., analytics dashboards, reporting
+  systems), the cost of repeated joins far outweighs the cost of
+  storing some redundant data.
+
+HOW to denormalize?
+  1. **Adding redundant columns**: Store a frequently needed column
+     from a related table directly in the current table.
+  2. **Pre-computed aggregates**: Store calculated values (totals, counts)
+     instead of computing them each time.
+  3. **Merging tables**: Combine tables that are frequently joined.
+  4. **Materialized views**: Store query results physically.
+
+■ DENORMALIZATION TECHNIQUES
+─────────────────────────────
+  ┌──────────────────────────┬─────────────────────────────────────────┐
+  │ Technique                │ Example                                 │
+  ├──────────────────────────┼─────────────────────────────────────────┤
+  │ Add redundant column     │ Store dept_name in employee table       │
+  │                          │   (avoids joining with department)      │
+  │ Pre-computed aggregate   │ Store total_orders in customer table    │
+  │ Merge 1:1 tables         │ Combine employee and employee_details   │
+  │ Materialized view        │ Cache daily sales summary               │
+  │ Denormalized copy        │ Keep a reporting copy with flat data    │
+  └──────────────────────────┴─────────────────────────────────────────┘
+
+■ TRADE-OFFS
+─────────────
+  ┌──────────────────────┬──────────────────────┬──────────────────────┐
+  │ Aspect               │ Normalization        │ Denormalization      │
+  ├──────────────────────┼──────────────────────┼──────────────────────┤
+  │ Redundancy           │ Minimal              │ Controlled redundancy│
+  │ Write performance    │ Faster (fewer tables)│ Slower (update in    │
+  │                      │                      │   multiple places)   │
+  │ Read performance     │ Slower (many joins)  │ Faster (fewer joins) │
+  │ Storage              │ Less                 │ More                 │
+  │ Data integrity       │ Higher               │ Risk of inconsistency│
+  │ Complexity (writes)  │ Simpler              │ More complex         │
+  │ Best for             │ Write-heavy / OLTP   │ Read-heavy / OLAP    │
+  └──────────────────────┴──────────────────────┴──────────────────────┘
+
+  **OLTP (Online Transaction Processing)**: Banking, e-commerce →
+    prefer NORMALIZATION for data integrity and write speed.
+
+  **OLAP (Online Analytical Processing)**: Reporting, BI, analytics →
+    prefer DENORMALIZATION for read speed and query simplicity.
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**Instagram's Feed**:
+  - Normalized: user table + post table + follow table + like table
+    → Generating a user's feed requires multiple complex joins.
+  - Denormalized: Instagram pre-computes and caches feed data in
+    a denormalized format (including user names, post content, like
+    counts) to serve feeds in milliseconds.
+
+■ WHEN TO DENORMALIZE
+──────────────────────
+  ✓ Frequent complex joins are causing performance bottlenecks.
+  ✓ Read operations vastly outnumber writes.
+  ✓ Query response time is critical (real-time dashboards).
+  ✓ Reporting tables that are refreshed periodically.
+
+  ✗ Do NOT denormalize prematurely — start normalized, then denormalize
+    specific tables based on actual performance measurements.
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is denormalization?
+  A: Denormalization is the intentional introduction of redundancy into a
+     normalized database to improve read performance by reducing joins.
+
+  Q: When would you denormalize?
+  A: When read performance is critical, queries involve many joins,
+     and the application is read-heavy (OLAP/reporting). The trade-off
+     is increased storage and more complex write operations.
+
+
+================================================================================
+                     END OF CHAPTER 4 NOTES
+================================================================================

@@ -1,0 +1,802 @@
+================================================================================
+DATABASE SYSTEM CONCEPTS - FOURTH EDITION
+Silberschatz, Korth, and Sudarshan
+================================================================================
+COMPLETE TABLE OF CONTENTS
+================================================================================
+
+CHAPTER 1: Introduction
+  1.1 Database System Applications
+  1.2 Database Systems versus File Systems
+  1.3 View of Data
+    1.3.1 Data Abstraction
+    1.3.2 Instances and Schemas
+  1.4 Data Models
+    1.4.1 The Entity-Relationship Model
+    1.4.2 Relational Model
+    1.4.3 Other Data Models
+  1.5 Database Languages
+    1.5.1 Data-Definition Language
+    1.5.2 Data-Manipulation Language
+    1.5.3 Database Access from Application Programs
+  1.6 Database Users and Administrators
+    1.6.1 Database Users and User Interfaces
+    1.6.2 Database Administrator
+  1.7 Transaction Management
+  1.8 Database System Structure
+    1.8.1 Storage Manager
+    1.8.2 The Query Processor
+  1.9 Application Architectures
+  1.10 History of Database Systems
+  1.11 Summary
+
+================================================================================
+PART I: DATA MODELS
+================================================================================
+
+CHAPTER 2: Entity-Relationship Model
+  2.1 Basic Concepts
+    2.1.1 Entity Sets
+    2.1.2 Relationship Sets
+  2.2 Constraints
+    2.2.1 Mapping Cardinalities
+    2.2.2 Participation Constraints
+  2.3 Keys
+    2.3.1 Entity Sets
+    2.3.2 Relationship Sets
+  2.4 Design Issues
+    2.4.1 Use of Entity Sets versus Attributes
+    2.4.2 Use of Entity Sets versus Relationship Sets
+    2.4.3 Binary versus n-ary Relationship Sets
+    2.4.4 Placement of Relationship Attributes
+  2.5 Entity-Relationship Diagram
+  2.6 Weak Entity Sets
+  2.7 Extended E-R Features
+    2.7.1 Specialization
+    2.7.2 Generalization
+    2.7.3 Attribute Inheritance
+    2.7.4 Constraints on Generalizations
+    2.7.5 Aggregation
+    2.7.6 Alternative E-R Notations
+  2.8 Design of an E-R Database Schema
+    2.8.1 Design Phases
+    2.8.2 Database Design for Banking Enterprise
+      2.8.2.1 Data Requirements
+      2.8.2.2 Entity Sets Designation
+      2.8.2.3 Relationship Sets Designation
+      2.8.2.4 E-R Diagram
+  2.9 Reduction of an E-R Schema to Tables
+    2.9.1 Tabular Representation of Strong Entity Sets
+    2.9.2 Tabular Representation of Weak Entity Sets
+    2.9.3 Tabular Representation of Relationship Sets
+      2.9.3.1 Redundancy of Tables
+      2.9.3.2 Combination of Tables
+    2.9.4 Composite Attributes
+    2.9.5 Multivalued Attributes
+    2.9.6 Tabular Representation of Generalization
+    2.9.7 Tabular Representation of Aggregation
+  2.10 The Unified Modeling Language UML
+  2.11 Summary
+
+CHAPTER 3: Relational Model
+  3.1 Structure of Relational Databases
+    3.1.1 Basic Structure
+    3.1.2 Database Schema
+    3.1.3 Keys
+    3.1.4 Schema Diagram
+    3.1.5 Query Languages
+  3.2 The Relational Algebra
+    3.2.1 Fundamental Operations
+      3.2.1.1 The Select Operation
+      3.2.1.2 The Project Operation
+      3.2.1.3 Composition of Relational Operations
+      3.2.1.4 The Union Operation
+      3.2.1.5 The Set Difference Operation
+      3.2.1.6 The Cartesian-Product Operation
+      3.2.1.7 The Rename Operation
+    3.2.2 Formal Definition of the Relational Algebra
+    3.2.3 Additional Operations
+      3.2.3.1 The Set-Intersection Operation
+      3.2.3.2 The Natural-Join Operation
+      3.2.3.3 The Division Operation
+      3.2.3.4 The Assignment Operation
+  3.3 Extended Relational-Algebra Operations
+    3.3.1 Generalized Projection
+    3.3.2 Aggregate Functions
+    3.3.3 Outer Join
+    3.3.4 Null Values
+  3.4 Modification of the Database
+    3.4.1 Deletion
+    3.4.2 Insertion
+    3.4.3 Updating
+  3.5 Views
+    3.5.1 View Definition
+    3.5.2 Updates through Views and Null Values
+    3.5.3 Views Defined by Using Other Views
+  3.6 The Tuple Relational Calculus
+    3.6.1 Example Queries
+    3.6.2 Formal Definition
+    3.6.3 Safety of Expressions
+    3.6.4 Expressive Power of Languages
+  3.7 The Domain Relational Calculus
+    3.7.1 Formal Definition
+    3.7.2 Example Queries
+    3.7.3 Safety of Expressions
+    3.7.4 Expressive Power of Languages
+  3.8 Summary
+
+================================================================================
+PART II: RELATIONAL DATABASES
+================================================================================
+
+CHAPTER 4: SQL
+  4.1 Background
+  4.2 Basic Structure
+    4.2.1 The select Clause
+    4.2.2 The where Clause
+    4.2.3 The from Clause
+    4.2.4 The Rename Operation
+    4.2.5 Tuple Variables
+    4.2.6 String Operations
+    4.2.7 Ordering the Display of Tuples
+    4.2.8 Duplicates
+  4.3 Set Operations
+    4.3.1 The Union Operation
+    4.3.2 The Intersect Operation
+    4.3.3 The Except Operation
+  4.4 Aggregate Functions
+  4.5 Null Values
+  4.6 Nested Subqueries
+    4.6.1 Set Membership
+    4.6.2 Set Comparison
+    4.6.3 Test for Empty Relations
+    4.6.4 Test for the Absence of Duplicate Tuples
+  4.7 Views
+  4.8 Complex Queries
+    4.8.1 Derived Relations
+    4.8.2 The with Clause
+  4.9 Modification of the Database
+    4.9.1 Deletion
+    4.9.2 Insertion
+    4.9.3 Updates
+    4.9.4 Update of a View
+    4.9.5 Transactions
+  4.10 Joined Relations
+    4.10.1 Examples
+    4.10.2 Join Types and Conditions
+  4.11 Data-Definition Language
+    4.11.1 Domain Types in SQL
+    4.11.2 Schema Definition in SQL
+  4.12 Embedded SQL
+  4.13 Dynamic SQL
+    4.13.1 ODBC
+    4.13.2 JDBC
+  4.14 Other SQL Features
+    4.14.1 Schemas, Catalogs, and Environments
+    4.14.2 Procedural Extensions and Stored Procedures
+  4.15 Summary
+
+CHAPTER 5: Other Relational Languages
+  5.1 Query-by-Example
+    5.1.1 Queries on One Relation
+    5.1.2 Queries on Several Relations
+    5.1.3 The Condition Box
+    5.1.4 The Result Relation
+    5.1.5 Ordering the Display of Tuples
+    5.1.6 Aggregate Operations
+    5.1.7 Modification of the Database
+      5.1.7.1 Deletion
+      5.1.7.2 Insertion
+      5.1.7.3 Updates
+    5.1.8 QBE in Microsoft Access
+  5.2 Datalog
+    5.2.1 Basic Structure
+    5.2.2 Syntax of Datalog Rules
+    5.2.3 Semantics of Nonrecursive Datalog
+      5.2.3.1 Semantics of a Rule
+      5.2.3.2 Semantics of a Program
+    5.2.4 Safety
+    5.2.5 Relational Operations in Datalog
+    5.2.6 Recursion in Datalog
+    5.2.7 The Power of Recursion
+    5.2.8 Recursion in Other Languages
+  5.3 User Interfaces and Tools
+    5.3.1 Forms and Graphical User Interfaces
+    5.3.2 Report Generators
+  5.4 Summary
+
+CHAPTER 6: Integrity and Security
+  6.1 Domain Constraints
+  6.2 Referential Integrity
+    6.2.1 Basic Concepts
+    6.2.2 Referential Integrity and the E-R Model
+    6.2.3 Database Modification
+    6.2.4 Referential Integrity in SQL
+  6.3 Assertions
+  6.4 Triggers
+    6.4.1 Need for Triggers
+    6.4.2 Triggers in SQL
+  6.5 Security and Authorization
+    6.5.1 Security Violations
+    6.5.2 Authorization
+    6.5.3 Authorization and Views
+    6.5.4 Granting of Privileges
+    6.5.5 Notion of Roles
+    6.5.6 Audit Trails
+  6.6 Authorization in SQL
+    6.6.1 Privileges in SQL
+    6.6.2 Roles
+    6.6.3 The Privilege to Grant Privileges
+    6.6.4 Other Features
+    6.6.5 Limitations of SQL Authorization
+  6.7 Encryption and Authentication
+    6.7.1 Encryption Techniques
+    6.7.2 Authentication
+  6.8 Summary
+
+CHAPTER 7: Relational-Database Design
+  7.1 First Normal Form
+  7.2 Pitfalls in Relational-Database Design
+  7.3 Functional Dependencies
+    7.3.1 Basic Concepts
+    7.3.2 Closure of a Set of Functional Dependencies
+    7.3.3 Closure of Attribute Sets
+    7.3.4 Canonical Cover
+  7.4 Decomposition
+  7.5 Desirable Properties of Decomposition
+    7.5.1 Lossless-Join Decomposition
+    7.5.2 Dependency Preservation
+    7.5.3 Repetition of Information
+  7.6 Boyce–Codd Normal Form
+    7.6.1 Definition
+    7.6.2 Decomposition Algorithm
+    7.6.3 Dependency Preservation
+  7.7 Third Normal Form
+    7.7.1 Definition
+    7.7.2 Decomposition Algorithm
+    7.7.3 Comparison of BCNF and 3NF
+  7.8 Fourth Normal Form
+    7.8.1 Multivalued Dependencies
+    7.8.2 Definition of Fourth Normal Form
+    7.8.3 Decomposition Algorithm
+  7.9 More Normal Forms
+  7.10 Overall Database Design Process
+    7.10.1 E-R Model and Normalization
+    7.10.2 The Universal Relation Approach
+    7.10.3 Denormalization for Performance
+    7.10.4 Other Design Issues
+  7.11 Summary
+
+================================================================================
+PART III: OBJECT-BASED DATABASES AND XML
+================================================================================
+
+CHAPTER 8: Object-Oriented Databases
+  8.1 Need for Complex Data Types
+  8.2 The Object-Oriented Data Model
+    8.2.1 Objects and Object Identifiers
+    8.2.2 Object Structures
+    8.2.3 Classes
+    8.2.4 Inheritance
+    8.2.5 Multiple Inheritance
+  8.3 Object-Oriented Languages
+  8.4 Persistent Programming Languages
+    8.4.1 Persistence of Objects
+    8.4.2 Object Identity and Pointers
+    8.4.3 Storage and Access of Persistent Objects
+    8.4.4 Persistent C++ Systems
+    8.4.5 Persistent Java Systems
+  8.5 Persistent C++ Systems
+    8.5.1 ODMG C++ Object Definition Language
+    8.5.2 ODMG C++ Object Manipulation Language
+  8.6 Persistent Java Systems
+  8.7 Summary
+
+CHAPTER 9: Object-Relational Databases
+  9.1 Nested Relations
+  9.2 Complex Types
+    9.2.1 Collection and Large Object Types
+    9.2.2 Structured Types
+    9.2.3 Creation of Values of Complex Types
+  9.3 Inheritance
+    9.3.1 Type Inheritance
+    9.3.2 Table Inheritance
+    9.3.3 Overlapping Subtables
+  9.4 Reference Types
+  9.5 Querying with Complex Types
+    9.5.1 Path Expressions
+    9.5.2 Collection-Valued Attributes
+    9.5.3 Nesting and Unnesting
+  9.6 Functions and Procedures
+    9.6.1 SQL Functions and Procedures
+    9.6.2 External Language Routines
+    9.6.3 Procedural Constructs
+  9.7 Object-Oriented versus Object-Relational
+  9.8 Summary
+
+CHAPTER 10: XML
+  10.1 Background
+  10.2 Structure of XML Data
+  10.3 XML Document Schema
+    10.3.1 Document Type Definition
+    10.3.2 XML Schema
+  10.4 Querying and Transformation
+    10.4.1 XPath
+    10.4.2 XSLT
+    10.4.3 XQuery
+  10.5 The Application Program Interface
+  10.6 Storage of XML Data
+    10.6.1 Relational Databases
+    10.6.2 Nonrelational Data Stores
+  10.7 XML Applications
+    10.7.1 Exchange of Data
+      10.7.1.1 Data Mediation
+  10.8 Summary
+
+================================================================================
+PART IV: DATA STORAGE AND QUERYING
+================================================================================
+
+CHAPTER 11: Storage and File Structure
+  11.1 Overview of Physical Storage Media
+  11.2 Magnetic Disks
+    11.2.1 Physical Characteristics of Disks
+    11.2.2 Performance Measures of Disks
+    11.2.3 Optimization of Disk-Block Access
+  11.3 RAID
+    11.3.1 Improvement of Reliability via Redundancy
+    11.3.2 Improvement in Performance via Parallelism
+    11.3.3 RAID Levels
+    11.3.4 Choice of RAID Level
+    11.3.5 Hardware Issues
+    11.3.6 Other RAID Applications
+  11.4 Tertiary Storage
+    11.4.1 Optical Disks
+    11.4.2 Magnetic Tapes
+  11.5 Storage Access
+    11.5.1 Buffer Manager
+    11.5.2 Buffer-Replacement Policies
+  11.6 File Organization
+    11.6.1 Fixed-Length Records
+    11.6.2 Variable-Length Records
+      11.6.2.1 Byte-String Representation
+      11.6.2.2 Fixed-Length Representation
+  11.7 Organization of Records in Files
+    11.7.1 Sequential File Organization
+    11.7.2 Clustering File Organization
+  11.8 Data-Dictionary Storage
+  11.9 Storage for Object-Oriented Databases
+    11.9.1 Mapping of Objects to Files
+    11.9.2 Implementation of Object Identifiers
+    11.9.3 Management of Persistent Pointers
+    11.9.4 Hardware Swizzling
+      11.9.4.1 Pointer Representation
+      11.9.4.2 Swizzling Pointers on a Page
+      11.9.4.3 Pointer Dereference
+      11.9.4.4 Optimizations
+    11.9.5 Disk Versus Memory Structure of Objects
+    11.9.6 Large Objects
+  11.10 Summary
+
+CHAPTER 12: Indexing and Hashing
+  12.1 Basic Concepts
+  12.2 Ordered Indices
+    12.2.1 Dense and Sparse Indices
+    12.2.2 Multilevel Indices
+    12.2.3 Index Update
+    12.2.4 Secondary Indices
+    12.2.5 Indices on Multiple Keys
+  12.3 B+-Tree Index Files
+    12.3.1 Structure of a B+-Tree
+    12.3.2 Queries on B+-Trees
+    12.3.3 Updates on B+-Trees
+      12.3.3.1 Insertion
+      12.3.3.2 Deletion
+    12.3.4 Nonunique Search Keys
+    12.3.5 Complexity of B+-Tree Updates
+  12.4 B+-Tree Extensions
+    12.4.1 B+-Tree File Organization
+    12.4.2 Secondary Indices and Record Relocation
+    12.4.3 Indexing Strings
+    12.4.4 Bulk Loading of B+-Tree Indices
+    12.4.5 B-Tree Index Files
+  12.5 Multiple-Key Access
+    12.5.1 Using Multiple Single-Key Indices
+    12.5.2 Indices on Multiple Keys
+    12.5.3 Covering Indices
+  12.6 Static Hashing
+    12.6.1 Hash Functions
+    12.6.2 Handling of Bucket Overflows
+    12.6.3 Hash Indices
+  12.7 Dynamic Hashing
+    12.7.1 Data Structure
+    12.7.2 Queries and Updates
+    12.7.3 Static Hashing versus Dynamic Hashing
+  12.8 Comparison of Ordered Indexing and Hashing
+  12.9 Index Definition in SQL
+  12.10 Bitmap Indices
+    12.10.1 Bitmap Index Structure
+    12.10.2 Efficient Implementation of Bitmap Operations
+    12.10.3 Bitmaps and B+-Trees
+  12.11 Summary
+
+CHAPTER 13: Query Processing
+  13.1 Overview
+  13.2 Measures of Query Cost
+  13.3 Selection Operation
+    13.3.1 Basic Algorithms
+    13.3.2 Selections Using Indices
+    13.3.3 Selections Involving Comparisons
+    13.3.4 Implementation of Complex Selections
+  13.4 Sorting
+  13.5 Join Operation
+    13.5.1 Nested-Loop Join
+    13.5.2 Block Nested-Loop Join
+    13.5.3 Indexed Nested-Loop Join
+    13.5.4 Merge Join
+    13.5.5 Hash Join
+      13.5.5.1 Recursive Partitioning
+      13.5.5.2 Handling of Overflows
+      13.5.5.3 Cost of Hash Join
+      13.5.5.4 Hybrid Hash–Join
+    13.5.6 Complex Joins
+  13.6 Other Operations
+    13.6.1 Duplicate Elimination
+    13.6.2 Projection
+    13.6.3 Set Operations
+    13.6.4 Outer Join
+    13.6.5 Aggregation
+  13.7 Evaluation of Expressions
+    13.7.1 Materialization
+    13.7.2 Pipelining
+      13.7.2.1 Implementation of Pipelining
+      13.7.2.2 Evaluation Algorithms for Pipelining
+  13.8 Summary
+
+CHAPTER 14: Query Optimization
+  14.1 Overview
+  14.2 Estimating Statistics of Expression Results
+    14.2.1 Catalog Information
+    14.2.2 Selection Size Estimation
+    14.2.3 Join Size Estimation
+    14.2.4 Size Estimation for Other Operations
+    14.2.5 Estimation of Number of Distinct Values
+  14.3 Transformation of Relational Expressions
+    14.3.1 Equivalence Rules
+    14.3.2 Examples of Transformations
+    14.3.3 Join Ordering
+    14.3.4 Enumeration of Equivalent Expressions
+  14.4 Choice of Evaluation Plans
+    14.4.1 Interaction of Evaluation Techniques
+    14.4.2 Cost-Based Optimization
+    14.4.3 Heuristic Optimization
+    14.4.4 Structure of Query Optimizers
+    14.4.5 Optimizing Nested Subqueries
+  14.5 Materialized Views
+    14.5.1 View Maintenance
+    14.5.2 Incremental View Maintenance
+      14.5.2.1 Join Operation
+      14.5.2.2 Selection and Projection Operations
+      14.5.2.3 Aggregation Operations
+      14.5.2.4 Other Operations
+      14.5.2.5 Handling Expressions
+    14.5.3 Query Optimization and Materialized Views
+  14.6 Summary
+
+================================================================================
+PART V: TRANSACTION MANAGEMENT
+================================================================================
+
+CHAPTER 15: Transactions
+  15.1 Transaction Concept
+  15.2 Transaction State
+  15.3 Implementation of Atomicity and Durability
+  15.4 Concurrent Executions
+  15.5 Serializability
+    15.5.1 Conflict Serializability
+    15.5.2 View Serializability
+  15.6 Recoverability
+    15.6.1 Recoverable Schedules
+    15.6.2 Cascadeless Schedules
+  15.7 Implementation of Isolation
+  15.8 Transaction Definition in SQL
+  15.9 Testing for Serializability
+  15.10 Summary
+
+CHAPTER 16: Concurrency Control
+  16.1 Lock-Based Protocols
+    16.1.1 Locks
+    16.1.2 Granting of Locks
+    16.1.3 The Two-Phase Locking Protocol
+    16.1.4 Implementation of Locking
+    16.1.5 Graph-Based Protocols
+  16.2 Timestamp-Based Protocols
+    16.2.1 Timestamps
+    16.2.2 The Timestamp-Ordering Protocol
+    16.2.3 Thomas' Write Rule
+  16.3 Validation-Based Protocols
+  16.4 Multiple Granularity
+  16.5 Multiversion Schemes
+    16.5.1 Multiversion Timestamp Ordering
+    16.5.2 Multiversion Two-Phase Locking
+  16.6 Deadlock Handling
+    16.6.1 Deadlock Prevention
+    16.6.2 Timeout-Based Schemes
+    16.6.3 Deadlock Detection and Recovery
+      16.6.3.1 Deadlock Detection
+      16.6.3.2 Recovery from Deadlock
+  16.7 Insert and Delete Operations
+    16.7.1 Deletion
+    16.7.2 Insertion
+    16.7.3 The Phantom Phenomenon
+  16.8 Weak Levels of Consistency
+    16.8.1 Degree-Two Consistency
+    16.8.2 Cursor Stability
+    16.8.3 Weak Levels of Consistency in SQL
+  16.9 Concurrency in Index Structures
+  16.10 Summary
+
+CHAPTER 17: Recovery System
+  17.1 Failure Classification
+  17.2 Storage Structure
+    17.2.1 Storage Types
+    17.2.2 Stable-Storage Implementation
+    17.2.3 Data Access
+  17.3 Recovery and Atomicity
+  17.4 Log-Based Recovery
+    17.4.1 Deferred Database Modification
+    17.4.2 Immediate Database Modification
+    17.4.3 Checkpoints
+  17.5 Shadow Paging
+  17.6 Recovery with Concurrent Transactions
+    17.6.1 Interaction with Concurrency Control
+    17.6.2 Transaction Rollback
+    17.6.3 Checkpoints
+    17.6.4 Restart Recovery
+  17.7 Buffer Management
+    17.7.1 Log-Record Buffering
+    17.7.2 Database Buffering
+    17.7.3 Operating System Role in Buffer Management
+  17.8 Failure with Loss of Nonvolatile Storage
+  17.9 Advanced Recovery Techniques
+    17.9.1 Logical Undo Logging
+    17.9.2 Transaction Rollback
+    17.9.3 Checkpoints
+    17.9.4 Restart Recovery
+    17.9.5 Fuzzy Checkpointing
+    17.9.6 ARIES
+      17.9.6.1 Data Structures
+      17.9.6.2 Recovery Algorithm
+      17.9.6.3 Other Features
+  17.10 Remote Backup Systems
+  17.11 Summary
+
+================================================================================
+PART VI: DATABASE SYSTEM ARCHITECTURE
+================================================================================
+
+CHAPTER 18: Database System Architecture
+  18.1 Centralized and Client–Server Architectures
+    18.1.1 Centralized Systems
+    18.1.2 Client–Server Systems
+  18.2 Server System Architectures
+    18.2.1 Transaction Server Process Structure
+    18.2.2 Data Servers
+  18.3 Parallel Systems
+    18.3.1 Speedup and Scaleup
+    18.3.2 Interconnection Networks
+    18.3.3 Parallel Database Architectures
+      18.3.3.1 Shared Memory
+      18.3.3.2 Shared Disk
+      18.3.3.3 Shared Nothing
+      18.3.3.4 Hierarchical
+  18.4 Distributed Systems
+    18.4.1 An Example of a Distributed Database
+    18.4.2 Implementation Issues
+  18.5 Network Types
+    18.5.1 Local-Area Networks
+    18.5.2 Wide-Area Networks
+  18.6 Summary
+
+CHAPTER 19: Distributed Databases
+  19.1 Homogeneous and Heterogeneous Databases
+  19.2 Distributed Data Storage
+    19.2.1 Data Replication
+    19.2.2 Data Fragmentation
+    19.2.3 Transparency
+  19.3 Distributed Transactions
+    19.3.1 System Structure
+    19.3.2 System Failure Modes
+  19.4 Commit Protocols
+    19.4.1 Two-Phase Commit
+      19.4.1.1 The Commit Protocol
+      19.4.1.2 Handling of Failures
+      19.4.1.3 Recovery and Concurrency Control
+    19.4.2 Three-Phase Commit
+    19.4.3 Alternative Models of Transaction Processing
+  19.5 Concurrency Control in Distributed Databases
+    19.5.1 Locking Protocols
+      19.5.1.1 Single Lock-Manager Approach
+      19.5.1.2 Distributed Lock Manager
+      19.5.1.3 Primary Copy
+      19.5.1.4 Majority Protocol
+      19.5.1.5 Biased Protocol
+      19.5.1.6 Quorum Consensus Protocol
+    19.5.2 Timestamping
+    19.5.3 Replication with Weak Degrees of Consistency
+    19.5.4 Deadlock Handling
+  19.6 Availability
+    19.6.1 Majority-Based Approach
+    19.6.2 Read One, Write All Available Approach
+    19.6.3 Site Reintegration
+    19.6.4 Comparison with Remote Backup
+    19.6.5 Coordinator Selection
+  19.7 Distributed Query Processing
+    19.7.1 Query Transformation
+    19.7.2 Simple Join Processing
+    19.7.3 Semijoin Strategy
+    19.7.4 Join Strategies that Exploit Parallelism
+  19.8 Heterogeneous Distributed Databases
+    19.8.1 Unified View of Data
+    19.8.2 Query Processing
+  19.9 Directory Systems
+    19.9.1 Directory Access Protocols
+    19.9.2 LDAP: Lightweight Directory Access Protocol
+      19.9.2.1 LDAP Data Model
+      19.9.2.2 Data Manipulation
+      19.9.2.3 Distributed Directory Trees
+  19.10 Summary
+
+CHAPTER 20: Parallel Databases
+  20.1 Introduction
+  20.2 I/O Parallelism
+    20.2.1 Partitioning Techniques
+    20.2.2 Comparison of Partitioning Techniques
+    20.2.3 Handling of Skew
+  20.3 Interquery Parallelism
+  20.4 Intraquery Parallelism
+  20.5 Intraoperation Parallelism
+    20.5.1 Parallel Sort
+      20.5.1.1 Range-Partitioning Sort
+      20.5.1.2 Parallel External Sort–Merge
+    20.5.2 Parallel Join
+      20.5.2.1 Partitioned Join
+      20.5.2.2 Fragment-and-Replicate Join
+      20.5.2.3 Partitioned Parallel Hash–Join
+      20.5.2.4 Parallel Nested-Loop Join
+    20.5.3 Other Relational Operations
+    20.5.4 Cost of Parallel Evaluation of Operations
+  20.6 Interoperation Parallelism
+    20.6.1 Pipelined Parallelism
+    20.6.2 Independent Parallelism
+    20.6.3 Query Optimization
+  20.7 Design of Parallel Systems
+  20.8 Summary
+
+================================================================================
+PART VII: OTHER TOPICS
+================================================================================
+
+CHAPTER 21: Application Development and Administration
+  21.1 Web Interfaces to Databases
+    21.1.1 Motivation
+    21.1.2 Web Fundamentals
+      21.1.2.1 Uniform Resource Locators
+      21.1.2.2 HyperText Markup Language
+      21.1.2.3 Client-Side Scripting and Applets
+    21.1.3 Web Servers and Sessions
+    21.1.4 Servlets
+    21.1.5 Server-Side Scripting
+    21.1.6 Improving Performance
+  21.2 Performance Tuning
+    21.2.1 Location of Bottlenecks
+    21.2.2 Tunable Parameters
+    21.2.3 Tuning of Hardware
+    21.2.4 Tuning of the Schema
+    21.2.5 Tuning of Indices
+    21.2.6 Tuning of Queries
+    21.2.7 Tuning of Transactions
+    21.2.8 Performance Simulation
+  21.3 Performance Benchmarks
+    21.3.1 Suites of Tasks
+    21.3.2 Database-Application Classes
+    21.3.3 The TPC Benchmarks
+    21.3.4 The OODB Benchmarks
+  21.4 Standardization
+    21.4.1 SQL Standards
+    21.4.2 Database Connectivity Standards
+    21.4.3 Object Database Standards
+    21.4.4 XML-Based Standards
+  21.5 E-Commerce
+    21.5.1 E-Catalogs
+    21.5.2 Marketplaces
+    21.5.3 Order Settlement
+  21.6 Legacy Systems
+  21.7 Summary
+
+CHAPTER 22: Advanced Querying and Information Retrieval
+  22.1 Decision-Support Systems
+  22.2 Data Analysis and OLAP
+    22.2.1 Online Analytical Processing
+    22.2.2 OLAP Implementation
+    22.2.3 Extended Aggregation
+    22.2.4 Ranking
+    22.2.5 Windowing
+  22.3 Data Mining
+    22.3.1 Applications of Data Mining
+    22.3.2 Classification
+      22.3.2.1 Decision Tree Classifiers
+      22.3.2.2 Other Types of Classifiers
+      22.3.2.3 Regression
+    22.3.3 Association Rules
+    22.3.4 Other Types of Associations
+    22.3.5 Clustering
+    22.3.6 Other Types of Mining
+  22.4 Data Warehousing
+    22.4.1 Components of a Data Warehouse
+    22.4.2 Warehouse Schemas
+  22.5 Information-Retrieval Systems
+    22.5.1 Keyword Search
+      22.5.1.1 Relevance Ranking Using Terms
+      22.5.1.2 Relevance Using Hyperlinks
+      22.5.1.3 Similarity-Based Retrieval
+      22.5.1.4 Synonyms and Homonyms
+    22.5.2 Indexing of Documents
+    22.5.3 Measuring Retrieval Effectiveness
+    22.5.4 Web Search Engines
+    22.5.5 Directories
+  22.6 Summary
+
+CHAPTER 23: Advanced Data Types and New Applications
+  23.1 Motivation
+  23.2 Time in Databases
+    23.2.1 Time Specification in SQL
+    23.2.2 Temporal Query Languages
+  23.3 Spatial and Geographic Data
+    23.3.1 Representation of Geometric Information
+    23.3.2 Geometric and Spatial Queries
+    23.3.3 Geographic Data
+      23.3.3.1 Representation of Geographic Data
+      23.3.3.2 Applications of Geographic Data
+    23.3.4 Spatial Queries
+    23.3.5 Indexing of Spatial Data
+      23.3.5.1 k-d Trees
+      23.3.5.2 Quadtrees
+      23.3.5.3 R-Trees
+  23.4 Multimedia Databases
+    23.4.1 Multimedia Data Formats
+    23.4.2 Continuous-Media Data
+    23.4.3 Similarity-Based Retrieval
+  23.5 Mobility and Personal Databases
+    23.5.1 A Model of Mobile Computing
+    23.5.2 Routing and Query Processing
+    23.5.3 Broadcast Data
+    23.5.4 Disconnectivity and Consistency
+  23.6 Summary
+
+CHAPTER 24: Advanced Transaction Processing
+  24.1 Transaction-Processing Monitors
+    24.1.1 TP-Monitor Architectures
+    24.1.2 Application Coordination Using TP monitors
+  24.2 Transactional Workflows
+    24.2.1 Workflow Specification
+    24.2.2 Failure-Atomicity Requirements of a Workflow
+    24.2.3 Execution of Workflows
+    24.2.4 Recovery of a Workflow
+    24.2.5 Workflow Management Systems
+  24.3 Main-Memory Databases
+  24.4 Real-Time Transaction Systems
+  24.5 Long-Duration Transactions
+    24.5.1 Nonserializable Executions
+    24.5.2 Concurrency Control
+    24.5.3 Nested and Multilevel Transactions
+    24.5.4 Compensating Transactions
+    24.5.5 Implementation Issues
+  24.6 Transaction Management in Multidatabases
+    24.6.1 Two-Level Serializability
+    24.6.2 Ensuring Global Serializability
+  24.7 Summary
+
+================================================================================
+TOTAL ENTRIES: 24 Chapters • 7 Parts • 663+ Sections and Subsections
+================================================================================

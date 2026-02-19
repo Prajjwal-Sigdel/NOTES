@@ -1,0 +1,232 @@
+DATABASE MANAGEMENT SYSTEMS (DBMS)
+COURSE SYLLABUS
+=====================================
+
+UNIT 1: INTRODUCTION [4 hrs]
+-----------------------------
+Specific Objectives:
+        • Familiarize with basic concepts of database systems, and its architecture.
+
+Contents:
+        1. Database Management System purpose and applications
+        2. Database Systems vs File Systems
+        3. View of Data
+                - Data Abstraction (Physical, logical and view level)
+                - Data Independence
+        4. Instances and Schemas
+        5. Database Languages
+                - DDL (Data Definition Language)
+                - DML (Data Manipulation Language)
+                - DCL (Data Control Language)
+        6. Database and Application Architecture
+                - Database System Architecture
+                - Database Application Architecture (two-tier and three-tier)
+
+
+UNIT 2: ER AND RELATIONAL MODEL [8 hrs]
+----------------------------------------
+Specific Objectives:
+        • Familiarize with ER Model and Relational Model and relational algebra.
+        • Design the relational database using ER model.
+
+Contents:
+        1. Introduction to ER Model
+        2. Entity sets, attributes and values
+                - Relationship sets
+                        * Participation
+                        * Entity's role
+                        * Descriptive attributes
+                        * Degree of relationship set
+                - Mapping Cardinalities
+                - Attributes
+                        * Simple
+                        * Composite
+                        * Single-valued
+                        * Multi-valued
+                        * Derived
+                - Entity-Relationship (ER) Diagram
+                - Specialization
+                - Generalization
+                - Aggregation
+        3. Key
+                - Super key
+                - Candidate key
+                - Primary key
+                - Strong and Weak Entity Sets
+        4. Introduction to Relational Model
+        5. Reducing ER diagrams to Relational Schema
+        6. Structure of Relational Databases
+                - Database Schema
+                - Keys
+                - Schema Diagrams
+        7. Relational Algebra
+
+
+UNIT 3: STRUCTURED QUERY LANGUAGE (SQL) [5 hrs]
+------------------------------------------------
+Specific Objectives:
+        • Implement and write DDL and DML queries in SQL.
+
+Contents:
+        1. Structured Query Language (SQL)
+                - SQL DDL
+                - SQL DML
+        2. Basic Structure of SQL Queries
+                - DDL queries
+                - Basic Operations
+                        * Rename
+                        * String
+                        * Attribute Specification in the select clause
+                        * ORDER BY
+                        * WHERE clause
+                - Set Operations
+                - Null values
+                - Aggregate Functions
+        3. Nested Queries
+        4. Join Expressions
+                - Natural Join
+                - Join Conditions
+                - Outer Joins
+        5. Modification of Database
+                - DELETE
+                - INSERT INTO
+                - UPDATE
+        6. Views
+        7. Stored Procedures
+
+
+UNIT 4: RELATIONAL DATABASE DESIGN [6 hrs]
+-------------------------------------------
+Specific Objectives:
+        • Apply the integrity constraints to implement database securities.
+        • Normalize the database to a defined normal form.
+
+Contents:
+        1. Integrity Constraints
+                - Domain Constraints
+                - Entity Integrity Constraints
+                - Referential Integrity Constraints
+                - Assertions
+                - Triggers
+        2. Features of Good Relational Designs
+        3. Functional Dependencies and Armstrong's Axioms
+        4. Closure of a Set of Functional Dependencies and Closure of Attribute Sets
+        5. Database Normalization and Normal Forms
+                - 1NF (First Normal Form)
+                - 2NF (Second Normal Form)
+                - 3NF (Third Normal Form)
+                - BCNF (Boyce-Codd Normal Form)
+        6. Denormalization for Performance
+
+
+UNIT 5: SECURITY [3 hrs]
+-------------------------
+Specific Objectives:
+        • Understand the need of database security.
+        • Understand the role of access control, authorization, views and encryption
+          mechanism to provide database security.
+
+Contents:
+        1. Security and Integrity Violations
+        2. Access Control
+        3. Authorization
+        4. Security and Views
+
+
+UNIT 6: QUERY PROCESSING AND OPTIMIZATION [5 hrs]
+--------------------------------------------------
+Specific Objectives:
+        • Understand the mechanism of query processing and need of query optimization.
+
+Contents:
+        1. Introduction to Query Processing
+        2. Equivalence of Expressions
+        3. Query Cost Estimation
+        4. Query Optimization
+        5. Query Evaluation and Execution Plan
+
+
+UNIT 7: STORAGE MANAGEMENT AND INDEXING [3 hrs]
+------------------------------------------------
+Specific Objectives:
+        • Familiarize with different file organization methods.
+
+Contents:
+        1. File Organization
+                - Fixed length records
+                - Variable length records
+        2. Organization of Records in File
+                - Heap
+                - Sequential
+                - Indexed sequential file organizations
+        3. B+ Tree Index Files
+        4. Hash Indices
+
+
+UNIT 8: TRANSACTIONS AND CONCURRENCY CONTROL [4 hrs]
+-----------------------------------------------------
+Specific Objectives:
+        • Understand the concepts of transactions, need of atomicity, durability and
+          isolation, serial schedule.
+        • Familiarize with the need of Concurrency control.
+
+Contents:
+        1. Transaction Concepts
+        2. Transaction Model and State Diagram
+        3. ACID Properties of Transaction
+                - Atomicity
+                - Consistency
+                - Isolation
+                - Durability
+        4. Serializability
+                - Conflict serializability
+                - View serializability
+        5. SQL Standard Isolation Levels
+        6. Concurrency Control
+                - Lock-Based Protocols
+                - Graph-Based Protocols
+
+
+UNIT 9: CRASH RECOVERY [3 hrs]
+-------------------------------
+Specific Objectives:
+        • Understand the recovery algorithms and techniques to protect and recover
+          the data from various failures.
+
+Contents:
+        1. Failure Classification
+        2. Recovery and Atomicity
+                - Log records
+                - Database modification
+                - Concurrency control and recovery
+                - Transaction commit
+                - Redo and Undo Transactions using Log
+                - Check Points
+        3. Recovery Algorithm Using Log Records
+                - Transaction Rollback
+                - Recovery After a System Crash
+                - Optimizing Commit Processing
+        4. High Availability Using Remote Backup System
+
+
+UNIT 10: EMERGING TREND IN DATABASES [4 hrs]
+---------------------------------------------
+Specific Objectives:
+        • Understand the concepts of NoSQL, ODBMS, Distributed Databases.
+
+Contents:
+        1. NoSQL Databases
+                - Characteristics
+                - Categories
+                - Advantages
+        2. Object Oriented Database and ORM
+        3. Distributed Databases
+        4. Distributed Ledger Technology
+                - Blockchain
+                - Cryptocurrency
+                - Blockchain Properties
+
+
+=====================================
+TOTAL HOURS: 45 hrs
+=====================================

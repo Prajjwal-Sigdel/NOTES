@@ -1,0 +1,1113 @@
+================================================================================
+                         POKHARA UNIVERSITY
+               BE COMPUTER ENGINEERING - OPERATING SYSTEM
+                   COMPLETE EXAMINATION PAPER SET (10 PAPERS)
+================================================================================
+
+
+================================================================================
+                           EXAM PAPER #1
+================================================================================
+
+Q.No. 1 a. Define Operating System. Explain the evolution of operating systems
+           from batch processing to modern multi-user systems with examples.
+           [8 marks]
+
+Q.No. 1 b. Compare and contrast Monolithic System architecture with Microkernel
+           architecture. Draw neat diagrams to illustrate both approaches and
+           discuss their advantages and disadvantages in modern computing.
+           [7 marks]
+
+           OR
+
+           Explain the Client-Server model and Exokernel architecture in 
+           operating systems. How do they differ from traditional OS designs?
+           [7 marks]
+
+Q.No. 2 a. Given the following set of processes, calculate the average waiting
+           time and average turnaround time using the following scheduling
+           algorithms. Construct Gantt charts and determine which algorithm
+           performs best. [10 marks]
+
+           Process     Arrival Time     Burst Time     Priority
+           -------     ------------     ----------     --------
+           P1          0                7              3
+           P2          2                4              1
+           P3          4                1              4
+           P4          5                4              2
+
+           i.   FCFS (First Come First Served)
+           ii.  Preemptive Priority Scheduling (1 = highest priority)
+           iii. RR (Round Robin with quantum = 2 ms)
+
+Q.No. 2 b. Define Process Control Block (PCB). Explain all the components of
+           PCB and draw a detailed process state transition diagram showing
+           all possible states (New, Ready, Running, Waiting, Terminated) and
+           the events that trigger transitions between states. [5 marks]
+
+Q.No. 3 a. Explain the Dining Philosophers Problem in detail with a neat
+           diagram. What are the conditions that lead to deadlock in this
+           scenario? Propose and explain two different solutions to prevent
+           deadlock in this classic synchronization problem. [8 marks]
+
+Q.No. 3 b. What are semaphores? Explain binary and counting semaphores with
+           examples. Solve the Producer-Consumer problem using semaphores,
+           providing complete pseudocode for both producer and consumer
+           processes. [7 marks]
+
+Q.No. 4 a. Consider the following page reference string for a system with 4
+           page frames initially empty:
+           
+           7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 1, 2, 0, 1, 7, 0, 1
+
+           Calculate the number of page hits, page faults, hit ratio, and
+           fault ratio for each of the following page replacement algorithms:
+           [10 marks]
+
+           i.   FIFO (First-In-First-Out)
+           ii.  LRU (Least Recently Used)
+           iii. Optimal Page Replacement
+
+Q.No. 4 b. What is the Translation Lookaside Buffer (TLB)? Explain its role in
+           virtual memory management with a neat diagram. How does it improve
+           memory access time? Calculate the effective memory access time if
+           TLB lookup time is 10 ns, memory access time is 100 ns, and TLB
+           hit ratio is 80%. [5 marks]
+
+Q.No. 5 a. A disk drive has 300 cylinders numbered 0 to 299. The disk head is
+           currently at cylinder 100, and the previous request serviced was at
+           cylinder 88. The pending disk I/O requests are in the following
+           order: 55, 180, 39, 122, 14, 124, 65, 67
+
+           Calculate the total head movement (in cylinders) for each of the
+           following disk scheduling algorithms: [10 marks]
+
+           i.   FCFS (First Come First Served)
+           ii.  SSTF (Shortest Seek Time First)
+           iii. SCAN
+           iv.  C-SCAN
+
+Q.No. 5 b. Explain the principles of Direct Memory Access (DMA). Draw a block
+           diagram showing DMA controller architecture and explain how DMA
+           transfers data without continuous CPU intervention. [5 marks]
+
+Q.No. 6 a. Explain the concept of file allocation methods in detail. Compare
+           and contrast the following allocation methods with diagrams:
+           [8 marks]
+
+           i.   Contiguous Allocation
+           ii.  Linked List Allocation
+           iii. Indexed Allocation
+
+           Discuss the advantages and disadvantages of each method.
+
+Q.No. 6 b. What is a hierarchical directory system? Explain how path names
+           (absolute and relative) work in such systems. Describe the
+           directory operations supported by modern operating systems.
+           [7 marks]
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Real-Time Operating Systems and their characteristics
+           ii.  Race Conditions and Critical Sections
+           iii. Memory Hierarchy and Storage Organization
+           iv.  Virtual Machines in Operating Systems
+
+
+================================================================================
+                           EXAM PAPER #2
+================================================================================
+
+Q.No. 1 a. What is an Operating System? Discuss the main functions of an
+           operating system with respect to Process Management, Memory
+           Management, File Management, and I/O Management. [8 marks]
+
+Q.No. 1 b. Explain the layered approach to operating system design. Draw a
+           diagram showing the different layers and explain how they interact.
+           What are the advantages and limitations of this approach? [7 marks]
+
+           OR
+
+           Describe System Calls in detail. Explain with examples how user
+           programs interact with the operating system kernel through system
+           calls. Provide examples from UNIX/Linux. [7 marks]
+
+Q.No. 2 a. What is the difference between a process and a thread? Explain the
+           benefits of multithreading. Compare the following thread models
+           with neat diagrams: [8 marks]
+
+           i.   Many-to-One Model
+           ii.  One-to-One Model
+           iii. Many-to-Many Model
+
+Q.No. 2 b. Consider the following processes with their arrival time, burst
+           time, and priority. Calculate average waiting time and average
+           turnaround time for the following scheduling algorithms. Which
+           algorithm provides the best average waiting time? [7 marks]
+
+           Process     Arrival Time     Burst Time     Priority
+           -------     ------------     ----------     --------
+           A           0                8              2
+           B           1                4              1
+           C           2                9              3
+           D           3                5              2
+
+           i.   SJF (Shortest Job First - Non-preemptive)
+           ii.  SRTF (Shortest Remaining Time First - Preemptive)
+           iii. Priority Scheduling (Preemptive, 1 = highest priority)
+
+Q.No. 3 a. Explain the Reader-Writers Problem in process synchronization. What
+           are the different variations of this problem? Provide a solution
+           using semaphores with complete pseudocode. [8 marks]
+
+Q.No. 3 b. What is a deadlock? Explain the four necessary conditions for
+           deadlock to occur. Discuss different strategies for handling
+           deadlocks: Prevention, Avoidance, Detection, and Recovery.
+           [7 marks]
+
+Q.No. 4 a. Explain paging as a memory management technique. What is a page
+           table and how does address translation work in paging? Consider a
+           system with: [10 marks]
+           
+           - Logical address space: 32 bits
+           - Page size: 4 KB
+           - Physical memory: 16 MB
+
+           Calculate:
+           i.   Number of pages in logical address space
+           ii.  Number of frames in physical memory
+           iii. Size of page table (assuming each entry is 4 bytes)
+           iv.  Bits required for page number and offset
+
+Q.No. 4 b. Define internal and external fragmentation. Explain with examples.
+           How does paging eliminate external fragmentation? What are the
+           techniques to reduce internal fragmentation? [5 marks]
+
+Q.No. 5 a. Consider the following page reference string for a system with 3
+           page frames: [10 marks]
+           
+           3, 2, 1, 0, 3, 2, 4, 3, 2, 1, 0, 4, 3, 2, 4, 0, 1, 3
+
+           For each of the following page replacement algorithms, calculate
+           page faults and hit ratio:
+
+           i.   Second Chance (Clock) Algorithm
+           ii.  Not Recently Used (NRU)
+           iii. LRU (Least Recently Used)
+
+Q.No. 5 b. What is thrashing in virtual memory systems? Explain the causes of
+           thrashing and discuss the working set model as a solution to
+           prevent thrashing. [5 marks]
+
+Q.No. 6 a. Explain interrupt-driven I/O in detail. Draw a flowchart showing
+           how interrupt-driven I/O works and compare it with polled I/O.
+           What are the advantages of interrupt-driven I/O? [8 marks]
+
+Q.No. 6 b. What is RAID (Redundant Array of Independent Disks)? Explain
+           different RAID levels (RAID 0, RAID 1, RAID 5) with diagrams.
+           Discuss their advantages in terms of performance and reliability.
+           [7 marks]
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Context Switching and its overhead
+           ii.  Distributed Operating Systems
+           iii. Device Drivers and Device Controllers
+           iv.  Security issues in modern Operating Systems
+
+
+================================================================================
+                           EXAM PAPER #3
+================================================================================
+
+Q.No. 1 a. Explain the concept of Virtual Machines in operating systems. How
+           does virtualization work? Discuss the difference between Type-1
+           (Bare-metal) and Type-2 (Hosted) hypervisors with examples.
+           [8 marks]
+
+Q.No. 1 b. What is the Shell in an operating system? Explain its role and
+           functionality. Describe the difference between command-line
+           interface (CLI) and graphical user interface (GUI) shells.
+           [7 marks]
+
+           OR
+
+           Explain the concept of files and file systems in operating systems.
+           Discuss file attributes, file operations, and file access methods
+           with examples. [7 marks]
+
+Q.No. 2 a. What is mutual exclusion? Explain Peterson's Algorithm for mutual
+           exclusion between two processes with pseudocode. Prove that it
+           satisfies the three requirements of mutual exclusion: mutual
+           exclusion, progress, and bounded waiting. [8 marks]
+
+Q.No. 2 b. Consider the following set of processes. Calculate average waiting
+           time, average turnaround time, and average response time for each
+           scheduling algorithm. Construct Gantt charts. [7 marks]
+
+           Process     Arrival Time     Burst Time
+           -------     ------------     ----------
+           P1          0                10
+           P2          1                1
+           P3          2                2
+           P4          3                1
+           P5          4                5
+
+           i.   FCFS
+           ii.  SJF (Non-preemptive)
+           iii. RR (Quantum = 3 ms)
+
+Q.No. 3 a. Explain the Sleeping Barber Problem in process synchronization.
+           Draw a diagram and provide a solution using semaphores with
+           complete pseudocode for both the barber and customer processes.
+           [8 marks]
+
+Q.No. 3 b. What is a monitor in concurrent programming? How does it provide
+           mutual exclusion? Compare monitors with semaphores and explain
+           which is easier to use and why. [7 marks]
+
+Q.No. 4 a. Consider the following snapshot of a system using Banker's Algorithm
+           for deadlock avoidance: [10 marks]
+
+           Available Resources: A=3, B=3, C=2
+
+           Process     Allocation          Maximum          Need
+                    A   B   C           A   B   C        A   B   C
+           -------  -----------         -----------      -----------
+           P0       0   1   0           7   5   3        7   4   3
+           P1       2   0   0           3   2   2        1   2   2
+           P2       3   0   2           9   0   2        6   0   0
+           P3       2   1   1           2   2   2        0   1   1
+           P4       0   0   2           4   3   3        4   3   1
+
+           Answer the following:
+           i.   Calculate the Need matrix
+           ii.  Is the system in a safe state?
+           iii. If a request from P1 arrives for (1, 0, 2), can it be
+                granted immediately?
+           iv.  Find a safe sequence if the system is in a safe state
+
+Q.No. 4 b. What is demand paging? Explain the concept with a neat diagram.
+           What is a page fault and what steps does the operating system take
+           when a page fault occurs? [5 marks]
+
+Q.No. 5 a. Consider the following page reference string with 4 frames available:
+           [10 marks]
+           
+           1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5, 6, 7, 6, 1, 2, 3
+
+           Calculate page faults, page hits, and fault ratio for:
+
+           i.   FIFO
+           ii.  Optimal Page Replacement
+           iii. LRU (using stack implementation)
+
+Q.No. 5 b. Explain hierarchical page tables. Why are they needed? Draw a
+           diagram showing two-level paging and explain how address
+           translation works in this scheme. [5 marks]
+
+Q.No. 6 a. What is contiguous memory allocation? Given memory partitions of
+           100K, 500K, 200K, 300K, and 600K (in order), how would the
+           following job requests be allocated using: [8 marks]
+
+           Job Requests: 212K, 417K, 112K, 426K
+
+           i.   First Fit
+           ii.  Best Fit
+           iii. Worst Fit
+
+           Which method results in the least fragmentation?
+
+Q.No. 6 b. Explain the structure and operations of single-level and
+           hierarchical directory systems. What are the advantages of
+           hierarchical directories over single-level directories? Discuss
+           with examples. [7 marks]
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Cloud Operating Systems and their characteristics
+           ii.  Test-and-Set Lock (TSL) instruction
+           iii. Inverted Page Tables
+           iv.  Access Control Lists in file systems
+
+
+================================================================================
+                           EXAM PAPER #4
+================================================================================
+
+Q.No. 1 a. Discuss the different types of operating systems: Batch Operating
+           Systems, Time-sharing Systems, Distributed Systems, Real-Time
+           Systems, and Mobile Operating Systems. Provide examples of each.
+           [8 marks]
+
+Q.No. 1 b. What is a kernel? Explain the architecture of a kernel. Compare and
+           contrast different types of kernels: Monolithic, Microkernel,
+           Hybrid, and Exokernel with diagrams. [7 marks]
+
+           OR
+
+           Explain concurrent and parallel processes. What is the difference
+           between concurrency and parallelism? How does modern multi-core
+           architecture support parallel execution? [7 marks]
+
+Q.No. 2 a. What is process scheduling? Explain the difference between
+           preemptive and non-preemptive scheduling. Discuss scheduling
+           criteria such as CPU utilization, throughput, turnaround time,
+           waiting time, and response time. [8 marks]
+
+Q.No. 2 b. Consider the following processes in a multi-core mobile OS
+           environment: [7 marks]
+
+           Process     Arrival Time     Burst Time     Priority
+           -------     ------------     ----------     --------
+           A           0                6              3
+           B           1                8              2
+           C           2                7              1
+           D           3                3              4
+
+           Calculate average waiting time and turnaround time for:
+
+           i.   Highest Response Ratio Next (HRRN)
+           ii.  Preemptive Priority Scheduling (1 = highest)
+           iii. RR (Quantum = 2 ms)
+
+Q.No. 3 a. Explain the Producer-Consumer problem with bounded buffer. What are
+           the synchronization issues? Solve this problem using semaphores
+           with complete pseudocode including initialization, producer, and
+           consumer processes. [8 marks]
+
+Q.No. 3 b. What is serializability in database transactions? Explain Two-Phase
+           Locking Protocol and Timestamp Ordering Protocol. How do these
+           protocols ensure serializability? [7 marks]
+
+Q.No. 4 a. Explain segmentation as a memory management technique. How is
+           segmentation different from paging? What is segmentation with
+           paging? Draw diagrams to illustrate segment tables and address
+           translation in segmentation. [8 marks]
+
+Q.No. 4 b. Consider a system using paging with the following specifications:
+           [7 marks]
+
+           - Virtual address: 28 bits
+           - Page size: 2 KB
+           - Physical memory: 64 MB
+           - TLB hit ratio: 85%
+           - TLB access time: 5 ns
+           - Memory access time: 80 ns
+
+           Calculate:
+           i.   Number of bits for page number and offset
+           ii.  Maximum number of pages
+           iii. Number of frames in physical memory
+           iv.  Effective memory access time
+
+Q.No. 5 a. A disk with 500 cylinders (0-499) has the following queue of I/O
+           requests: [10 marks]
+           
+           98, 183, 37, 122, 14, 124, 65, 67, 450, 310
+
+           Current head position: 53
+           Previous request: 70
+
+           Calculate total head movement for:
+
+           i.   FCFS
+           ii.  SSTF
+           iii. LOOK
+           iv.  C-LOOK
+
+Q.No. 5 b. What are device drivers? Explain the role of device drivers in I/O
+           management. How does device-independent I/O software work? Discuss
+           the layered structure of I/O software. [5 marks]
+
+Q.No. 6 a. Explain file naming conventions in operating systems. Discuss file
+           extensions and how different operating systems handle them. What
+           are the different file types and file structures? [8 marks]
+
+Q.No. 6 b. What is an inode (Index Node)? Explain how linked list allocation
+           using index nodes works in UNIX/Linux file systems. Draw a diagram
+           showing the structure of an inode and how it points to data blocks.
+           [7 marks]
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Mobile Operating Systems (Android/iOS architecture)
+           ii.  Coalescing and Compaction in memory management
+           iii. Deadlock detection using Resource Allocation Graph
+           iv.  Memory bottleneck in modern operating systems
+
+
+================================================================================
+                           EXAM PAPER #5
+================================================================================
+
+Q.No. 1 a. What are the main components of an operating system? Explain the
+           role of processes, files, system calls, and the shell in detail.
+           How do these components interact to provide services to users?
+           [8 marks]
+
+Q.No. 1 b. Compare and contrast User Space Threads and Kernel Space Threads.
+           What are the advantages and disadvantages of each? Explain how
+           thread management differs between user-level and kernel-level
+           implementations. [7 marks]
+
+           OR
+
+           Explain the evolution of operating systems from first generation
+           to fifth generation. Discuss the major innovations in each
+           generation. [7 marks]
+
+Q.No. 2 a. What is a race condition? Explain with an example how race
+           conditions can occur in concurrent processes. What are critical
+           regions and how do they help in avoiding race conditions? [8 marks]
+
+Q.No. 2 b. During a cloud-based server migration, the following processes need
+           to be scheduled: [7 marks]
+
+           Process     Arrival Time     Burst Time     Priority
+           -------     ------------     ----------     --------
+           P1          0                9              4
+           P2          2                5              1
+           P3          3                6              2
+           P4          6                3              3
+           P5          8                4              1
+
+           Calculate average turnaround time and waiting time for:
+
+           i.   Lottery Scheduling (assume P1:20 tickets, P2:30, P3:25,
+                P4:15, P5:10 tickets - show one possible execution)
+           ii.  Preemptive SJF (SRTF)
+           iii. RR (Quantum = 3 ms)
+
+Q.No. 3 a. Explain the concept of blocking and buffering in file I/O. Why are
+           they important? Discuss different buffering strategies: unbuffered,
+           single buffering, double buffering, and circular buffering.
+           [8 marks]
+
+Q.No. 3 b. What is Dekker's Algorithm? Explain how it achieves mutual exclusion
+           between two processes. Provide the complete algorithm with
+           explanation. [7 marks]
+
+Q.No. 4 a. Consider the following snapshot for a system with resources A, B, C,
+           D: [10 marks]
+
+           Available: A=1, B=5, C=2, D=0
+
+           Process     Allocation          Maximum
+                    A  B  C  D          A  B  C  D
+           -------  -----------         -----------
+           P0       0  0  1  2          0  0  1  2
+           P1       1  0  0  0          1  7  5  0
+           P2       1  3  5  4          2  3  5  6
+           P3       0  6  3  2          0  6  5  2
+           P4       0  0  1  4          0  6  5  6
+
+           Using Banker's Algorithm:
+           i.   Calculate the Need matrix
+           ii.  Determine if the system is in a safe state
+           iii. Find a safe sequence if one exists
+           iv.  If P1 requests (0, 4, 2, 0), should it be granted?
+
+Q.No. 4 b. What is memory mapping? Explain memory-mapped I/O and memory-mapped
+           files. How do they improve system performance? Draw a diagram to
+           illustrate the concept. [5 marks]
+
+Q.No. 5 a. Consider the following page reference string for a system with 3
+           frames: [10 marks]
+           
+           2, 5, 10, 1, 2, 2, 6, 9, 1, 2, 10, 2, 6, 1, 2, 1, 6, 9, 5, 1
+
+           Calculate page faults, hit ratio, and fault ratio for:
+
+           i.   Working Set Page Replacement (window size τ = 4)
+           ii.  FIFO
+           iii. Second Chance (Clock) Algorithm
+
+Q.No. 5 b. Explain the concept of shared pages in virtual memory. When is page
+           sharing useful? How does the operating system implement and manage
+           shared pages? [5 marks]
+
+Q.No. 6 a. What is Direct Memory Access (DMA)? Explain the DMA transfer process
+           step by step with a timing diagram. How does DMA improve I/O
+           performance compared to programmed I/O? [8 marks]
+
+Q.No. 6 b. Explain different file access methods: Sequential Access, Direct
+           Access (Random Access), and Indexed Sequential Access. Provide
+           examples of applications suitable for each method. [7 marks]
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Remote Procedure Call (RPC) in distributed systems
+           ii.  Difference between preemptable and non-preemptable resources
+           iii. Hashed Page Tables
+           iv.  File protection and Access Control
+
+
+================================================================================
+                           EXAM PAPER #6
+================================================================================
+
+Q.No. 1 a. Explain the fundamental differences between Batch Processing Systems
+           and Interactive Time-Sharing Systems. What are the design goals for
+           each type? Provide real-world examples. [8 marks]
+
+Q.No. 1 b. What is context switching? Explain the context switching process
+           with a detailed diagram showing how the CPU switches from one
+           process to another. What is context switching overhead and how can
+           it be minimized? [7 marks]
+
+           OR
+
+           Explain the concept of system calls. Describe different categories
+           of system calls (Process control, File management, Device
+           management, Information maintenance, Communication). Provide
+           examples from UNIX/Linux. [7 marks]
+
+Q.No. 2 a. What are the benefits of multithreading? Explain thread creation,
+           termination, and thread synchronization. Compare single-threaded
+           and multi-threaded processes with diagrams. [8 marks]
+
+Q.No. 2 b. In a real-time embedded system, the following periodic tasks need to
+           be scheduled: [7 marks]
+
+           Process     Arrival Time     Burst Time     Deadline
+           -------     ------------     ----------     --------
+           T1          0                4              8
+           T2          0                3              12
+           T3          0                2              16
+
+           i.   Calculate if the task set is schedulable using Rate
+                Monotonic Scheduling (RMS)
+           ii.  Calculate average waiting time using Earliest Deadline First
+                (EDF)
+           iii. Compare the two approaches
+
+Q.No. 3 a. Explain deadlock in operating systems. Describe the four necessary
+           and sufficient conditions (Coffman conditions) for deadlock.
+           Provide examples for each condition. [8 marks]
+
+Q.No. 3 b. What is deadlock prevention? Explain different strategies to prevent
+           deadlock by negating each of the four Coffman conditions. Which
+           strategy is most practical and why? [7 marks]
+
+Q.No. 4 a. Consider the following page reference string with 4 frames: [10 marks]
+           
+           8, 1, 0, 7, 3, 0, 3, 4, 5, 3, 5, 2, 0, 6, 8, 4, 8, 1, 5, 3
+
+           For each page replacement algorithm, calculate:
+           - Number of page faults
+           - Number of page hits
+           - Hit ratio
+           - Fault ratio
+
+           i.   MRU (Most Recently Used)
+           ii.  LRU (Least Recently Used)
+           iii. Optimal
+
+Q.No. 4 b. What is a Translation Lookaside Buffer (TLB)? Explain TLB
+           organization and operation. What happens during a TLB miss? How
+           does TLB improve the performance of virtual memory systems?
+           [5 marks]
+
+Q.No. 5 a. Explain the principles of I/O hardware. Describe the following
+           components with diagrams: [8 marks]
+
+           i.   I/O Devices
+           ii.  Device Controllers
+           iii. I/O Ports and Registers
+           iv.  Interrupt Mechanisms
+
+Q.No. 5 b. A disk system with 200 tracks is currently serving a request at
+           track 85. The previous request was at track 110. The pending
+           requests are: [7 marks]
+           
+           170, 60, 95, 130, 25, 80, 50, 115
+
+           Calculate total seek time for:
+
+           i.   SCAN
+           ii.  C-SCAN
+           iii. SSTF
+
+Q.No. 6 a. What are the goals of I/O software? Explain the layered structure
+           of I/O software from hardware to user level. Discuss: [8 marks]
+
+           i.   Interrupt Handlers
+           ii.  Device Drivers
+           iii. Device-Independent I/O Software
+           iv.  User-Space I/O Software
+
+Q.No. 6 b. Explain file protection mechanisms in operating systems. What are
+           different types of access (read, write, execute, append, delete)?
+           Describe Access Control Lists (ACL) and capability-based protection
+           with examples. [7 marks]
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Amoeba Distributed Operating System architecture
+           ii.  Critical Section Problem and its requirements
+           iii. RAM Disks and their applications
+           iv.  Disk management in Linux file systems
+
+
+================================================================================
+                           EXAM PAPER #7
+================================================================================
+
+Q.No. 1 a. What is an Operating System? Explain the main goals and functions
+           of an operating system from the user's perspective and the system's
+           perspective. [8 marks]
+
+Q.No. 1 b. Explain the concept of a Virtual Machine. How does virtualization
+           enable multiple operating systems to run on a single physical
+           machine? Discuss the benefits and challenges of virtualization.
+           [7 marks]
+
+           OR
+
+           What is the difference between user mode and kernel mode? Explain
+           mode switching and why it is necessary. What operations require
+           kernel mode execution? [7 marks]
+
+Q.No. 2 a. Explain Fair-Share Scheduling and Guaranteed Scheduling algorithms.
+           How do they differ from traditional priority-based scheduling?
+           Where are these scheduling algorithms used? [8 marks]
+
+Q.No. 2 b. Consider a CPU-intensive batch processing system with the following
+           jobs: [7 marks]
+
+           Process     Arrival Time     Burst Time
+           -------     ------------     ----------
+           J1          0                12
+           J2          3                8
+           J3          5                15
+           J4          8                7
+           J5          10               10
+
+           Calculate average waiting time, turnaround time, and throughput for:
+
+           i.   FCFS
+           ii.  Non-preemptive SJF
+           iii. Preemptive SJF (SRTF)
+
+Q.No. 3 a. What is the bounded-buffer problem? Explain it in the context of
+           inter-process communication. Provide a solution using message
+           passing mechanism with pseudocode. [8 marks]
+
+Q.No. 3 b. Explain the concept of locking protocols in database concurrency
+           control. What is Two-Phase Locking (2PL)? Describe the growing
+           phase and shrinking phase with examples. [7 marks]
+
+Q.No. 4 a. Explain memory management with bitmaps and linked lists. Draw
+           diagrams to show how free and allocated memory blocks are tracked
+           using both methods. Compare their advantages and disadvantages.
+           [8 marks]
+
+Q.No. 4 b. Given a memory system with the following parameters: [7 marks]
+
+           - Page size: 4 KB
+           - Logical address: 24 bits
+           - Physical memory: 16 MB
+           - Page table entry size: 4 bytes
+
+           Consider the page reference string: 0, 1, 2, 3, 4, 1, 2, 5, 0, 1,
+           2, 3, 4, 5
+
+           With 3 frames, calculate page faults using:
+           i.   FIFO
+           ii.  LRU
+
+Q.No. 5 a. Consider the following resource allocation scenario: [10 marks]
+
+           System has 5 processes (P0-P4) and 3 resource types (A, B, C):
+           - Total resources: A=10, B=5, C=7
+           - Current allocation and maximum need:
+
+           Process     Allocation          Maximum
+                    A   B   C           A   B   C
+           -------  -----------         -----------
+           P0       0   1   0           7   5   3
+           P1       2   0   0           3   2   2
+           P2       3   0   2           9   0   2
+           P3       2   1   1           2   2   2
+           P4       0   0   2           4   3   3
+
+           i.   Calculate Available resources
+           ii.  Calculate the Need matrix
+           iii. Apply Banker's algorithm to determine if the system is safe
+           iv.  Find a safe sequence
+
+Q.No. 5 b. What is a device controller? Explain its role in I/O operations.
+           How does the CPU communicate with device controllers? Describe
+           memory-mapped I/O versus port-mapped I/O. [5 marks]
+
+Q.No. 6 a. Suppose a disk system has 250 cylinders (0-249). The current head
+           position is at cylinder 120, and the previous request was at 140.
+           The disk request queue contains: [8 marks]
+           
+           86, 147, 91, 177, 94, 150, 102, 175, 130
+
+           Calculate the total head movement for:
+
+           i.   FCFS
+           ii.  SSTF  
+           iii. LOOK
+           iv.  C-LOOK
+
+Q.No. 6 b. Explain the concept of file descriptors. How does the operating
+           system maintain file descriptor tables? Describe the relationship
+           between file descriptors, file tables, and inode tables in UNIX/Linux.
+           [7 marks]
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Cloud Operating Systems and their advantages
+           ii.  Peterson's Algorithm for mutual exclusion
+           iii. Comparison of Paging and Segmentation
+           iv.  Security mechanisms in Operating Systems
+
+
+================================================================================
+                           EXAM PAPER #8
+================================================================================
+
+Q.No. 1 a. Explain the client-server model in operating systems. How does it
+           differ from monolithic and layered architectures? Draw a diagram
+           and provide examples of client-server operating systems. [8 marks]
+
+Q.No. 1 b. What is the difference between a program and a process? Explain the
+           process lifecycle from creation to termination. What are the
+           different process creation mechanisms? [7 marks]
+
+           OR
+
+           Explain the file system hierarchy in UNIX/Linux. Describe important
+           directories like /bin, /etc, /home, /usr, /var, and their purposes.
+           [7 marks]
+
+Q.No. 2 a. What is starvation in process scheduling? How is it different from
+           deadlock? Explain scheduling algorithms that can prevent starvation.
+           Discuss aging as a technique to prevent starvation. [8 marks]
+
+Q.No. 2 b. In a multi-processor system with load balancing, consider the
+           following processes: [7 marks]
+
+           Process     Arrival Time     Burst Time     Priority
+           -------     ------------     ----------     --------
+           P1          0                11             2
+           P2          2                6              4
+           P3          4                9              1
+           P4          6                4              3
+           P5          7                8              2
+
+           Calculate average waiting time and turnaround time for:
+
+           i.   Priority Scheduling (Non-preemptive, 1 = highest)
+           ii.  RR (Quantum = 4 ms)
+           iii. Multilevel Queue Scheduling (assume P1, P4 in system queue
+                with FCFS; P2, P3, P5 in interactive queue with RR, quantum=2)
+
+Q.No. 3 a. Explain resource allocation graphs in deadlock detection. How can
+           you determine if a deadlock exists by examining the resource
+           allocation graph? Provide an algorithm for deadlock detection using
+           resource allocation graphs. [8 marks]
+
+Q.No. 3 b. What are monitors in concurrent programming? Explain condition
+           variables in monitors. Solve the Producer-Consumer problem using
+           monitors with pseudocode. [7 marks]
+
+Q.No. 4 a. Explain the concept of relocation and protection in memory
+           management. What are base and limit registers? How do they provide
+           protection? Draw a diagram showing address translation using base
+           and limit registers. [8 marks]
+
+Q.No. 4 b. Consider the following memory partitions (in KB): [7 marks]
+           
+           Available partitions: 200K, 450K, 150K, 300K, 600K, 100K
+
+           Process requests arrive in order: 357K, 210K, 130K, 60K
+
+           Show how processes are allocated using:
+           i.   First Fit
+           ii.  Best Fit
+           iii. Worst Fit
+
+           Calculate internal fragmentation for each method.
+
+Q.No. 5 a. Consider the following page reference string with 3 frames: [10 marks]
+           
+           4, 7, 6, 1, 7, 6, 1, 2, 7, 2, 7, 1, 2, 6, 2, 1, 7, 6, 1, 4
+
+           Calculate page faults and fault ratio for:
+
+           i.   FIFO
+           ii.  Optimal
+           iii. Clock (Second Chance) - assume reference bits
+           iv.  LRU
+
+Q.No. 5 b. What is the difference between logical (virtual) address and
+           physical address? Explain the Memory Management Unit (MMU) and its
+           role in address translation. [5 marks]
+
+Q.No. 6 a. Explain polled I/O versus interrupt-driven I/O. Draw timing diagrams
+           for both methods and compare their efficiency. When is each method
+           preferred? [8 marks]
+
+Q.No. 6 b. A disk drive has 350 cylinders (0-349). Current head position is at
+           cylinder 75, previous request was at 50. The request queue is:
+           [7 marks]
+           
+           128, 200, 40, 280, 95, 310, 15, 120
+
+           Calculate total head movement for:
+
+           i.   SCAN (moving toward higher cylinders)
+           ii.  C-SCAN (moving toward higher cylinders)
+           iii. LOOK
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Windows Operating System architecture
+           ii.  Timestamp Ordering Protocol for serializability
+           iii. File system implementation techniques
+           iv.  Mobile Operating System security
+
+
+================================================================================
+                           EXAM PAPER #9
+================================================================================
+
+Q.No. 1 a. Discuss the evolution of operating systems from the 1st generation
+           (vacuum tubes) to the present (mobile and cloud OS). What were the
+           major technological innovations in each generation? [8 marks]
+
+Q.No. 1 b. Explain the exokernel approach to operating system design. How does
+           it differ from microkernel and monolithic approaches? What are the
+           advantages and challenges of exokernels? [7 marks]
+
+           OR
+
+           What are the main differences between batch processing systems and
+           real-time systems? Explain hard real-time and soft real-time
+           systems with examples. [7 marks]
+
+Q.No. 2 a. Explain the concept of concurrent processes. What is the difference
+           between concurrency and parallelism? How do modern multi-core
+           processors support both? Discuss challenges in concurrent
+           programming. [8 marks]
+
+Q.No. 2 b. In a database transaction processing system, consider the following
+           transactions: [7 marks]
+
+           Transaction     Arrival Time     Execution Time     Priority
+           -----------     ------------     --------------     --------
+           T1              0                14                 3
+           T2              2                10                 1
+           T3              5                8                  2
+           T4              8                6                  4
+
+           Calculate average waiting time and turnaround time for:
+
+           i.   FCFS
+           ii.  Priority (Preemptive, 1 = highest)
+           iii. Shortest Remaining Time (SRTF)
+
+Q.No. 3 a. What is the Test-and-Set Lock (TSL) instruction? Explain how it
+           provides atomic operations for mutual exclusion. Provide pseudocode
+           for implementing mutual exclusion using TSL. What are spinlocks and
+           their limitations? [8 marks]
+
+Q.No. 3 b. Explain the sleep and wakeup primitives for process synchronization.
+           How do they help in solving synchronization problems? What is the
+           lost wakeup problem and how is it solved? [7 marks]
+
+Q.No. 4 a. Consider the following snapshot of a system: [10 marks]
+
+           Available Resources: A=2, B=1, C=0, D=2
+
+           Process     Allocation          Maximum
+                    A  B  C  D          A  B  C  D
+           -------  -----------         -----------
+           P0       2  0  0  1          4  2  1  2
+           P1       0  1  0  1          1  1  2  1
+           P2       1  0  1  0          2  2  2  3
+           P3       1  1  0  0          1  1  1  1
+           P4       0  0  0  1          3  1  2  2
+
+           Using Banker's Algorithm:
+           i.   Calculate the Need matrix
+           ii.  Is the system in a safe state?
+           iii. Find all possible safe sequences
+           iv.  If P2 requests (1, 1, 0, 1), can the request be granted?
+
+Q.No. 4 b. What is block mapping in virtual memory? Explain how it differs from
+           direct mapping. Describe associative mapping and set-associative
+           mapping with diagrams. [5 marks]
+
+Q.No. 5 a. Consider the following page reference string for a system with 4
+           frames: [10 marks]
+           
+           5, 4, 3, 2, 1, 4, 3, 5, 4, 3, 2, 1, 5, 1, 2, 3, 4, 5
+
+           Calculate page faults, page hits, hit ratio, and fault ratio for:
+
+           i.   Not Recently Used (NRU) - use reference and modify bits
+           ii.  Working Set (window size τ = 3)
+           iii. FIFO
+
+Q.No. 5 b. What is an inverted page table? Why is it used? Explain the
+           structure and operation of inverted page tables. What are the
+           advantages and disadvantages compared to conventional page tables?
+           [5 marks]
+
+Q.No. 6 a. Explain different RAID levels in detail: [8 marks]
+
+           i.   RAID 0 (Striping)
+           ii.  RAID 1 (Mirroring)
+           iii. RAID 4 (Striping with dedicated parity)
+           iv.  RAID 5 (Striping with distributed parity)
+           v.   RAID 6 (Striping with double parity)
+
+           Compare them in terms of performance, reliability, and cost.
+
+Q.No. 6 b. A disk system with 180 tracks is currently at track 100, and the
+           previous request was at track 90. The pending requests in FIFO order
+           are: [7 marks]
+           
+           55, 150, 85, 165, 20, 175, 30, 140
+
+           Calculate total head movements for:
+
+           i.   FCFS
+           ii.  SSTF
+           iii. SCAN (initially moving toward higher tracks)
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Distributed systems and Remote Procedure Call (RPC)
+           ii.  Process synchronization using message passing
+           iii. Linux file system structure and management
+           iv.  Memory wall problem in modern computers
+
+
+================================================================================
+                           EXAM PAPER #10
+================================================================================
+
+Q.No. 1 a. What is an Operating System? Explain the dual role of an operating
+           system as a resource manager and as an extended machine. Discuss
+           with examples. [8 marks]
+
+Q.No. 1 b. Explain hybrid kernel architecture. How does it combine features of
+           monolithic and microkernel designs? Provide examples of operating
+           systems using hybrid kernels (e.g., Windows NT, macOS). [7 marks]
+
+           OR
+
+           What is a shell in operating systems? Compare different types of
+           shells (Bourne shell, C shell, Bash, PowerShell). Explain shell
+           scripting and its importance. [7 marks]
+
+Q.No. 2 a. Explain the difference between single-threaded and multi-threaded
+           processes. What are the challenges in multi-threaded programming?
+           Discuss thread safety and synchronization issues. [8 marks]
+
+Q.No. 2 b. Consider a web server handling the following HTTP requests: [7 marks]
+
+           Request     Arrival Time     Processing Time     Priority
+           -------     ------------     ---------------     --------
+           R1          0                5                   2
+           R2          1                12                  3
+           R3          3                8                   1
+           R4          5                6                   4
+           R5          7                4                   2
+
+           Calculate average response time and turnaround time for:
+
+           i.   Round Robin (Quantum = 3 ms)
+           ii.  Shortest Job First (Non-preemptive)
+           iii. Priority (Preemptive, 1 = highest)
+
+Q.No. 3 a. What is a critical section? Explain the three requirements for a
+           correct critical section solution: Mutual Exclusion, Progress, and
+           Bounded Waiting. Why are these requirements important? [8 marks]
+
+Q.No. 3 b. Explain the concept of message passing for inter-process
+           communication. Compare synchronous and asynchronous message passing.
+           How does message passing differ from shared memory communication?
+           [7 marks]
+
+Q.No. 4 a. Explain fixed-partition and variable-partition multiprogramming.
+           Draw diagrams for both schemes. What are the advantages and
+           disadvantages of each? How does compaction help in variable-
+           partition schemes? [8 marks]
+
+Q.No. 4 b. Consider a virtual memory system with: [7 marks]
+
+           - Page size: 8 KB
+           - Virtual address space: 32 bits
+           - Physical memory: 256 MB
+           - Page fault service time: 8 ms
+           - Memory access time: 100 ns
+           - Page fault rate: 2%
+
+           Calculate:
+           i.   Number of pages in virtual address space
+           ii.  Number of frames in physical memory
+           iii. Effective access time
+           iv.  How much physical memory is needed for the page table if
+                each entry is 4 bytes?
+
+Q.No. 5 a. Consider the following page reference string with 3 frames: [10 marks]
+           
+           9, 0, 5, 1, 0, 3, 0, 4, 1, 3, 0, 3, 1, 4, 5, 1, 5, 3, 4, 0
+
+           For each algorithm, calculate page faults, page hits, hit ratio:
+
+           i.   LRU (Least Recently Used)
+           ii.  LFU (Least Frequently Used)
+           iii. Optimal Page Replacement
+           iv.  Second Chance
+
+Q.No. 5 b. What is the difference between swapping and paging? Explain the
+           concept of swapping in memory management. When is swapping
+           necessary and what are its limitations? [5 marks]
+
+Q.No. 6 a. Explain the layered structure of I/O software with a neat diagram.
+           Describe the function of each layer: [8 marks]
+
+           i.   Hardware (Device Controllers)
+           ii.  Interrupt Handlers
+           iii. Device Drivers
+           iv.  Device-Independent I/O Software
+           v.   User-Level I/O Software
+
+Q.No. 6 b. A disk drive with 400 cylinders (0-399) has the disk arm currently
+           at cylinder 180. The previous request was at 150. The request queue
+           contains: [7 marks]
+           
+           50, 260, 100, 350, 70, 310, 20, 200
+
+           Calculate the total seek distance for:
+
+           i.   SSTF
+           ii.  SCAN (initially moving toward 399)
+           iii. C-LOOK
+
+Q.No. 7.   Write short notes on (Any THREE): [15 marks]
+
+           i.   Real-Time Operating Systems and scheduling
+           ii.  Amoeba distributed OS and process management
+           iii. File allocation methods (Contiguous, Linked, Indexed)
+           iv.  Security threats and protection mechanisms in OS
+
+
+================================================================================
+                        END OF EXAMINATION PAPER SET
+================================================================================
+
+Note: Each paper is designed to be completed in 3 hours.
+      Total marks per paper: 75
+      Pass marks: 30
+
+================================================================================

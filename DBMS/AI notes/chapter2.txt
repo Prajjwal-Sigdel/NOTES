@@ -1,0 +1,1107 @@
+================================================================================
+             CHAPTER 2: ER MODEL AND RELATIONAL MODEL
+                            [8 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  2.1  Introduction to ER Model
+  2.2  Entity Sets, Attributes and Values
+       2.2.1  Relationship Sets (Participation, Role, Descriptive Attrs, Degree)
+       2.2.2  Mapping Cardinalities
+       2.2.3  Attributes (Simple, Composite, Single/Multi-valued, Derived)
+       2.2.4  Entity-Relationship (ER) Diagram
+       2.2.5  Specialization
+       2.2.6  Generalization
+       2.2.7  Aggregation
+  2.3  Keys (Super, Candidate, Primary, Strong/Weak Entity Sets)
+  2.4  Introduction to Relational Model
+  2.5  Reducing ER Diagrams to Relational Schema
+  2.6  Structure of Relational Databases
+       2.6.1  Database Schema
+       2.6.2  Keys
+       2.6.3  Schema Diagrams
+  2.7  Relational Algebra
+
+================================================================================
+2.1  INTRODUCTION TO ER MODEL
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+The **Entity-Relationship (ER) Model** is a high-level conceptual data
+model proposed by **Peter Chen (1976)** that describes the structure of a
+database using **entities**, **attributes**, and **relationships**. It
+provides a graphical representation (ER Diagram) that is independent of
+any specific DBMS and serves as a blueprint for database design.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+WHY do we need the ER Model?
+
+Before writing any SQL or creating any table, a database designer must
+understand the real-world domain. The ER Model bridges the gap between
+the real-world problem and the database implementation:
+
+  Real World → ER Model (Conceptual Design) → Relational Schema → SQL Tables
+
+HOW does the ER Model work?
+
+The ER Model captures:
+  1. **Entities**: Real-world objects or concepts (e.g., Student, Course)
+  2. **Attributes**: Properties of entities (e.g., name, age, GPA)
+  3. **Relationships**: Associations between entities (e.g., Student
+     "enrolls in" Course)
+
+The ER Model is converted to a **relational schema** before
+implementation in a relational DBMS.
+
+■ KEY TERMINOLOGY
+──────────────────
+  • **Entity**: A distinguishable real-world object (e.g., a specific
+    student "Aarav" with roll_no 101).
+  • **Entity Set**: A collection of similar entities (e.g., the set of
+    ALL students).
+  • **Attribute**: A property that describes an entity (e.g., name, age).
+  • **Relationship**: An association among entities (e.g., "enrolled in").
+  • **Relationship Set**: A set of relationships of the same type.
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+Consider designing a database for **Uber (Ride-Sharing)**:
+  - Entities: Driver, Rider, Trip, Vehicle, Payment
+  - Relationships: Driver "drives" Vehicle, Rider "requests" Trip,
+    Trip "has" Payment
+  - Attributes: Driver(name, license_no, rating), Trip(pickup, dropoff,
+    fare, distance)
+
+The ER Model helps visualize these components BEFORE writing any code.
+
+
+================================================================================
+2.2  ENTITY SETS, ATTRIBUTES AND VALUES
+================================================================================
+
+■ ENTITY AND ENTITY SET
+─────────────────────────
+  • **Entity**: An object that exists in the real world and is
+    distinguishable from other objects.
+    Example: A specific student "Aarav" or a specific course "DBMS".
+
+  • **Entity Set**: A set of entities of the same type that share the
+    same properties (attributes).
+    Example: The entity set "Student" = {Aarav, Bipana, Chetan, ...}
+
+  In ER Diagrams:
+    Entity sets are represented as **rectangles**.
+
+────────────────────────────────────────────────
+2.2.1  RELATIONSHIP SETS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **Relationship** is an association among two or more entities.
+A **Relationship Set** is a set of relationships of the same type.
+
+Formally, a relationship set R is a subset of:
+  $R \subseteq E_1 \times E_2 \times \ldots \times E_n$
+
+where $E_1, E_2, \ldots, E_n$ are entity sets.
+
+In ER Diagrams: Relationship sets are represented as **diamonds**.
+
+■ PARTICIPATION
+────────────────
+**Participation** defines whether ALL or SOME entities in an entity set
+participate in a relationship.
+
+  1. **Total Participation** (Existence Dependency):
+     EVERY entity in the entity set participates in at least one
+     relationship in the relationship set.
+     Notation: **Double line** (═══) connecting entity to relationship.
+     Example: Every "Department" MUST have at least one "Employee".
+
+  2. **Partial Participation**:
+     SOME (but not all) entities participate in the relationship.
+     Notation: **Single line** (───) connecting entity to relationship.
+     Example: Some "Employees" may manage a department, others don't.
+
+■ ENTITY'S ROLE
+────────────────
+When the same entity set participates MORE THAN ONCE in a relationship
+set, we assign **roles** to distinguish each participation.
+
+Example: In a "supervises" relationship on the Employee entity set:
+  - Employee (role: supervisor) ──supervises──► Employee (role: supervisee)
+
+  ┌──────────┐   supervisor   ┌───────────────┐   supervisee   ┌──────────┐
+  │ Employee │───────────────►│  supervises    │◄──────────────│ Employee │
+  └──────────┘                └───────────────┘                └──────────┘
+  (This is called a **recursive/unary relationship**)
+
+■ DESCRIPTIVE ATTRIBUTES
+──────────────────────────
+Relationships can have their own attributes called **descriptive
+attributes**. These describe a property of the relationship, not of
+either entity.
+
+Example: Student "enrolls in" Course
+  - The relationship "enrolls_in" has descriptive attributes:
+    grade, enrollment_date
+  - "grade" belongs to the relationship, not to Student or Course alone.
+
+  In ER Diagrams: Descriptive attributes are shown as ovals connected
+  to the relationship diamond.
+
+■ DEGREE OF RELATIONSHIP SET
+──────────────────────────────
+The **degree** of a relationship set is the number of entity sets that
+participate in the relationship.
+
+  ┌────────────┬──────────────────┬────────────────────────────────────┐
+  │ Degree     │ Name             │ Example                            │
+  ├────────────┼──────────────────┼────────────────────────────────────┤
+  │ 1 (Unary)  │ Recursive        │ Employee supervises Employee       │
+  │ 2 (Binary) │ Most common      │ Student enrolls in Course          │
+  │ 3 (Ternary)│ Three entities   │ Supplier supplies Part to Project  │
+  │ n (n-ary)  │ n entity sets    │ Rare in practice                   │
+  └────────────┴──────────────────┴────────────────────────────────────┘
+
+Most relationships are **binary** (degree 2).
+
+────────────────────────────────────────────────
+2.2.2  MAPPING CARDINALITIES
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+**Mapping Cardinality** (or **Cardinality Ratio**) expresses the number
+of entities in one entity set that can be associated with entities in
+another entity set through a relationship.
+
+■ FOUR TYPES OF MAPPING CARDINALITIES
+
+  1. **One-to-One (1:1)**:
+     An entity in A is associated with AT MOST ONE entity in B, and
+     vice versa.
+     Example: One Person has One Passport.
+
+     A ──────── R ──────── B
+     a1 ───────────────── b1
+     a2 ───────────────── b2
+
+  2. **One-to-Many (1:N)**:
+     An entity in A is associated with MANY entities in B, but an entity
+     in B is associated with AT MOST ONE entity in A.
+     Example: One Department has Many Employees.
+
+     A ──────── R ──────── B
+     a1 ───────────────── b1
+     a1 ───────────────── b2
+     a2 ───────────────── b3
+
+  3. **Many-to-One (N:1)**:
+     Many entities in A are associated with AT MOST ONE entity in B.
+     Example: Many Students belong to One Department.
+
+     A ──────── R ──────── B
+     a1 ───────────────── b1
+     a2 ───────────────── b1
+     a3 ───────────────── b2
+
+  4. **Many-to-Many (M:N)**:
+     An entity in A is associated with MANY entities in B, and vice versa.
+     Example: Students enroll in Many Courses; Courses have Many Students.
+
+     A ──────── R ──────── B
+     a1 ───────────────── b1
+     a1 ───────────────── b2
+     a2 ───────────────── b1
+     a2 ───────────────── b3
+
+■ ER NOTATION FOR CARDINALITIES
+─────────────────────────────────
+  • Arrow (→) pointing TO the "one" side
+  • Line (──) on the "many" side
+  • OR: Use 1..1, 1..*, 0..*, etc. (min..max notation)
+
+■ REAL-WORLD EXAMPLES
+──────────────────────
+  • 1:1  — Country ─── has ──── Capital
+  • 1:N  — Author ─── writes ── Books
+  • N:1  — Employees ── work_in ── Department
+  • M:N  — Students ── enroll ── Courses
+
+────────────────────────────────────────────────
+2.2.3  ATTRIBUTES
+────────────────────────────────────────────────
+
+■ TYPES OF ATTRIBUTES
+──────────────────────
+
+  ┌──────────────────┬────────────────────────────────────────────────────┐
+  │ Type             │ Description & Example                              │
+  ├──────────────────┼────────────────────────────────────────────────────┤
+  │ Simple           │ Atomic, cannot be divided further.                 │
+  │ (Atomic)         │ Example: age, salary, emp_id                       │
+  │                  │ ER Notation: Simple oval ○                         │
+  ├──────────────────┼────────────────────────────────────────────────────┤
+  │ Composite        │ Can be divided into smaller sub-parts.             │
+  │                  │ Example: name → (first_name, middle_name,          │
+  │                  │   last_name); address → (street, city, zip)        │
+  │                  │ ER Notation: Oval with sub-ovals branching out     │
+  ├──────────────────┼────────────────────────────────────────────────────┤
+  │ Single-Valued    │ Holds exactly ONE value for each entity.           │
+  │                  │ Example: emp_id, date_of_birth                     │
+  │                  │ ER Notation: Simple oval ○                         │
+  ├──────────────────┼────────────────────────────────────────────────────┤
+  │ Multi-Valued     │ Can hold MULTIPLE values for a single entity.      │
+  │                  │ Example: phone_numbers (a person may have multiple)│
+  │                  │ ER Notation: Double oval ◎                         │
+  ├──────────────────┼────────────────────────────────────────────────────┤
+  │ Derived          │ Value can be CALCULATED from other attributes.     │
+  │                  │ Example: age (derived from date_of_birth),          │
+  │                  │   total_marks (derived from individual marks)       │
+  │                  │ ER Notation: Dashed oval ○̤  (oval with dashes)     │
+  ├──────────────────┼────────────────────────────────────────────────────┤
+  │ Key Attribute    │ Uniquely identifies each entity in the entity set. │
+  │                  │ Example: emp_id, roll_no                           │
+  │                  │ ER Notation: Underlined text inside oval            │
+  └──────────────────┴────────────────────────────────────────────────────┘
+
+■ ER DIAGRAM NOTATION SUMMARY
+
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ SYMBOL           │ MEANING                                       │
+  ├──────────────────┼──────────────────────────────────────────────-│
+  │ ┌─────────┐      │ Entity Set (Rectangle)                        │
+  │ ◇ (Diamond)      │ Relationship Set                              │
+  │ ○ (Oval)         │ Attribute                                     │
+  │ ◎ (Double oval)  │ Multi-valued Attribute                        │
+  │ ○̤  (Dashed oval) │ Derived Attribute                             │
+  │ ─── (Single line)│ Partial Participation                         │
+  │ ═══ (Double line)│ Total Participation                           │
+  │ ┌═════════┐      │ Weak Entity Set (Double Rectangle)            │
+  │ ◇═◇ (Dbl Diamond)│ Identifying Relationship                     │
+  └──────────────────┴──────────────────────────────────────────────-┘
+
+────────────────────────────────────────────────
+2.2.4  ENTITY-RELATIONSHIP (ER) DIAGRAM
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+An **ER Diagram** is a graphical representation of the ER Model. It uses
+a standard set of symbols (rectangles, diamonds, ovals, lines) to depict
+entities, relationships, attributes, and constraints in a database design.
+
+■ SAMPLE ER DIAGRAM: UNIVERSITY SYSTEM
+
+  ┌──────────────┐          ┌───────────┐          ┌──────────────┐
+  │   STUDENT    │──────────│ enrolls   │──────────│   COURSE     │
+  │              │    M     │ in        │    N     │              │
+  │ roll_no (PK) │          │           │          │ course_id(PK)│
+  │ name         │          │ grade     │          │ course_name  │
+  │ dept         │          │ (desc.    │          │ credits      │
+  │ dob          │          │  attr)    │          │              │
+  └──────────────┘          └───────────┘          └──────────────┘
+         │                                                │
+         │ N                                              │ 1
+         │                                                │
+  ┌──────────────┐                                ┌──────────────┐
+  │ belongs_to   │                                │  offered_by  │
+  └──────────────┘                                └──────────────┘
+         │ 1                                              │ 1
+  ┌──────────────┐                                ┌──────────────┐
+  │  DEPARTMENT  │                                │ INSTRUCTOR   │
+  │ dept_id (PK) │                                │ inst_id (PK) │
+  │ dept_name    │                                │ name         │
+  │ building     │                                │ salary       │
+  └──────────────┘                                └──────────────┘
+
+■ STEPS TO DRAW AN ER DIAGRAM
+──────────────────────────────
+  1. Identify all entity sets from the problem description.
+  2. Identify attributes for each entity set (mark keys).
+  3. Identify relationships between entity sets.
+  4. Determine mapping cardinalities (1:1, 1:N, M:N).
+  5. Determine participation constraints (total/partial).
+  6. Add descriptive attributes to relationships if needed.
+  7. Identify specialization, generalization, and aggregation.
+  8. Draw using standard ER notation.
+
+────────────────────────────────────────────────
+2.2.5  SPECIALIZATION
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+**Specialization** is a TOP-DOWN approach of defining sub-entity sets
+(subclasses) of an entity set (superclass) based on distinguishing
+characteristics. It is the process of identifying subsets of an entity
+set that have additional attributes or participate in additional
+relationships.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Specialization is like **inheritance in OOP**: a superclass entity set
+is divided into subclasses, each inheriting all attributes of the
+superclass but also having their own unique attributes.
+
+Example:
+  Entity set: PERSON
+  Specialization into: STUDENT and EMPLOYEE
+
+  PERSON (superclass)
+    ├── STUDENT (subclass) — has: roll_no, GPA, batch_year
+    └── EMPLOYEE (subclass) — has: emp_id, salary, designation
+
+  Both STUDENT and EMPLOYEE inherit PERSON's attributes (name, DOB, etc.)
+
+■ TYPES
+────────
+  • **Disjoint (d)**: An entity can belong to AT MOST ONE subclass.
+    Example: A vehicle is either a Car OR a Truck, not both.
+  • **Overlapping (o)**: An entity can belong to MULTIPLE subclasses.
+    Example: A person can be both a Student AND an Employee.
+
+  • **Total**: Every entity in the superclass MUST belong to at least
+    one subclass.
+  • **Partial**: Some entities may not belong to any subclass.
+
+■ ER NOTATION
+──────────────
+  Superclass connected by a triangle (labeled "ISA") to subclasses.
+
+                ┌──────────┐
+                │  PERSON  │
+                └────┬─────┘
+                     │
+                   ╱ISA╲
+                  ╱     ╲
+          ┌──────┘       └──────┐
+    ┌─────┴─────┐        ┌─────┴─────┐
+    │  STUDENT  │        │ EMPLOYEE  │
+    │ roll_no   │        │ emp_id    │
+    │ GPA       │        │ salary    │
+    └───────────┘        └───────────┘
+
+────────────────────────────────────────────────
+2.2.6  GENERALIZATION
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+**Generalization** is a BOTTOM-UP approach of combining two or more
+entity sets (subclasses) that share common attributes into a higher-level
+entity set (superclass). It is the INVERSE of specialization.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+In generalization, we START with specific entity sets and IDENTIFY common
+features to create a generalized superclass.
+
+Example:
+  Start with: CAR (vehicle_id, make, model, num_doors)
+              TRUCK (vehicle_id, make, model, payload_capacity)
+
+  Common attributes: vehicle_id, make, model
+  Generalize into: VEHICLE (vehicle_id, make, model)
+    ├── CAR (num_doors)
+    └── TRUCK (payload_capacity)
+
+■ SPECIALIZATION vs GENERALIZATION
+────────────────────────────────────
+  ┌────────────────────┬──────────────────┬──────────────────────┐
+  │ Aspect             │ Specialization   │ Generalization       │
+  ├────────────────────┼──────────────────┼──────────────────────┤
+  │ Approach           │ Top-Down         │ Bottom-Up            │
+  │ Process            │ Superclass →     │ Subclasses →         │
+  │                    │   Subclasses     │   Superclass         │
+  │ Driven by          │ Distinguishing   │ Common attributes    │
+  │                    │   characteristics│                      │
+  │ Result             │ New subclasses   │ New superclass       │
+  │ Analogy (OOP)      │ Inheritance      │ Abstraction          │
+  └────────────────────┴──────────────────┴──────────────────────┘
+
+NOTE: The ER diagram representation is IDENTICAL for both — the ISA
+triangle. The difference is purely in the design approach (top-down vs
+bottom-up). The final schema is the same.
+
+────────────────────────────────────────────────
+2.2.7  AGGREGATION
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+**Aggregation** is an abstraction mechanism that treats a RELATIONSHIP
+(and the entities it connects) as a HIGHER-LEVEL ENTITY that can
+participate in further relationships. It allows relationships among
+relationships.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+Standard ER model does NOT allow relationships between relationships.
+Aggregation solves this limitation.
+
+WHY do we need it?
+Consider: Employee works on Project under supervision of a Manager.
+  - Employee "works_on" Project → this is a relationship.
+  - Now we want Manager to "manages" the (Employee works_on Project)
+    combination. We can't directly have a relationship on a relationship.
+
+SOLUTION: Aggregate the "works_on" relationship (along with Employee and
+Project) into a single higher-level entity, then define a relationship
+between this aggregate and Manager.
+
+■ ER DIAGRAM WITH AGGREGATION
+
+  ┌─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+  │  AGGREGATION                                        │
+  │  ┌──────────┐        ┌──────────┐    ┌──────────┐  │
+  │  │ EMPLOYEE │────────│ works_on │────│ PROJECT  │  │
+  │  └──────────┘        └──────────┘    └──────────┘  │
+  └─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┬ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+                              │
+                        ┌─────┴─────┐
+                        │  manages  │
+                        └─────┬─────┘
+                              │
+                        ┌─────┴─────┐
+                        │  MANAGER  │
+                        └───────────┘
+
+The dashed box represents the aggregation. The entire "Employee works_on
+Project" is treated as a single abstract entity that participates in
+the "manages" relationship with Manager.
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+**GitHub Repository Management**:
+  - Developer "contributes_to" Repository (a relationship)
+  - Organization "sponsors" the (Developer contributes_to Repository)
+    combination. This requires aggregation — the sponsorship is of the
+    contribution, not just the developer or repository alone.
+
+
+================================================================================
+2.3  KEYS
+================================================================================
+
+■ FORMAL DEFINITIONS
+─────────────────────
+
+**1. Super Key:**
+   A **super key** is a set of one or more attributes that, taken
+   collectively, can UNIQUELY IDENTIFY an entity in an entity set.
+
+   Formally: A set of attributes $K \subseteq R$ is a super key of
+   relation $R$ if no two distinct tuples in any legal instance of $R$
+   have the same values for $K$.
+
+   Example: For Student(roll_no, name, email, phone):
+     Super keys: {roll_no}, {email}, {roll_no, name}, {roll_no, email},
+     {roll_no, name, email, phone}, etc.
+
+   NOTE: ANY superset of a super key is also a super key.
+
+**2. Candidate Key:**
+   A **candidate key** is a MINIMAL super key — a super key from which
+   no attribute can be removed without losing the uniqueness property.
+
+   Formally: A super key $K$ is a candidate key if no proper subset of
+   $K$ is also a super key.
+
+   Example: For Student(roll_no, name, email, phone):
+     Candidate keys: {roll_no}, {email}
+     (NOT {roll_no, name} because {roll_no} alone is sufficient)
+
+**3. Primary Key:**
+   A **primary key** is the candidate key CHOSEN by the database designer
+   as the principal means of identifying entities. A relation can have
+   only ONE primary key.
+
+   Properties:
+     • Must be unique for every tuple.
+     • Cannot contain NULL values (Entity Integrity Constraint).
+     • Should be stable (rarely changes).
+     • Preferably short (for efficient indexing).
+
+   Example: roll_no is chosen as the primary key for Student.
+
+**4. Foreign Key:**
+   An attribute (or set of attributes) in one relation that REFERENCES
+   the primary key of another relation.
+
+   Example: dept_id in Student references dept_id in Department.
+
+■ STRONG vs WEAK ENTITY SETS
+──────────────────────────────
+
+  ┌──────────────────────┬──────────────────────┬──────────────────────┐
+  │ Aspect               │ Strong Entity Set    │ Weak Entity Set      │
+  ├──────────────────────┼──────────────────────┼──────────────────────┤
+  │ Has own primary key? │ YES                  │ NO (has partial key) │
+  │ Can exist alone?     │ YES (independent)    │ NO (depends on       │
+  │                      │                      │   identifying entity)│
+  │ Identified by        │ Its own primary key  │ PK of strong entity  │
+  │                      │                      │   + its partial key  │
+  │ ER Notation          │ Single rectangle     │ Double rectangle     │
+  │ Relationship         │ Normal relationship  │ Identifying relation │
+  │                      │                      │   (double diamond)   │
+  │ Participation        │ Any                  │ Always TOTAL in      │
+  │                      │                      │   identifying rel.   │
+  │ Example              │ Course(course_id)    │ Section(sec_id)      │
+  │                      │                      │   depends on Course  │
+  └──────────────────────┴──────────────────────┴──────────────────────┘
+
+**Weak Entity Example:**
+  Course (strong): course_id (PK), course_name
+  Section (weak): sec_id (partial/discriminator key), room, time
+
+  Section CANNOT exist without its parent Course. Section is identified
+  by: {course_id + sec_id} (borrowed PK + discriminator).
+
+  ER Diagram:
+    ┌══════════════┐       ◇═══════◇       ┌──────────────┐
+    │   SECTION    │═══════│ sec_of │───────│   COURSE     │
+    │ sec_id (disc)│       │        │       │ course_id(PK)│
+    │ room, time   │       └════════┘       │ course_name  │
+    └══════════════┘                        └──────────────┘
+    (double rectangle)    (double diamond)  (single rectangle)
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is the difference between super key and candidate key?
+  A: A super key is any set of attributes that uniquely identifies tuples.
+     A candidate key is a MINIMAL super key — removing any attribute
+     from it would lose the uniqueness property.
+
+  Q: Can a table have multiple candidate keys?
+  A: Yes. For example, Student might have {roll_no} and {email} as
+     candidate keys. One is chosen as the primary key.
+
+  Q: What is a weak entity?
+  A: An entity that cannot be uniquely identified by its own attributes
+     alone. It depends on a strong (owner/identifying) entity and uses
+     the strong entity's PK combined with its own discriminator to form
+     its full key.
+
+
+================================================================================
+2.4  INTRODUCTION TO RELATIONAL MODEL
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+The **Relational Model**, proposed by **E.F. Codd (1970)**, organizes
+data into **relations** (tables) consisting of **tuples** (rows) and
+**attributes** (columns). Each relation has a **schema** that defines its
+structure, and a set of **constraints** that enforce data integrity.
+
+■ KEY TERMINOLOGY
+──────────────────
+  ┌──────────────────┬──────────────────────────────────────────────────┐
+  │ Formal Term      │ Informal Equivalent                              │
+  ├──────────────────┼──────────────────────────────────────────────────┤
+  │ Relation         │ Table                                            │
+  │ Tuple            │ Row / Record                                     │
+  │ Attribute        │ Column / Field                                   │
+  │ Domain           │ Set of allowed values for an attribute           │
+  │ Degree (Arity)   │ Number of attributes (columns) in a relation    │
+  │ Cardinality      │ Number of tuples (rows) in a relation           │
+  │ Relation Schema  │ Table structure (name + attributes + types)      │
+  │ Relation Instance│ Actual data (set of tuples) at a given time     │
+  │ NULL             │ Unknown or missing value                         │
+  └──────────────────┴──────────────────────────────────────────────────┘
+
+■ PROPERTIES OF A RELATION
+───────────────────────────
+  1. Each relation has a UNIQUE name.
+  2. Each attribute has a distinct name within the relation.
+  3. All values in a column are of the SAME domain (data type).
+  4. Each tuple is DISTINCT (no duplicate rows).
+  5. The ORDER of tuples is IRRELEVANT (a relation is a SET).
+  6. The ORDER of attributes is IRRELEVANT.
+  7. Each cell contains an ATOMIC (indivisible) value (1NF).
+
+■ EXAMPLE
+──────────
+Relation Schema: student(roll_no: INT, name: VARCHAR, dept: VARCHAR, gpa: FLOAT)
+
+Relation Instance:
+  ┌─────────┬────────┬──────┬──────┐
+  │ roll_no │ name   │ dept │ gpa  │
+  ├─────────┼────────┼──────┼──────┤
+  │ 101     │ Aarav  │ CS   │ 3.8  │
+  │ 102     │ Bipana │ IT   │ 3.5  │
+  │ 103     │ Chetan │ CS   │ 3.9  │
+  └─────────┴────────┴──────┴──────┘
+  Degree = 4,  Cardinality = 3
+
+■ RELATIONAL MODEL vs ER MODEL
+────────────────────────────────
+  ┌──────────────────┬────────────────────┬──────────────────────────┐
+  │ Aspect           │ ER Model           │ Relational Model         │
+  ├──────────────────┼────────────────────┼──────────────────────────┤
+  │ Level            │ Conceptual (design)│ Logical (implementation) │
+  │ Representation   │ Diagram (graphical)│ Tables (mathematical)    │
+  │ Purpose          │ Design blueprint   │ Actual data organization │
+  │ Components       │ Entities, Rels,    │ Relations, Tuples,       │
+  │                  │   Attributes       │   Attributes, Keys       │
+  │ Relationships    │ Diamonds           │ Foreign keys             │
+  │ Foundation       │ Practical/intuitive│ Set theory + logic       │
+  └──────────────────┴────────────────────┴──────────────────────────┘
+
+
+================================================================================
+2.5  REDUCING ER DIAGRAMS TO RELATIONAL SCHEMA
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Reducing an ER diagram to a relational schema** is the process of
+converting a conceptual ER model into a set of relation schemas (tables)
+that can be directly implemented in a relational DBMS.
+
+■ CONVERSION RULES
+────────────────────
+
+**Rule 1: Strong Entity Set → Table**
+  Each strong entity set becomes a table with all its simple attributes
+  as columns. The primary key of the entity set becomes the primary key
+  of the table.
+
+  Example: Student(roll_no, name, dept) → student(roll_no PK, name, dept)
+
+**Rule 2: Weak Entity Set → Table**
+  Each weak entity set becomes a table with:
+  - All its own attributes (including the discriminator)
+  - The primary key of the identifying (owner) entity
+  - Primary key = PK of owner + discriminator
+
+  Example: Section depends on Course.
+  Section(sec_id, room) → section(course_id FK, sec_id, room)
+  PK = (course_id, sec_id)
+
+**Rule 3: Composite Attributes → Flatten**
+  Only the LEAF (component) attributes of a composite attribute are
+  included in the table. The composite attribute itself is NOT included.
+
+  Example: Address = (street, city, zip)
+  → Columns: street, city, zip  (NOT "address" as a single column)
+
+**Rule 4: Multi-Valued Attributes → Separate Table**
+  Each multi-valued attribute becomes a SEPARATE table containing:
+  - The primary key of the entity
+  - The multi-valued attribute itself
+  - PK = (entity_PK, multivalued_attribute)
+
+  Example: Employee with multi-valued phone_numbers:
+  employee(emp_id PK, name, ...)
+  emp_phone(emp_id FK, phone_number)
+  PK of emp_phone = (emp_id, phone_number)
+
+**Rule 5: Derived Attributes → Usually NOT stored**
+  Derived attributes are generally computed at query time, not stored.
+  However, they CAN be stored for performance (denormalization).
+
+  Example: age (derived from DOB) is usually NOT a column.
+
+**Rule 6: Relationship Sets → Depends on Cardinality**
+
+  a) **Many-to-Many (M:N) Relationship → New Table**
+     Create a new table with:
+     - PKs of both participating entity sets (as foreign keys)
+     - Any descriptive attributes of the relationship
+     - PK = combination of both entity PKs
+
+     Example: Student enrolls_in Course (M:N)
+     enrollment(roll_no FK, course_id FK, grade)
+     PK = (roll_no, course_id)
+
+  b) **One-to-Many (1:N) Relationship → Add FK to the "Many" side**
+     Add the PK of the "one" side as a foreign key in the "many" side
+     table. No new table is needed.
+
+     Example: Department (1) has (N) Employees
+     employee(emp_id PK, name, ..., dept_id FK)
+
+  c) **One-to-One (1:1) Relationship → Add FK to either side**
+     Add the PK of one entity as a foreign key in the other entity's
+     table. Prefer adding FK to the side with TOTAL participation.
+
+     Example: Employee (1) has (1) Passport
+     passport(passport_no PK, issue_date, ..., emp_id FK UNIQUE)
+
+**Rule 7: Specialization/Generalization → Multiple Approaches**
+  Option A: Create separate tables for superclass and each subclass.
+            Subclass tables contain FK to superclass + their own attrs.
+  Option B: Create ONE table per subclass, each containing ALL
+            attributes (superclass + subclass). (More redundancy)
+  Option C: Single table with all attributes + a type discriminator
+            column. (NULLs for non-applicable attributes)
+
+**Rule 8: Aggregation → Treat as Entity**
+  The aggregated relationship becomes a table (as per M:N rules), and
+  the outer relationship references this table's PK.
+
+■ COMPREHENSIVE EXAMPLE
+─────────────────────────
+  ER Model: Student (M:N) enrolls_in Course, Department (1:N) has Student
+
+  Relational Schema:
+    department(dept_id PK, dept_name, building)
+    student(roll_no PK, name, dob, dept_id FK→department)
+    course(course_id PK, course_name, credits)
+    enrollment(roll_no FK, course_id FK, grade, semester)
+      PK = (roll_no, course_id)
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: How do you handle M:N relationships in relational schema?
+  A: Create a new junction/bridge table with PKs of both entities as
+     FKs, plus any descriptive attributes. The PK is the combination
+     of both FKs.
+
+  Q: How do you handle multi-valued attributes?
+  A: Create a separate table with the entity's PK and the multi-valued
+     attribute as columns.
+
+
+================================================================================
+2.6  STRUCTURE OF RELATIONAL DATABASES
+================================================================================
+
+────────────────────────────────────────────────
+2.6.1  DATABASE SCHEMA
+────────────────────────────────────────────────
+
+A **relational database schema** consists of a set of relation schemas,
+each defining:
+  • Relation name
+  • Set of attributes with their domains (data types)
+  • Constraints (PK, FK, CHECK, NOT NULL, UNIQUE)
+
+The schema is the LOGICAL DESIGN of the database. It is defined using
+DDL and stored in the system catalog/data dictionary.
+
+────────────────────────────────────────────────
+2.6.2  KEYS IN RELATIONAL DATABASE
+────────────────────────────────────────────────
+
+  ┌──────────────────┬────────────────────────────────────────────────┐
+  │ Key Type         │ Description                                    │
+  ├──────────────────┼────────────────────────────────────────────────┤
+  │ Super Key        │ Any set of attributes that uniquely identifies │
+  │                  │   tuples (may have redundant attributes)       │
+  │ Candidate Key    │ Minimal super key (no redundant attributes)    │
+  │ Primary Key      │ Selected candidate key for identification     │
+  │ Alternate Key    │ Candidate keys NOT chosen as primary key       │
+  │ Foreign Key      │ Attribute referencing another relation's PK    │
+  │ Composite Key    │ Key consisting of multiple attributes          │
+  │ Surrogate Key    │ System-generated artificial key (e.g., auto-   │
+  │                  │   increment ID) with no business meaning       │
+  └──────────────────┴────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────
+2.6.3  SCHEMA DIAGRAMS
+────────────────────────────────────────────────
+
+A **schema diagram** is a graphical representation of a database schema
+showing:
+  • All relations (tables) as boxes
+  • Attributes listed inside each box
+  • Primary keys underlined or marked
+  • Foreign key relationships shown as arrows
+
+Example Schema Diagram (University):
+
+  ┌──────────────────┐        ┌──────────────────┐
+  │    DEPARTMENT    │        │    INSTRUCTOR     │
+  │  ──────────────  │        │  ──────────────   │
+  │  dept_id (PK)    │◄───┐   │  inst_id (PK)     │
+  │  dept_name       │    │   │  name             │
+  │  building        │    │   │  salary           │
+  │  budget          │    │   │  dept_id (FK)──────┤
+  └──────────────────┘    │   └──────────────────┘
+                          │
+  ┌──────────────────┐    │   ┌──────────────────┐
+  │     STUDENT      │    │   │      COURSE      │
+  │  ──────────────  │    │   │  ──────────────   │
+  │  roll_no (PK)    │    └───│  course_id (PK)   │
+  │  name            │        │  title            │
+  │  dept_id (FK)────┤        │  credits          │
+  │  total_credits   │        │  dept_id (FK)─────┘
+  └──────────────────┘        └──────────────────┘
+         │                           │
+         │    ┌──────────────────┐   │
+         └───►│   ENROLLMENT     │◄──┘
+              │  ──────────────  │
+              │  roll_no (FK,PK) │
+              │  course_id(FK,PK)│
+              │  grade           │
+              │  semester        │
+              └──────────────────┘
+
+
+================================================================================
+2.7  RELATIONAL ALGEBRA
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Relational Algebra** is a procedural query language that consists of a
+set of operations that take one or two relations as input and produce a
+new relation as output. It forms the theoretical foundation of SQL and
+query optimization.
+
+Relational Algebra is a **procedural** language: the user specifies
+WHAT to retrieve AND HOW to retrieve it (step by step).
+
+■ FUNDAMENTAL OPERATIONS (6 Basic Operations)
+───────────────────────────────────────────────
+
+1. **SELECT (σ)** — Selection
+   Selects tuples (rows) that satisfy a given predicate (condition).
+
+   Notation: $\sigma_{predicate}(R)$
+
+   Example: Find all students in the CS department:
+     $\sigma_{dept = 'CS'}(Student)$
+
+   SQL Equivalent: SELECT * FROM Student WHERE dept = 'CS';
+
+   Properties:
+     • Produces a subset of tuples from the input relation.
+     • The schema (attributes) of the result is the SAME as the input.
+     • Predicates can use: =, ≠, <, >, ≤, ≥, ∧ (AND), ∨ (OR), ¬ (NOT)
+     • Commutative: $\sigma_{p1}(\sigma_{p2}(R)) = \sigma_{p2}(\sigma_{p1}(R))$
+     • Cascading: $\sigma_{p1 \wedge p2}(R) = \sigma_{p1}(\sigma_{p2}(R))$
+
+────────────────────────────────────────────────
+
+2. **PROJECT (π)** — Projection
+   Selects specific attributes (columns) from a relation, eliminating
+   duplicates in the result.
+
+   Notation: $\pi_{A_1, A_2, \ldots, A_k}(R)$
+
+   Example: Get names and departments of all students:
+     $\pi_{name, dept}(Student)$
+
+   SQL Equivalent: SELECT DISTINCT name, dept FROM Student;
+
+   Properties:
+     • Reduces the number of columns.
+     • Automatically ELIMINATES DUPLICATE tuples.
+     • NOT commutative in general.
+     • $\pi_{A}(\pi_{B}(R)) = \pi_{A}(R)$ if $A \subseteq B$
+
+────────────────────────────────────────────────
+
+3. **UNION (∪)**
+   Combines tuples from two relations, eliminating duplicates.
+
+   Notation: $R \cup S$
+
+   Prerequisite: R and S must be **union-compatible**:
+     • Same number of attributes (same degree)
+     • Corresponding attributes have the same domain
+
+   Example: Find students who are in CS OR IT:
+     $\sigma_{dept='CS'}(Student) \cup \sigma_{dept='IT'}(Student)$
+
+   SQL Equivalent: (SELECT * FROM Student WHERE dept='CS')
+                   UNION
+                   (SELECT * FROM Student WHERE dept='IT');
+
+────────────────────────────────────────────────
+
+4. **SET DIFFERENCE (−)**
+   Returns tuples that are in the first relation but NOT in the second.
+
+   Notation: $R - S$
+
+   Prerequisite: R and S must be union-compatible.
+
+   Example: Find students in CS but NOT in IT:
+     $\sigma_{dept='CS'}(Student) - \sigma_{dept='IT'}(Student)$
+
+   SQL Equivalent: (SELECT * FROM Student WHERE dept='CS')
+                   EXCEPT
+                   (SELECT * FROM Student WHERE dept='IT');
+
+────────────────────────────────────────────────
+
+5. **CARTESIAN PRODUCT (×)**
+   Combines EVERY tuple from R with EVERY tuple from S.
+
+   Notation: $R \times S$
+
+   If R has $n_1$ tuples and S has $n_2$ tuples, then $R \times S$
+   has $n_1 \times n_2$ tuples.
+
+   If R has $k_1$ attributes and S has $k_2$ attributes, then
+   $R \times S$ has $k_1 + k_2$ attributes.
+
+   Example:
+     $Student \times Course$ gives every possible (student, course) pair.
+
+   Cartesian product alone is rarely useful. It's typically combined
+   with SELECT to form a JOIN.
+
+   $\sigma_{Student.dept\_id = Department.dept\_id}(Student \times Department)$
+
+────────────────────────────────────────────────
+
+6. **RENAME (ρ)**
+   Renames a relation and/or its attributes.
+
+   Notation: $\rho_{X(A_1, A_2, \ldots)}(R)$
+   - Renames relation R to X with attributes $A_1, A_2, \ldots$
+
+   Or simply: $\rho_X(R)$ to rename the relation only.
+
+   Example: Rename Student to S:
+     $\rho_S(Student)$
+
+   Useful when: performing self-joins or when attribute names conflict
+   in Cartesian products.
+
+────────────────────────────────────────────────
+
+■ ADDITIONAL (DERIVED) OPERATIONS
+──────────────────────────────────
+
+These can be expressed using the 6 fundamental operations but are
+defined separately for convenience:
+
+7. **SET INTERSECTION (∩)**
+   Returns tuples present in BOTH relations.
+
+   $R \cap S = R - (R - S)$
+
+   Example: Students enrolled in BOTH "DBMS" and "Networks":
+     $\pi_{roll\_no}(\sigma_{course='DBMS'}(Enrollment)) \cap \pi_{roll\_no}(\sigma_{course='Networks'}(Enrollment))$
+
+8. **NATURAL JOIN (⋈)**
+   Combines two relations on their COMMON attributes (same name and
+   domain), returning only matching tuples. Duplicate common columns
+   are removed.
+
+   $R \bowtie S$
+
+   Example:
+     $Student \bowtie Enrollment$ (joins on roll_no)
+
+   Equivalent to:
+     $\pi_{...}(\sigma_{R.common = S.common}(R \times S))$
+
+9. **THETA JOIN (⋈θ)**
+   A join with an arbitrary condition θ.
+   $R \bowtie_\theta S = \sigma_\theta(R \times S)$
+
+10. **EQUI JOIN**
+    A theta join where the condition uses ONLY equality (=).
+
+11. **DIVISION (÷)**
+    Used for "for all" type queries.
+
+    $R \div S$ returns tuples in R that are associated with ALL tuples in S.
+
+    Example: Find students who have enrolled in ALL courses:
+      $\pi_{roll\_no, course\_id}(Enrollment) \div \pi_{course\_id}(Course)$
+
+12. **ASSIGNMENT (←)**
+    Assigns the result of an expression to a temporary relation variable.
+
+    $temp \leftarrow \sigma_{dept='CS'}(Student)$
+
+■ COMPREHENSIVE EXAMPLE
+─────────────────────────
+Schema:
+  employee(person_name, street, city)
+  works(person_name, company_name, salary)
+  company(company_name, city)
+
+Query: Find names of employees who live in 'Butwal' with salary < 50000.
+
+  Step 1: Select employees in Butwal:
+    $temp1 \leftarrow \sigma_{city='Butwal'}(employee)$
+
+  Step 2: Join with works:
+    $temp2 \leftarrow temp1 \bowtie works$
+
+  Step 3: Filter salary < 50000:
+    $temp3 \leftarrow \sigma_{salary < 50000}(temp2)$
+
+  Step 4: Project the name:
+    $result \leftarrow \pi_{person\_name}(temp3)$
+
+  Combined:
+    $\pi_{person\_name}(\sigma_{salary < 50000 \wedge city='Butwal'}(employee \bowtie works))$
+
+■ RELATIONAL ALGEBRA OPERATIONS SUMMARY TABLE
+───────────────────────────────────────────────
+  ┌──────────────┬────────┬───────────────────────────────────────────┐
+  │ Operation    │ Symbol │ Purpose                                   │
+  ├──────────────┼────────┼───────────────────────────────────────────┤
+  │ Select       │ σ      │ Filter rows by condition                  │
+  │ Project      │ π      │ Choose specific columns                   │
+  │ Union        │ ∪      │ Combine tuples from two relations         │
+  │ Set Diff     │ −      │ Tuples in R but not in S                  │
+  │ Cart. Product│ ×      │ All combinations of tuples                │
+  │ Rename       │ ρ      │ Rename relation or attributes             │
+  │ Intersection │ ∩      │ Tuples common to both relations           │
+  │ Natural Join │ ⋈      │ Join on common attributes                 │
+  │ Theta Join   │ ⋈θ     │ Join with arbitrary condition             │
+  │ Division     │ ÷      │ "For all" queries                         │
+  │ Assignment   │ ←      │ Store intermediate results                │
+  └──────────────┴────────┴───────────────────────────────────────────┘
+
+■ RELATIONAL ALGEBRA vs RELATIONAL CALCULUS
+────────────────────────────────────────────
+  ┌──────────────────────┬────────────────────┬────────────────────────┐
+  │ Aspect               │ Relational Algebra │ Relational Calculus    │
+  ├──────────────────────┼────────────────────┼────────────────────────┤
+  │ Type                 │ Procedural         │ Non-Procedural         │
+  │ Specifies            │ What + How         │ What only              │
+  │ Operations           │ σ, π, ∪, −, ×, ρ  │ Predicates, quantifiers│
+  │ Foundation           │ Set operations     │ First-order logic      │
+  │ Types                │ Single type        │ TRC and DRC            │
+  │ SQL based on         │ Both               │ Both                   │
+  └──────────────────────┴────────────────────┴────────────────────────┘
+
+  **TRC (Tuple Relational Calculus)**: Variables represent tuples.
+    {t | P(t)} — "the set of all tuples t such that predicate P is true"
+    Example: {t | t ∈ Student ∧ t.dept = 'CS'}
+
+  **DRC (Domain Relational Calculus)**: Variables represent domain values.
+    {<x1, x2, ...> | P(x1, x2, ...)}
+    Example: {<n> | ∃r,d (Student(r, n, d) ∧ d = 'CS')}
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What are the 6 fundamental operations of relational algebra?
+  A: Select (σ), Project (π), Union (∪), Set Difference (−),
+     Cartesian Product (×), and Rename (ρ).
+
+  Q: What is the difference between SELECT and PROJECT?
+  A: SELECT (σ) filters ROWS based on a condition (horizontal).
+     PROJECT (π) selects specific COLUMNS (vertical).
+
+  Q: What is natural join?
+  A: Natural join combines two relations on their common attributes
+     (same name), returning only matching tuples with duplicate
+     columns eliminated.
+
+  Q: When do you use the division operation?
+  A: Division is used for "for all" queries. E.g., "Find students
+     enrolled in ALL courses."
+
+
+================================================================================
+                     END OF CHAPTER 2 NOTES
+================================================================================

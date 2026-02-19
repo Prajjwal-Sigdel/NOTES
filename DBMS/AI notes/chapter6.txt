@@ -1,0 +1,593 @@
+================================================================================
+          CHAPTER 6: QUERY PROCESSING AND OPTIMIZATION
+                            [5 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  6.1  Introduction to Query Processing
+  6.2  Equivalence of Expressions
+  6.3  Query Cost Estimation
+  6.4  Query Optimization
+  6.5  Query Evaluation and Execution Plan
+
+================================================================================
+6.1  INTRODUCTION TO QUERY PROCESSING
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Query Processing** refers to the range of activities involved in
+extracting data from a database, including: parsing and translating the
+SQL query, optimizing it into an efficient execution plan, and evaluating
+(executing) the plan to produce the result.
+
+■ IN-DEPTH EXPLANATION
+───────────────────────
+When a user submits an SQL query, the DBMS does NOT simply execute it
+as-is. Instead, it goes through a sophisticated pipeline to find the
+MOST EFFICIENT way to execute the query.
+
+WHY is this necessary?
+  A single SQL query can be executed in MANY different ways (different
+  join orders, different access methods, different algorithms). The
+  performance difference between the best and worst plan can be
+  several orders of magnitude (e.g., 0.1 seconds vs. 10 minutes).
+
+■ BASIC STEPS OF QUERY PROCESSING
+
+  ┌─────────────────────────┐
+  │   SQL Query from User   │
+  └────────────┬────────────┘
+               ▼
+  ┌─────────────────────────────────────────┐
+  │   Step 1: PARSING & TRANSLATION        │
+  │   • Syntax Check                       │
+  │   • Semantic Check                     │
+  │   • Convert to RA Expression           │
+  └────────────┬────────────────────────────┘
+               ▼
+  ┌─────────────────────────────────────────┐
+  │   Relational Algebra Expression        │
+  └────────────┬────────────────────────────┘
+               ▼
+  ┌─────────────────────────────────────────┐
+  │   Step 2: OPTIMIZATION                 │
+  │   • Generate Alternative Plans         │
+  │   • Estimate Cost of Each              │
+  │   • Choose Cheapest Plan               │
+  └────────────┬────────────────────────────┘
+               ▼
+  ┌─────────────────────────────────────────┐
+  │   Optimized Execution Plan             │
+  └────────────┬────────────────────────────┘
+               ▼
+  ┌─────────────────────────────────────────┐
+  │   Step 3: EVALUATION                   │
+  │   • Execute Chosen Plan                │
+  │   • Use Indices/Algorithms             │
+  │   • Return Results                     │
+  └────────────┬────────────────────────────┘
+               ▼
+  ┌─────────────────────────────────────────┐
+  │         Query Results                  │
+  └─────────────────────────────────────────┘
+
+**Step 1: PARSING AND TRANSLATION**
+  a) **Lexical Analysis**: Tokenize the SQL query into keywords,
+     identifiers, operators, literals.
+  b) **Syntax Analysis (Parsing)**: Check if the query conforms to
+     SQL grammar rules. Build a parse tree.
+  c) **Semantic Analysis**: Verify that:
+     - Referenced tables and columns exist (check data dictionary).
+     - Data types are compatible.
+     - User has privileges to access the data.
+  d) **Translation**: Convert the SQL query into an internal
+     representation — typically a **relational algebra expression**
+     or an **operator tree** (query tree).
+
+  SQL: SELECT name FROM employee WHERE dept = 'CS' AND salary > 50000;
+  RA:  π_name(σ_(dept='CS' ∧ salary>50000)(employee))
+
+**Step 2: OPTIMIZATION**
+  a) Generate multiple EQUIVALENT relational algebra expressions.
+  b) For each expression, generate possible EVALUATION PLANS
+     (choice of algorithms and access methods).
+  c) Estimate the COST of each plan using statistics.
+  d) Choose the plan with the LOWEST estimated cost.
+
+**Step 3: EVALUATION**
+  a) Execute the chosen evaluation plan.
+  b) Use the query evaluation engine to process operations
+     (sequential scan, index scan, hash join, sort-merge join, etc.).
+  c) Return the result to the user.
+
+■ QUERY TREE (OPERATOR TREE)
+──────────────────────────────
+A query tree represents a relational algebra expression as a tree:
+  - Leaf nodes = input relations (tables)
+  - Internal nodes = relational algebra operations
+  - Root node = final result
+
+Example:
+  SQL: SELECT name FROM employee e JOIN department d
+       ON e.dept_id = d.dept_id WHERE d.dept_name = 'CS';
+
+  Initial Query Tree:
+                    π(name)
+                       │
+                  σ(dept_name='CS')
+                       │
+                    ⋈(e.dept_id = d.dept_id)
+                   ╱            ╲
+              employee       department
+
+  Optimized Query Tree (push selection down):
+                    π(name)
+                       │
+                    ⋈(e.dept_id = d.dept_id)
+                   ╱            ╲
+              employee     σ(dept_name='CS')
+                                │
+                           department
+
+  By pushing the selection (σ) BELOW the join (⋈), we FIRST filter
+  department to only 'CS' rows (much smaller), THEN join — dramatically
+  reducing the number of tuples processed.
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+When you run a query on **Amazon's product database** with millions of
+products, the query processor must decide:
+  - Should it scan ALL products or use an index on category?
+  - For a join between orders and products, should it use a hash join,
+    merge join, or nested loop join?
+  - Which table should be on the "build" side of the hash join?
+  These decisions, made by the optimizer, can make the difference between
+  a 50ms response and a 50-second response.
+
+
+================================================================================
+6.2  EQUIVALENCE OF EXPRESSIONS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+Two relational algebra expressions are **equivalent** if they produce
+the SAME result on every legal database instance. The query optimizer
+uses **equivalence rules** (transformation rules) to convert one
+expression into an equivalent but more efficient form.
+
+■ TRANSFORMATION RULES (EQUIVALENCE RULES)
+────────────────────────────────────────────
+
+**Rule 1: Cascade of Selections (σ decomposition)**
+  σ_(p₁ ∧ p₂)(R) = σ_p₁(σ_p₂(R))
+
+  A conjunctive selection can be split into a cascade of individual
+  selections. This allows pushing individual conditions down the tree.
+
+**Rule 2: Commutativity of Selection**
+  σ_p₁(σ_p₂(R)) = σ_p₂(σ_p₁(R))
+
+  The order of applying selections doesn't matter.
+
+**Rule 3: Cascade of Projections**
+  π_L₁(π_L₂(R)) = π_L₁(R)  if L₁ ⊆ L₂
+
+  Only the outermost (final) projection matters.
+
+**Rule 4: Commutativity of Join (and Cartesian Product)**
+  R ⋈ S = S ⋈ R
+  R × S = S × R
+
+  The order of joining doesn't affect the result (but may affect cost).
+
+**Rule 5: Associativity of Join**
+  (R ⋈ S) ⋈ T = R ⋈ (S ⋈ T)
+
+  Allows choosing the BEST join order.
+
+**Rule 6: Pushing Selection Before Join (Most Important!)**
+  If predicate p involves only attributes of R:
+  σ_p(R ⋈ S) = σ_p(R) ⋈ S
+
+  This is the MOST IMPORTANT optimization — filter early to reduce
+  the number of tuples entering the join.
+
+**Rule 7: Pushing Projection Before Join**
+  π_L(R ⋈_p S) = π_L(π_L₁(R) ⋈_p π_L₂(S))
+
+  Where L₁ and L₂ include the join attributes plus the attributes
+  needed in L. Reduces the width (number of columns) of intermediate
+  results.
+
+**Rule 8: Commutativity of Set Operations**
+  R ∪ S = S ∪ R
+  R ∩ S = S ∩ R
+  (But: R − S ≠ S − R)
+
+**Rule 9: Associativity of Set Operations**
+  (R ∪ S) ∪ T = R ∪ (S ∪ T)
+  (R ∩ S) ∩ T = R ∩ (S ∩ T)
+
+**Rule 10: Distribution of Selection over Union**
+  σ_p(R ∪ S) = σ_p(R) ∪ σ_p(S)
+
+**Rule 11: Distribution of Selection over Set Difference**
+  σ_p(R − S) = σ_p(R) − σ_p(S)
+
+**Rule 12: Distribution of Projection over Union**
+  π_L(R ∪ S) = π_L(R) ∪ π_L(S)
+
+■ EXAMPLE: APPLYING TRANSFORMATION RULES
+──────────────────────────────────────────
+
+Query: Find names of employees who live in 'Pokhara'.
+Schema: employee(person_name, street, city)
+
+RA: π_person_name(σ_(city='Pokhara')(employee))
+
+This is already optimal for a single table. Now consider a multi-table
+query:
+
+Query: Find names of employees in Pokhara who work for 'Nabil Bank'.
+Schema: employee(person_name, street, city)
+        works(person_name, company_name, salary)
+
+Initial: π_person_name(σ_(city='Pokhara' ∧ company_name='Nabil Bank')(employee ⋈ works))
+
+Step 1 — Cascade selection:
+  π_person_name(σ_(city='Pokhara')(σ_(company_name='Nabil Bank')(employee ⋈ works)))
+
+Step 2 — Push selections down:
+  π_person_name(σ_(city='Pokhara')(employee) ⋈ σ_(company_name='Nabil Bank')(works))
+
+Initial Query Tree:              Optimized Query Tree:
+    π(person_name)                   π(person_name)
+         │                                │
+    σ(city='Pokhara'                     ⋈
+     ∧ co='Nabil Bank')              ╱       ╲
+         │                   σ(city='Pokhara')  σ(co='Nabil Bank')
+         ⋈                        │                    │
+       ╱    ╲                employee                works
+  employee  works
+
+The optimized version filters BOTH tables BEFORE joining, dramatically
+reducing the join input size.
+
+
+================================================================================
+6.3  QUERY COST ESTIMATION
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Query Cost Estimation** is the process of calculating the approximate
+resource consumption (primarily disk I/O) of a query evaluation plan.
+The optimizer uses cost estimates to compare alternative plans and
+choose the cheapest one.
+
+■ COST COMPONENTS
+──────────────────
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Cost Factor          │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Disk I/O (dominant)  │ Number of disk block reads and writes.       │
+  │                      │ This is usually the PRIMARY cost metric      │
+  │                      │ because disk access is 10⁵× slower than      │
+  │                      │ memory access.                                │
+  │ CPU Cost             │ Time for computation: comparisons, hashing,  │
+  │                      │ sorting, arithmetic. Usually secondary.       │
+  │ Memory Cost          │ Buffer space required for intermediate        │
+  │                      │ results and hash tables.                      │
+  │ Communication Cost   │ Network transfer cost in distributed DBs.    │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ STATISTICAL INFORMATION USED
+───────────────────────────────
+The DBMS maintains statistics about each relation in the system catalog:
+
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Statistic            │ Meaning                                      │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ nᵣ                   │ Number of tuples (rows) in relation r        │
+  │ bᵣ                   │ Number of disk blocks containing r           │
+  │ lᵣ                   │ Size of a tuple (record) in bytes            │
+  │ fᵣ                   │ Blocking factor (tuples per block)           │
+  │ V(A, r)              │ Number of distinct values of attribute A     │
+  │                      │   in relation r                               │
+  │ Height of index      │ For B⁺ tree indices                          │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+  Relationship: bᵣ = ⌈nᵣ / fᵣ⌉
+
+■ COST OF BASIC OPERATIONS
+────────────────────────────
+
+**1. Linear/Sequential Scan (Full Table Scan):**
+  Cost = bᵣ (read every block)
+  Best for: small tables or when most tuples match.
+
+**2. Binary Search (on ordered file):**
+  Cost = ⌈log₂(bᵣ)⌉ (for equality on ordering attribute)
+
+**3. Index Scan (B⁺ Tree):**
+  Primary Index, equality: hᵢ + 1 blocks
+    (hᵢ = height of tree; 1 for the data block)
+  Primary Index, range: hᵢ + b (b = number of matching blocks)
+  Secondary Index, equality: hᵢ + 1 (at most)
+  Secondary Index, range: hᵢ + n (n = number of matching records;
+    could be very expensive as records may be in different blocks)
+
+**4. Selection Cost Estimation:**
+  σ_(A=v)(r): depends on whether an index exists on A.
+  - With B⁺ tree index: hᵢ + 1 blocks
+  - Without index: bᵣ blocks (full scan)
+  - Selectivity estimate: nᵣ / V(A, r) tuples expected
+
+**5. Join Cost Estimation:**
+  Nested Loop Join: nᵣ × bₛ + bᵣ blocks (worst case)
+  Block Nested Loop: bᵣ × bₛ + bᵣ blocks
+  Sort-Merge Join: bᵣ + bₛ + 2 × bᵣ × ⌈log(bᵣ)⌉ + 2 × bₛ × ⌈log(bₛ)⌉ (if not sorted)
+  Hash Join: 3 × (bᵣ + bₛ) blocks (if fits in memory)
+
+■ COST COMPARISON EXAMPLE
+───────────────────────────
+  employee: nᵣ = 10000, bᵣ = 500, B⁺ tree on emp_id (height=3)
+  department: nₛ = 50, bₛ = 5
+
+  Query: employee ⋈ department (on dept_id)
+
+  Plan A — Nested Loop (employee outer):
+    Cost = 500 + 10000 × 5 = 50,500 block reads
+
+  Plan B — Nested Loop (department outer):
+    Cost = 5 + 50 × 500 = 25,005 block reads
+
+  Plan C — Block Nested Loop (department outer):
+    Cost = 5 + 5 × 500 = 2,505 block reads
+
+  Plan D — Hash Join:
+    Cost ≈ 3 × (500 + 5) = 1,515 block reads
+
+  The optimizer would choose Plan D (hash join) → 30× faster than Plan A!
+
+
+================================================================================
+6.4  QUERY OPTIMIZATION
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Query Optimization** is the process of selecting the most efficient
+evaluation plan for a given query from among the many possible plans.
+The optimizer transforms the query into equivalent forms and estimates
+the cost of each plan to find the cheapest one.
+
+■ TWO APPROACHES TO OPTIMIZATION
+──────────────────────────────────
+
+**1. Heuristic-Based Optimization (Rule-Based)**
+  Uses a set of RULES (heuristics) to transform the query into a
+  "generally efficient" form WITHOUT estimating costs.
+
+  Key Heuristic Rules:
+  a) **Push selections down** the tree as far as possible.
+     (Reduce tuple count early → less data to process)
+  b) **Push projections down** to remove unnecessary columns.
+     (Reduce tuple width → less I/O)
+  c) **Perform most restrictive selections first**.
+     (Selections with smallest result should be done first)
+  d) **Replace Cartesian products with joins** when possible.
+     (A × B followed by σ on join condition → use A ⋈ B)
+  e) **Use left-deep join trees** for pipelining.
+
+  Pros: Simple, fast to compute, no statistics needed.
+  Cons: May not find the truly optimal plan; ignores data distribution.
+
+**2. Cost-Based Optimization**
+  Generates multiple candidate plans, estimates the COST of each using
+  statistics, and selects the plan with the LOWEST estimated cost.
+
+  Process:
+  1. Enumerate equivalent RA expressions (using transformation rules).
+  2. For each expression, enumerate possible algorithms for each
+     operation (e.g., hash join vs. merge join vs. nested loop).
+  3. Estimate cost of each complete plan using catalog statistics.
+  4. Choose the plan with minimum estimated cost.
+
+  Pros: Finds near-optimal plans based on actual data characteristics.
+  Cons: Expensive to compute; requires up-to-date statistics.
+
+  ┌────────────────────────┬─────────────────────┬────────────────────────┐
+  │ Aspect                 │ Heuristic-Based     │ Cost-Based             │
+  ├────────────────────────┼─────────────────────┼────────────────────────┤
+  │ Uses statistics?       │ No                  │ Yes                    │
+  │ Guaranteed optimal?    │ No                  │ Near-optimal           │
+  │ Speed of optimization  │ Fast                │ Slower                 │
+  │ Complexity             │ Low                 │ High                   │
+  │ Handles skew/outliers? │ No                  │ Yes                    │
+  │ Used by                │ Simple DBMS         │ Oracle, PostgreSQL,    │
+  │                        │                     │ MySQL, SQL Server      │
+  └────────────────────────┴─────────────────────┴────────────────────────┘
+
+  Modern DBMS use a COMBINATION: apply heuristic rules first to prune
+  the search space, then use cost-based optimization on the remaining
+  candidates.
+
+■ HEURISTIC OPTIMIZATION EXAMPLE
+──────────────────────────────────
+
+Query: Find names of sailors who reserved a red or green boat.
+Schema: sailors(sid, name, rating, age)
+        boats(bid, bname, color)
+        reserves(sid, bid, day)
+
+SQL:
+  SELECT DISTINCT s.name
+  FROM sailors s, reserves r, boats b
+  WHERE s.sid = r.sid AND r.bid = b.bid
+    AND (b.color = 'red' OR b.color = 'green');
+
+Initial RA (Canonical/Naive):
+  π_name(σ_(s.sid=r.sid ∧ r.bid=b.bid ∧ (color='red' ∨ color='green'))(sailors × reserves × boats))
+
+Initial Query Tree:
+            π(name)
+               │
+          σ(all conditions)
+               │
+            × (Cartesian Product)
+          ╱    │    ╲
+    sailors reserves boats
+
+This is TERRIBLE — Cartesian product of all three tables!
+
+Apply Heuristic Rules:
+
+Step 1: Push σ(color='red' ∨ color='green') to boats:
+Step 2: Replace × + σ(join conditions) with ⋈:
+Step 3: Push π down:
+
+Optimized Query Tree:
+            π(name)
+               │
+            ⋈(s.sid = r.sid)
+           ╱        ╲
+    π(sid,name)    ⋈(r.bid = b.bid)
+        │          ╱         ╲
+    sailors   π(sid,bid)   σ(color='red' ∨ color='green')
+                  │              │
+              reserves        boats
+
+Now:
+  - Boats filtered FIRST (only red/green boats).
+  - Joined with reserves (much smaller).
+  - Then joined with sailors.
+  - Projections eliminate unnecessary columns early.
+
+
+================================================================================
+6.5  QUERY EVALUATION AND EXECUTION PLAN
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **Query Evaluation Plan** (or Execution Plan) is a detailed,
+step-by-step specification of how a query will be executed. It includes:
+  1. The order of operations.
+  2. The algorithm to use for each operation (e.g., hash join, index scan).
+  3. How intermediate results are passed between operations.
+
+■ COMPONENTS OF AN EXECUTION PLAN
+───────────────────────────────────
+
+  ┌──────────────────────┬──────────────────────────────────────────────┐
+  │ Component            │ Description                                  │
+  ├──────────────────────┼──────────────────────────────────────────────┤
+  │ Access Path          │ How each table is accessed:                  │
+  │                      │ - Sequential scan (full table scan)          │
+  │                      │ - Index scan (B⁺ tree, hash)                 │
+  │                      │ - Index-only scan                            │
+  │ Join Algorithm       │ How joins are performed:                     │
+  │                      │ - Nested Loop Join                           │
+  │                      │ - Block Nested Loop Join                     │
+  │                      │ - Sort-Merge Join                            │
+  │                      │ - Hash Join                                  │
+  │ Join Order           │ In which order are tables joined?            │
+  │                      │ (Left-deep, right-deep, bushy)               │
+  │ Pipelining           │ Can operations pass results directly to      │
+  │                      │ the next? (vs. materialization to disk)      │
+  └──────────────────────┴──────────────────────────────────────────────┘
+
+■ JOIN ALGORITHMS
+──────────────────
+
+**1. Nested Loop Join:**
+  For each tuple in R (outer), scan ALL tuples in S (inner).
+  Cost: nᵣ × bₛ + bᵣ
+  Best for: Small outer relation, index on inner.
+
+**2. Block Nested Loop Join:**
+  For each BLOCK of R, scan all BLOCKS of S.
+  Cost: bᵣ × bₛ + bᵣ
+  Improvement: Reduces disk I/O significantly.
+
+**3. Sort-Merge Join:**
+  Sort both relations on the join attribute, then merge.
+  Cost: Sort cost + bᵣ + bₛ
+  Best for: When relations are already sorted or sort is needed anyway.
+
+**4. Hash Join:**
+  Build a hash table on the smaller relation (build phase).
+  Probe the hash table with the larger relation (probe phase).
+  Cost: 3(bᵣ + bₛ) if fits in memory.
+  Best for: Equi-joins on large relations. Most common in practice.
+
+■ PIPELINING vs MATERIALIZATION
+─────────────────────────────────
+
+**Materialization:**
+  Each intermediate operation writes its COMPLETE result to disk.
+  The next operation reads from disk.
+  → More disk I/O, but simple.
+
+**Pipelining:**
+  Operations pass tuples DIRECTLY to the next operation WITHOUT writing
+  to disk. Results are produced and consumed on-the-fly.
+  → Less disk I/O, faster.
+  → Not always possible (e.g., sorting requires full input).
+
+  Materialization:
+  ┌─────────────────┐  Write to disk  ┌─────────────────┐  Write to disk  ┌──────────────┐
+  │ Scan employees  │ ──────────────→ │ Filter dept=CS  │ ──────────────→ │ Project name │
+  └─────────────────┘                 └─────────────────┘                 └──────────────┘
+
+  Pipelining:
+  ┌─────────────────┐  Stream tuples  ┌─────────────────┐  Stream tuples  ┌──────────────┐
+  │ Scan employees  │ ═══════════════→│ Filter dept=CS  │ ═══════════════→│ Project name │
+  └─────────────────┘                 └─────────────────┘                 └──────────────┘
+
+■ VIEWING EXECUTION PLANS
+───────────────────────────
+Most DBMS allow you to see the execution plan:
+
+  PostgreSQL: EXPLAIN ANALYZE SELECT * FROM employee WHERE dept='CS';
+  MySQL:      EXPLAIN SELECT * FROM employee WHERE dept='CS';
+  Oracle:     EXPLAIN PLAN FOR SELECT * FROM employee WHERE dept='CS';
+
+Sample EXPLAIN output:
+  Seq Scan on employee  (cost=0.00..35.50 rows=10 width=244)
+    Filter: (dept = 'CS'::text)
+
+  Or with index:
+  Index Scan using idx_emp_dept on employee  (cost=0.28..8.30 rows=10)
+    Index Cond: (dept = 'CS'::text)
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What are the basic steps of query processing?
+  A: (1) Parsing and translation (SQL → relational algebra),
+     (2) Optimization (find cheapest plan using heuristics/cost-based),
+     (3) Evaluation (execute the chosen plan and return results).
+
+  Q: What is the most important heuristic in query optimization?
+  A: Push selections down the query tree as early as possible. This
+     reduces the number of tuples in intermediate results, making
+     subsequent operations (especially joins) much cheaper.
+
+  Q: What are the main join algorithms?
+  A: Nested Loop, Block Nested Loop, Sort-Merge Join, and Hash Join.
+     Hash Join is generally fastest for equi-joins on large relations.
+
+  Q: What is the difference between cost-based and heuristic optimization?
+  A: Heuristic uses fixed rules (push selections down, etc.) without
+     statistics — fast but may not be optimal. Cost-based enumerates
+     plans, estimates costs using statistics, and picks the cheapest —
+     better results but more expensive to compute.
+
+
+================================================================================
+                     END OF CHAPTER 6 NOTES
+================================================================================

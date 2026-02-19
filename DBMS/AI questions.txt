@@ -1,0 +1,967 @@
+================================================================================
+                    DATABASE MANAGEMENT SYSTEMS (DBMS)
+                     AI-GENERATED PRACTICE PAPERS
+                  (10 Sets — Arranged by Question Number)
+================================================================================
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 1 (a)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) What is a Database Management System? Explain the purpose and
+         applications of DBMS in modern industries.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) Compare and contrast Database Systems with traditional File Systems.
+         Why are database systems preferred in modern applications?
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) What are database languages? Explain DDL, DML, and DCL with suitable
+         examples of each.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) Explain the concept of instances and schemas in a database. How do
+         they differ? Give an example to illustrate.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) Explain the database system architecture with a suitable diagram.
+         What are the responsibilities of each component in the architecture?
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) What is a view of data? How does the concept of data abstraction
+         simplify the interaction between users and the database at different
+         levels?
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) Differentiate between DDL and DML with examples. What role does DCL
+         play in database management?
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) Explain the three-tier database application architecture. What are
+         the advantages of separating the application into presentation,
+         application logic, and data layers?
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (a) Define the terms: database, database management system, and database
+         system. How are they related to each other?
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 1 (a) What are the advantages and disadvantages of a database management
+         system? Under what circumstances would using a file system be more
+         appropriate than a DBMS?
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 1 (b)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) Define the three levels of data abstraction (physical, logical, and
+         view level) with a suitable diagram. How does data abstraction help
+         in managing complex databases?
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) Explain the concept of data independence. Differentiate between
+         physical data independence and logical data independence with
+         examples.
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) Explain the two-tier and three-tier database application architecture
+         with diagrams. What are the advantages of three-tier architecture?
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) What is the role of a Database Management System in an organization?
+         Discuss the evolution of DBMS from flat files to modern relational
+         systems.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) What is data abstraction? Why is it necessary? Explain how the three
+         levels of data abstraction (physical, logical, and view) interact
+         with each other.
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) Explain the structure of a relational database. What are the
+         differences between a relation schema and a relation instance?
+         Illustrate with an example.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) What is a database schema diagram? Draw a schema diagram for a
+         university database involving students, courses, instructors, and
+         departments. Show all keys and relationships.
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) What are the different types of database users? Explain the role of
+         a database administrator (DBA) and their responsibilities.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 1 (b) What is physical and logical data independence? Explain why logical
+         data independence is more difficult to achieve than physical data
+         independence.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 1 (b) Explain the database application architecture. Differentiate between
+         two-tier (client-server) and three-tier architecture. In what
+         scenarios is each preferred?
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 2 (a)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) What is an ER Model? Define the following terms with examples:
+         entity set, relationship set, participation, mapping cardinalities,
+         and degree of a relationship set.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) Define the following terms in the context of the ER model:
+         specialization, generalization, and aggregation. Illustrate each
+         concept with a suitable example.
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) What are keys in a relational database? Define super key, candidate
+         key, and primary key with examples. Differentiate between strong
+         entity sets and weak entity sets.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) What is a relational model? How do you reduce an ER diagram into a
+         relational schema? Explain with an example involving at least three
+         entities with different types of relationships.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) Define the following ER model concepts with examples: participation
+         constraints (total and partial), entity's role in a relationship,
+         and descriptive attributes of a relationship.
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) What is relational algebra? Explain the following fundamental
+         operations with examples: select, project, union, set difference,
+         Cartesian product, and rename.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) Explain the process of reducing an ER diagram to a relational schema.
+         How are the following handled during the conversion:
+         (i) composite attributes, (ii) multivalued attributes,
+         (iii) weak entity sets, (iv) many-to-many relationships?
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) What are mapping cardinalities? Explain one-to-one, one-to-many,
+         many-to-one, and many-to-many cardinalities with ER diagram
+         notations and real-world examples.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (a) What is the structure of a relational database? Define the terms:
+         relation, tuple, attribute, domain, and degree of a relation. How
+         is a relational schema different from a relational instance?
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 2 (a) What is a schema diagram? Draw a schema diagram for an e-commerce
+         database with at least five relations. Identify all primary keys,
+         foreign keys, and relationships.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 2 (b)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for a ride-sharing application (e.g.,
+         Uber/Pathao). Include entities such as Driver, Rider, Trip, Vehicle,
+         and Payment. Clearly show primary keys, weak entities, composite
+         attributes, multivalued attributes, and derived attributes.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for an online food delivery system (e.g.,
+         Foodmandu). Include entities such as Customer, Restaurant,
+         Menu_Item, Delivery_Person, and Order. Show all types of attributes
+         and relationship cardinalities.
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for a smart city traffic management system.
+         Include entities such as Vehicle, Traffic_Signal, Intersection,
+         Violation, and Fine. Show mapping cardinalities, descriptive
+         attributes, and entity roles.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for a hospital management system. Include
+         entities such as Patient, Doctor, Department, Appointment,
+         Prescription, and Medicine. Illustrate specialization and
+         generalization in your diagram.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for a bank management system. Include entities
+         such as Customer, Account, Branch, Loan, and Transaction. Show
+         composite attributes (e.g., customer name), multivalued attributes
+         (e.g., phone numbers), and derived attributes (e.g., account age).
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for a gym/fitness center management system.
+         Include entities such as Member, Trainer, Workout_Plan, Equipment,
+         and Membership. Show all types of attributes and define the
+         relationships with proper cardinalities.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for a real estate property management system.
+         Include entities such as Property, Owner, Tenant, Lease_Agreement,
+         and Maintenance_Request. Show aggregation and generalization where
+         applicable.
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for an event management system (e.g.,
+         conferences, concerts). Include entities such as Event, Venue,
+         Organizer, Attendee, Sponsor, and Ticket. Show weak entities and
+         relationship descriptive attributes.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for an online examination system (e.g., for a
+         university). Include entities such as Student, Exam, Question,
+         Answer, Course, and Result. Show total and partial participation
+         constraints and identify all primary keys.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 2 (b) Draw an ER diagram for a vehicle rental system (e.g., car rental).
+         Include entities such as Customer, Vehicle, Rental, Insurance, and
+         Payment. Demonstrate the use of weak entity sets, derived
+         attributes, and composite attributes.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 3 (a)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following relational schema for an e-commerce platform:
+           customers(cust_id, cust_name, email, city)
+           products(prod_id, prod_name, category, price)
+           orders(order_id, cust_id, prod_id, quantity, order_date)
+
+         Write relational algebra expressions for the following queries:
+         i.   Find the names of all customers who live in 'Kathmandu'.
+         ii.  Find the product names and prices of all products in the
+              'Electronics' category.
+         iii. Find the names of customers who have ordered a product with
+              price greater than Rs. 10,000.
+         iv.  Find the total quantity ordered for each product.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following relational schema for a university system:
+           student(roll_no, name, dept, semester)
+           course(course_id, course_name, credits)
+           enrollment(roll_no, course_id, grade)
+
+         Write relational algebra expressions for the following queries:
+         i.   Find the names of students enrolled in the 'Database Systems'
+              course.
+         ii.  Find the names of students who have scored 'A' grade in any
+              course.
+         iii. Find the course names along with the number of students
+              enrolled in each course.
+         iv.  Find the names of students who are NOT enrolled in any course.
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following schema for a logistics company:
+           warehouse(w_id, w_name, location, capacity)
+           shipment(ship_id, w_id, destination, ship_date, status)
+           driver(driver_id, driver_name, license_no, phone)
+           assignment(ship_id, driver_id, truck_no)
+
+         Write relational algebra expressions for the following queries:
+         i.   Find the names of all drivers assigned to shipments departing
+              from the warehouse located in 'Birgunj'.
+         ii.  Find the shipment IDs and destinations of all shipments with
+              status 'In Transit'.
+         iii. List the names of drivers who have not been assigned to any
+              shipment.
+         iv.  Find the warehouse names along with the total number of
+              shipments from each warehouse.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following schema for a streaming service (e.g.,
+         Netflix):
+           users(user_id, username, email, subscription_type, join_date)
+           content(content_id, title, genre, release_year, rating)
+           watch_history(user_id, content_id, watch_date, duration_watched)
+
+         Write relational algebra expressions for the following queries:
+         i.   Find the titles of all content in the 'Action' genre released
+              after 2020.
+         ii.  Find the usernames of users who have watched content with
+              rating above 8.0.
+         iii. Find the titles of content that no user has watched.
+         iv.  Update the subscription_type of all users who joined before
+              2023 to 'Premium'.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following relational schema for an airline reservation
+         system:
+           flight(flight_id, airline, source, destination, departure, arrival)
+           passenger(pass_id, name, passport_no, nationality)
+           booking(booking_id, pass_id, flight_id, seat_no, class, booking_date)
+
+         Write relational algebra expressions for the following queries:
+         i.   Find the names of all passengers who have booked a flight from
+              'Kathmandu' to 'Delhi'.
+         ii.  Find the flight IDs and airlines of all flights departing after
+              '2025-06-01'.
+         iii. Find the names of passengers who have booked 'Business' class
+              on any flight.
+         iv.  Find the names of passengers who have bookings on more than one
+              flight.
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following relational schema for a social media
+         platform:
+           users(user_id, username, full_name, email, join_date)
+           posts(post_id, user_id, content, post_date, likes_count)
+           comments(comment_id, post_id, user_id, comment_text, comment_date)
+           follows(follower_id, following_id, follow_date)
+
+         Write SQL statements for the following:
+         i.   Create the follows table with appropriate constraints ensuring
+              a user cannot follow themselves.
+         ii.  Display the usernames of users who have more than 100
+              followers.
+         iii. Find the top 10 posts with the highest number of comments.
+         iv.  Delete all comments made by a user with user_id = 'U105'.
+         v.   Update the likes_count of a post with post_id = 'P200' by
+              incrementing it by 1.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following schema for a pharmacy management system:
+           medicine(med_id, med_name, manufacturer, expiry_date, unit_price,
+                    stock_qty)
+           customer(cust_id, cust_name, phone, address)
+           purchase(purchase_id, cust_id, med_id, quantity, purchase_date,
+                    total_amount)
+
+         Write SQL statements for the following:
+         i.   Display the names and prices of all medicines manufactured by
+              'Sun Pharma' that are not expired.
+         ii.  Find the customer who has made the highest total purchase
+              amount.
+         iii. List all medicines with stock quantity less than 10 (low stock
+              alert).
+         iv.  Create a view named sales_summary showing medicine name, total
+              quantity sold, and total revenue for each medicine.
+         v.   Write a stored procedure that takes a medicine ID as input and
+              returns its current stock and expiry date.
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following schema for a hotel booking system:
+           hotels(hotel_id, hotel_name, city, star_rating, total_rooms)
+           guests(guest_id, guest_name, phone, email, nationality)
+           reservations(res_id, guest_id, hotel_id, check_in, check_out,
+                        room_type, amount)
+
+         Write relational algebra expressions for the following queries:
+         i.   Find the names of all hotels in 'Pokhara' with a star rating
+              of 4 or above.
+         ii.  Find the guest names who have reservations at hotels with more
+              than 100 total rooms.
+         iii. Find the hotel names where no reservation has been made.
+         iv.  List the names of guests who have made reservations in both
+              'Kathmandu' and 'Pokhara'.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following schema for an inventory management system:
+           supplier(supplier_id, supplier_name, city, phone)
+           parts(part_id, part_name, color, weight, unit_cost)
+           supply(supplier_id, part_id, quantity, supply_date)
+
+         Write relational algebra expressions for the following queries:
+         i.   Find the names of suppliers who supply parts with color 'Red'.
+         ii.  Find the part names and weights of parts supplied by 'Nepal
+              Hardware Pvt. Ltd.'.
+         iii. Find the supplier names who supply all parts (division
+              operation).
+         iv.  Update the unit_cost of all parts weighing more than 50 kg
+              by 5%.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 3 (a) Consider the following schema for a music streaming platform:
+           artists(artist_id, artist_name, genre, country)
+           albums(album_id, album_name, artist_id, release_year)
+           songs(song_id, song_name, album_id, duration, play_count)
+           playlists(playlist_id, user_id, playlist_name, created_date)
+           playlist_songs(playlist_id, song_id, added_date)
+
+         Write SQL statements for the following:
+         i.   Display the top 10 most played songs along with their artist
+              name and album name.
+         ii.  Find artists who have released more than 3 albums.
+         iii. Find the total play count for each genre.
+         iv.  Delete all songs from playlists that belong to albums released
+              before 2010.
+         v.   Create a view showing each playlist name with the total number
+              of songs and total duration.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 3 (b)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) Using the following e-commerce schema:
+           customers(cust_id, cust_name, email, city)
+           products(prod_id, prod_name, category, price)
+           orders(order_id, cust_id, prod_id, quantity, order_date)
+
+         Write SQL statements for the following:
+         i.   Create the orders table with appropriate primary and foreign
+              keys.
+         ii.  Insert a new order record into the orders table.
+         iii. Display the names of customers who have placed more than 3
+              orders.
+         iv.  Delete all orders placed before '2024-01-01'.
+         v.   Update the price of all products in the 'Clothing' category
+              by 15%.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) What is a nested query in SQL? Explain with examples. Using the
+         following university schema:
+           student(roll_no, name, dept, semester)
+           course(course_id, course_name, credits)
+           enrollment(roll_no, course_id, grade)
+
+         Write SQL statements for:
+         i.   Display all students who are enrolled in courses with more
+              than 3 credits.
+         ii.  Find the average grade point for each department.
+         iii. Create a view showing student name, course name, and grade.
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) Explain the different types of join expressions in SQL: natural
+         join, inner join, left outer join, right outer join, and full outer
+         join. Illustrate each with an example using the following logistics
+         schema:
+           warehouse(w_id, w_name, location, capacity)
+           shipment(ship_id, w_id, destination, ship_date, status)
+           driver(driver_id, driver_name, license_no, phone)
+           assignment(ship_id, driver_id, truck_no)
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) Using the following streaming service schema:
+           users(user_id, username, email, subscription_type, join_date)
+           content(content_id, title, genre, release_year, rating)
+           watch_history(user_id, content_id, watch_date, duration_watched)
+
+         Write SQL statements for the following:
+         i.   Create the watch_history table with foreign key constraints.
+         ii.  Display the top 5 most-watched content titles with their total
+              watch count.
+         iii. Find the username and total watch duration for each user whose
+              total watch duration exceeds 100 hours.
+         iv.  Delete all watch history records older than 2 years.
+         v.   Create a stored procedure to add a new user with all required
+              details.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) Explain set operations in SQL (UNION, INTERSECT, EXCEPT) with
+         examples. Using the following airline reservation schema:
+           flight(flight_id, airline, source, destination, departure, arrival)
+           passenger(pass_id, name, passport_no, nationality)
+           booking(booking_id, pass_id, flight_id, seat_no, class, booking_date)
+
+         Write SQL statements for:
+         i.   Find names of passengers who have booked flights to both
+              'Delhi' and 'Dubai'.
+         ii.  Display all flight details with the number of bookings for
+              each flight.
+         iii. Find the passenger name, flight details, and seat number for
+              all bookings sorted by booking date in descending order.
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) Explain aggregate functions in SQL (COUNT, SUM, AVG, MAX, MIN) with
+         examples. How are GROUP BY and HAVING clauses used with aggregate
+         functions?
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) What are null values in SQL? How do null values affect comparison
+         operations and aggregate functions? Explain with examples.
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) Using the following hotel booking schema:
+           hotels(hotel_id, hotel_name, city, star_rating, total_rooms)
+           guests(guest_id, guest_name, phone, email, nationality)
+           reservations(res_id, guest_id, hotel_id, check_in, check_out,
+                        room_type, amount)
+
+         Write SQL statements for:
+         i.   Create the reservations table with check constraint ensuring
+              check_out is after check_in.
+         ii.  Display the total revenue collected by each hotel, sorted in
+              descending order.
+         iii. Find the names of guests who have stayed more than 5 times at
+              any single hotel.
+         iv.  Write a nested query to find hotels whose average reservation
+              amount is higher than the overall average.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 3 (b) Using the following inventory management schema:
+           supplier(supplier_id, supplier_name, city, phone)
+           parts(part_id, part_name, color, weight, unit_cost)
+           supply(supplier_id, part_id, quantity, supply_date)
+
+         Write SQL statements for the following:
+         i.   Display the supplier name and total quantity supplied for each
+              supplier, showing only suppliers with total quantity greater
+              than 500.
+         ii.  Find the part name with the maximum unit cost.
+         iii. Write a nested query to find suppliers who do not supply any
+              part with color 'Blue'.
+         iv.  Create a stored procedure named get_supplier_parts that takes
+              a supplier ID and returns all parts supplied by that supplier.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 3 (b) What is the difference between DDL and DML commands? Explain the
+         following DDL commands with syntax and examples: CREATE TABLE,
+         ALTER TABLE, DROP TABLE, and TRUNCATE.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 4 (a)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What are integrity constraints? Explain domain constraints, entity
+         integrity constraints, and referential integrity constraints with
+         examples.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What are functional dependencies? Explain Armstrong's axioms with
+         examples of each rule (reflexivity, augmentation, transitivity).
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What are assertions and triggers in SQL? Explain how triggers are
+         defined and used with a practical example.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What is denormalization? When and why is it used? Explain the
+         trade-offs between normalization and denormalization with a
+         practical example.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What are the features of good relational designs? Explain the
+         problems caused by bad database design with examples (redundancy,
+         update anomaly, insertion anomaly, deletion anomaly).
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What is the closure of attribute sets? Given relation
+         R(A, B, C, D, E, F) with functional dependencies
+         F = {AB → C, C → D, D → E, E → F, B → D}, find:
+         i.   The closure of {A, B}⁺.
+         ii.  All candidate keys of R.
+         iii. The highest normal form of R. Justify your answer.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What is a multivalued dependency? Differentiate between functional
+         dependency and multivalued dependency with examples. How does 4NF
+         address multivalued dependencies?
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) Explain the concept of referential integrity constraints. What
+         happens when referential integrity is violated? Explain the
+         actions: CASCADE, SET NULL, SET DEFAULT, and RESTRICT.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (a) What is database normalization? Explain the anomalies (insertion,
+         deletion, update) that occur in an unnormalized relation. How does
+         normalization eliminate these anomalies?
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 4 (a) Define domain constraints and check constraints. How are they
+         implemented in SQL? Provide examples of each.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 4 (b)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) What is database normalization? Why is it important? Normalize the
+         following relation into 3NF:
+         | Student_ID | Student_Name | Course_ID | Course_Name     | Instructor  | Dept |
+         |------------|--------------|-----------|-----------------|-------------|------|
+         | S101       | Aarav        | C01       | DBMS            | Dr. Sharma  | CS   |
+         | S101       | Aarav        | C02       | Networks        | Dr. Poudel  | CS   |
+         | S102       | Bipana       | C01       | DBMS            | Dr. Sharma  | CS   |
+         | S103       | Chetan       | C03       | Data Structures | Dr. Thapa   | IT   |
+         | S103       | Chetan       | C01       | DBMS            | Dr. Sharma  | CS   |
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) Define 1NF, 2NF, and BCNF. Consider the following relation and
+         normalize it to BCNF:
+         | Emp_ID | Emp_Name | Project_ID | Project_Name | Hours | Dept_Name | Dept_Head  |
+         |--------|----------|------------|--------------|-------|-----------|------------|
+         | E1     | Ramesh   | P101       | Website      | 40    | IT        | Mr. Khadka |
+         | E1     | Ramesh   | P102       | Mobile App   | 20    | IT        | Mr. Khadka |
+         | E2     | Sita     | P101       | Website      | 30    | IT        | Mr. Khadka |
+         | E3     | Gita     | P103       | Analytics    | 45    | DS        | Ms. Karki  |
+         | E3     | Gita     | P101       | Website      | 15    | DS        | Ms. Karki  |
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) What is the closure of a set of functional dependencies? Given the
+         relation R(A, B, C, D, E) with functional dependencies
+         F = {A → BC, B → D, CD → E, A → D}, find:
+         i.   The closure of attribute A (A⁺).
+         ii.  The candidate keys of R.
+         iii. Whether the relation is in 3NF or BCNF. Justify your answer.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) Define triggers in SQL. Write an SQL trigger that automatically
+         updates the stock quantity in a products table whenever a new order
+         is inserted into the orders table.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) Normalize the following relation into 3NF. Identify the functional
+         dependencies first:
+         | Invoice_No | Date       | Cust_ID | Cust_Name | Item_Code | Item_Name | Qty | Unit_Price | Total |
+         |------------|------------|---------|-----------|-----------|-----------|-----|------------|-------|
+         | INV001     | 2025-01-15 | C101    | Hari      | I01       | Laptop    | 1   | 85000      | 85000 |
+         | INV001     | 2025-01-15 | C101    | Hari      | I02       | Mouse     | 2   | 500        | 1000  |
+         | INV002     | 2025-01-20 | C102    | Sita      | I01       | Laptop    | 1   | 85000      | 85000 |
+         | INV003     | 2025-02-01 | C101    | Hari      | I03       | Keyboard  | 1   | 1500       | 1500  |
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) Explain the difference between assertions and triggers. Write an SQL
+         trigger that logs every deletion from an employee table into an
+         audit_log table with the deleted employee's ID, name, and the
+         timestamp of deletion.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) Normalize the following relation into 3NF. The primary key is
+         {Order_ID, Product_ID}:
+         | Order_ID | Order_Date | Cust_Name | Cust_City | Product_ID | Product_Name | Qty | Price |
+         |----------|------------|-----------|-----------|------------|--------------|-----|-------|
+         | O1       | 2025-03-01 | Ram       | Pokhara   | P1         | Phone        | 2   | 25000 |
+         | O1       | 2025-03-01 | Ram       | Pokhara   | P2         | Cover        | 2   | 500   |
+         | O2       | 2025-03-05 | Shyam     | Butwal    | P1         | Phone        | 1   | 25000 |
+         | O3       | 2025-03-10 | Ram       | Pokhara   | P3         | Charger      | 3   | 800   |
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) What is BCNF? How is it different from 3NF? Give an example of a
+         relation that is in 3NF but not in BCNF. Decompose it into BCNF.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 4 (b) Given the relation R(A, B, C, D, E, F) with functional
+         dependencies:
+         F = {A → B, A → C, BC → D, D → E, CF → A}
+         i.   Find A⁺, (CF)⁺, and (BC)⁺.
+         ii.  Identify all candidate keys.
+         iii. Determine the highest normal form.
+         iv.  Decompose into BCNF if not already in BCNF.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 4 (b) What is the role of triggers in maintaining database integrity?
+         Write an SQL trigger for the following scenario: Whenever a
+         student's grade is updated in the enrollment table, the trigger
+         should check if the new grade is valid (between 0 and 100) and log
+         the change in a grade_change_log table.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 5 (a)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) Explain the need for database security. What are security violations
+         and integrity violations? Differentiate between them with examples.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) What is access control in database security? Explain mandatory
+         access control (MAC) and discretionary access control (DAC).
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) What is authorization in database security? Explain the different
+         types of authorization privileges (read, insert, update, delete)
+         and how they are granted and revoked in SQL.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) How do views provide security in a database? Explain with a
+         practical example where views are used to restrict access to
+         sensitive data.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) Explain how the GRANT and REVOKE commands work in SQL for managing
+         authorization. Provide examples of granting and revoking specific
+         privileges on a table.
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) What is an access control mechanism? Explain role-based access
+         control (RBAC) with a practical example of a hospital database
+         where different users (doctors, nurses, administrators) have
+         different levels of access.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) How do encryption mechanisms provide database security? Explain
+         symmetric key and asymmetric key encryption with their use in
+         database systems.
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) What are the different types of security threats in a database
+         system? Explain how SQL injection attacks work and how they can be
+         prevented.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (a) What are the components of a database security system? Explain how
+         views can be used as a security mechanism with an example.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 5 (a) What is the difference between authentication and authorization in
+         database security? Explain multi-factor authentication and how it
+         applies to database access.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 5 (b)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) What is query processing? Explain the basic steps involved in
+         processing a query with the help of a diagram.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) What is query optimization? Explain the difference between
+         cost-based optimization and heuristic-based optimization.
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) What is equivalence of expressions in query processing? Explain
+         with examples of equivalent relational algebra expressions and how
+         transformation rules are applied.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) What is query cost estimation? Explain how the cost of different
+         query evaluation plans is estimated in terms of disk I/O, CPU, and
+         communication costs.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) Consider the following airline reservation schema:
+           flight(flight_id, airline, source, destination, departure, arrival)
+           passenger(pass_id, name, passport_no, nationality)
+           booking(booking_id, pass_id, flight_id, seat_no, class, booking_date)
+
+         Write the relational algebra expression for the query: "Find the
+         names of all passengers who have booked a flight operated by 'Nepal
+         Airlines'." Construct the initial query tree and the optimized
+         query tree after applying transformation rules.
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) What is a query evaluation plan? Explain how a query optimizer
+         selects the best evaluation plan among multiple alternatives.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) What is a query execution plan? Explain with an example how a
+         relational algebra expression can be represented as a query tree
+         and then optimized using heuristic transformation rules.
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) Explain the steps involved in query processing: parsing,
+         optimization, and evaluation. How does the query parser validate
+         an SQL query?
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 5 (b) What are heuristic rules for query optimization? List and explain
+         at least four commonly used heuristic transformation rules with
+         examples.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 5 (b) Consider the following relational algebra expression:
+           π(artist_name)(σ(genre='Rock' ∧ play_count > 1000000)(artists ⋈ albums ⋈ songs))
+
+         Construct the initial query tree for this expression. Apply
+         heuristic transformation rules (push selection down, push
+         projection down) to optimize it. Draw the final optimized query
+         tree.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 6 (a)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) What is file organization? Explain heap file organization and
+         sequential file organization with their advantages and
+         disadvantages.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) What is a B⁺ tree? Construct a B⁺ tree of order 4 for the
+         following key values inserted in the given order: 5, 8, 12, 15,
+         20, 25, 30, 35, 40. Show the tree structure after all insertions.
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) Explain hash indices. How does hashing work for file organization?
+         What are the advantages and disadvantages of hash-based indexing?
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) What is an indexed sequential file organization? Explain with a
+         diagram how records are organized and accessed in an indexed
+         sequential file.
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) Explain fixed-length records and variable-length records in file
+         organization. How are variable-length records handled?
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) What is a B⁺ tree index file? Explain the structure of B⁺ tree
+         nodes (internal and leaf). What are the advantages of B⁺ trees
+         over other indexing methods?
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) What are hash indices? Explain static hashing and dynamic
+         (extendable) hashing with diagrams. What are the problems with
+         static hashing?
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) Explain the organization of records in files using heap file
+         organization and its advantages and disadvantages. When is heap
+         file organization appropriate?
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (a) Construct a B⁺ tree of order 3 for the following key values
+         inserted in the given order: 10, 20, 5, 15, 25, 30, 35, 40, 3, 8.
+         Show the tree after each insertion step for the last three values
+         (3, 8, 40).
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 6 (a) Compare B⁺ tree indexing with hash indexing. Under what
+         circumstances is each preferred? Explain with examples.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 6 (b)
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is a transaction? Explain the different states of a
+         transaction with a state transition diagram.
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) Define the ACID properties of a transaction. Why is each property
+         important for maintaining database consistency?
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is concurrency control? Explain the lock-based protocol.
+         Differentiate between shared lock and exclusive lock with examples.
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is serializability? Differentiate between conflict
+         serializability and view serializability with examples. How do you
+         test for conflict serializability using a precedence graph?
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is a deadlock in database systems? Explain deadlock prevention
+         and deadlock detection techniques. Illustrate with an example of
+         two transactions causing a deadlock.
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is a schedule in transaction processing? Differentiate between
+         serial schedule and non-serial schedule. Explain how you determine
+         whether a non-serial schedule is serializable.
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What are the SQL standard isolation levels? Explain Read
+         Uncommitted, Read Committed, Repeatable Read, and Serializable
+         with the types of problems (dirty read, non-repeatable read,
+         phantom read) each level prevents.
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is the two-phase locking protocol? Explain the growing phase
+         and shrinking phase. Differentiate between basic 2PL, strict 2PL,
+         and rigorous 2PL with examples.
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is recovery and atomicity? Explain how log records are used to
+         ensure atomicity. Differentiate between redo and undo operations
+         in log-based recovery.
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 6 (b) What is crash recovery? Explain the concept of checkpoints. How do
+         checkpoints reduce the recovery time after a system crash?
+         Illustrate with a timeline diagram showing transactions,
+         checkpoints, and a crash point.
+
+
+
+════════════════════════════════════════════════════════════════════════════════
+                            QUESTION 7
+════════════════════════════════════════════════════════════════════════════════
+
+SET 1 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. NoSQL databases and their characteristics
+      b. Checkpoints in crash recovery
+      c. Conflict serializability
+
+SET 2 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Object Oriented Database and ORM
+      b. Denormalization for performance
+      c. SQL standard isolation levels
+
+SET 3 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Failure classification in crash recovery
+      b. Distributed Ledger Technology and Blockchain
+      c. Features of good relational designs
+
+SET 4 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Recovery and atomicity using log records
+      b. Categories of NoSQL databases
+      c. Graph-based protocols for concurrency control
+
+SET 5 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Redo and undo transactions using log
+      b. Distributed databases and their advantages
+      c. Schema diagrams in relational databases
+
+SET 6 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Transaction rollback and recovery after system crash
+      b. Cryptocurrency and blockchain properties
+      c. Two-phase locking protocol
+
+SET 7 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. High availability using remote backup system
+      b. Optimizing commit processing
+      c. Characteristics and advantages of NoSQL databases
+
+SET 8 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Redo and undo operations in recovery
+      b. View serializability
+      c. Distributed databases and data replication
+
+SET 9 ──────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Transaction model and state diagram
+      b. Object-Relational Model
+      c. Concurrency control and recovery
+
+SET 10 ─────────────────────────────────────────────────────────────────────────
+Q. 7  Write short notes on any two of the following:
+      a. Graph-based protocols in concurrency control
+      b. Blockchain and its role in distributed databases
+      c. Lock-based protocols and their types
+
+
+
+================================================================================
+                         END OF PRACTICE PAPERS
+================================================================================

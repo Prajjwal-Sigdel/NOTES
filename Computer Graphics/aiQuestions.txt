@@ -1,0 +1,685 @@
+================================================================================
+                              SET 1 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Explain the architecture of raster scan and random scan display
+        systems with neat diagrams. Compare them on the basis of image
+        quality, cost, memory usage, and application areas.
+
+    b.  Describe the working principle of a CRT with a labeled diagram.
+        Explain how a color CRT produces colors using the beam penetration
+        method.
+
+
+2.  a.  Derive Bresenham's Line Drawing Algorithm for slope |m| < 1.
+        Using this algorithm, digitize the line from (20, 10) to (30, 18).
+
+    b.  Differentiate between Boundary Fill and Flood Fill algorithms.
+        Write the algorithm for 4-connected Boundary Fill.
+
+
+3.  a.  Define the homogeneous coordinate system and explain why it is
+        used in computer graphics transformations. Write the homogeneous
+        matrix representations for translation, rotation, and scaling.
+
+    b.  Perform fixed-point scaling of triangle P(2, 2), Q(6, 2), R(4, 6)
+        with scaling factors Sx = 2 and Sy = 1.5 about the fixed point
+        (4, 3). Show all steps.
+
+
+4.  a.  Derive the general equation for perspective projection with a neat
+        diagram. What is the difference between one-point, two-point, and
+        three-point perspective projections?
+
+    b.  What are fractal geometry methods? Explain the concept of
+        self-similarity and fractal dimension with the Koch snowflake as
+        an example.
+
+
+5.  a.  Explain the A-Buffer method for hidden surface removal. How is it
+        different from the Z-Buffer method?
+
+    b.  Derive the Phong illumination model equation. Explain the role of
+        ambient, diffuse, and specular components in visual realism.
+
+
+6.  a.  What is Gouraud shading? Explain the intensity interpolation
+        process with a triangular polygon example.
+
+    b.  Explain the basic architecture and rendering pipeline of OpenGL.
+        What role do callback functions play in OpenGL programming?
+
+
+7.  Write short notes on (any TWO):
+        i.   Color models (RGB and CMYK)
+        ii.  Graphics file formats
+        iii. Three-dimensional coordinate systems
+
+
+
+================================================================================
+                              SET 2 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  What is a video controller? Explain the refresh operation of a
+        video controller with a neat diagram.
+
+                                      OR
+
+        List and explain at least five applications of computer graphics
+        in different fields such as CAD, entertainment, medicine,
+        education, and simulation.
+
+    b.  Explain the working principle of LCD display technology. How does
+        it differ from CRT in terms of display mechanism?
+
+
+2.  a.  Explain the DDA line drawing algorithm. Use DDA to rasterize the
+        line from (2, 3) to (12, 8). Tabulate the computed pixel
+        positions at each step.
+
+    b.  Derive the midpoint ellipse generation algorithm. Explain why
+        separate calculations are needed for Region 1 and Region 2.
+
+
+3.  a.  What is 2D viewing pipeline? Explain each stage of the pipeline
+        with a diagram.
+
+    b.  Reflect the triangle with vertices A(3, 4), B(7, 4), C(5, 8)
+        about the line y = -x. Show all transformation steps using
+        composite matrices.
+
+
+4.  a.  What are polygon surfaces in 3D representation? Explain how
+        surface normals are computed for a polygon defined by its
+        vertices.
+
+    b.  Differentiate between parallel and perspective projection with
+        real-life application examples. Derive the projection matrix
+        for one-point perspective projection.
+
+
+5.  a.  Explain the Depth Buffer (Z-Buffer) method for visible surface
+        detection. What are its advantages and limitations?
+
+    b.  Compare Flat shading, Gouraud shading, and Phong shading in
+        terms of interpolation method, computation, and visual quality.
+        Which produces the most realistic results and why?
+
+
+6.  a.  Explain GKS (Graphical Kernel System) and its features. What are
+        the different levels of GKS implementation?
+
+    b.  How are basic geometric transformations (translation, rotation,
+        scaling) implemented in OpenGL? Explain the significance of
+        glPushMatrix() and glPopMatrix().
+
+
+7.  Write short notes on (any TWO):
+        i.   Hard copy devices
+        ii.  Sutherland-Hodgman polygon clipping algorithm
+        iii. Bezier surfaces
+
+
+
+================================================================================
+                              SET 3 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  What is a frame buffer? A raster system has a resolution of
+        1024 x 768 and supports 16 million colors. Calculate the size
+        of the frame buffer in megabytes. Show all working.
+
+    b.  Explain the classification of interactive input devices into
+        six logical classes (Locator, Stroke, Valuator, Choice, String,
+        Pick). Describe the working principle of any two physical input
+        devices.
+
+
+2.  a.  Compare DDA and Bresenham's line drawing algorithms in terms of
+        efficiency, accuracy, and computation type. Derive the initial
+        decision parameter for Bresenham's algorithm for slope < 1.
+
+    b.  Derive the midpoint circle generation algorithm. Use it to plot
+        circle points for the first octant with radius 8. Tabulate all
+        values of the decision parameter and the plotted coordinates.
+
+
+3.  a.  Perform rotation of a rectangle with vertices A(1, 1), B(4, 1),
+        C(4, 3), D(1, 3) by 90 degrees counterclockwise about the pivot
+        point (2, 2). Show all steps.
+
+    b.  Explain the Cohen-Sutherland line clipping algorithm. Clip the
+        line segment from P1(40, 15) to P2(75, 45) against the window
+        defined by Xwmin = 20, Xwmax = 60, Ywmin = 10, Ywmax = 40.
+
+
+4.  a.  What is a Bezier curve? Derive the parametric equation for a
+        cubic Bezier curve using Bernstein polynomials.
+
+    b.  Explain the 3D viewing transformation pipeline. How does it
+        differ from the 2D viewing pipeline?
+
+
+5.  a.  Explain the Back-Face Detection method. For a polygon surface
+        with vertices (1, 0, 1), (0, 1, 1), (0, 0, 0), determine
+        whether the surface is visible from a viewpoint along the
+        positive z-axis.
+
+    b.  What is diffuse reflection? Derive Lambert's cosine law and
+        explain its significance in the illumination model.
+
+
+6.  a.  What is PHIGS (Programmer's Hierarchical Interactive Graphics
+        System)? How does it extend GKS with hierarchical modeling and
+        3D support?
+
+    b.  Explain how lighting and material properties are set up in
+        OpenGL. What is the role of glLightfv() and glMaterialfv()
+        functions?
+
+
+7.  Write short notes on (any TWO):
+        i.   DAC and frame buffer organization
+        ii.  Scan line polygon fill algorithm
+        iii. Fast Phong shading
+
+
+
+================================================================================
+                              SET 4 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Discuss the evolution and recent trends in computer graphics
+        technology such as Virtual Reality, Augmented Reality, and real-
+        time ray tracing. How have GPUs transformed the field?
+
+    b.  Explain the working mechanism of the Digital-to-Analog Converter
+        (DAC) in a raster scan system. How does it contribute to
+        producing the display output?
+
+
+2.  a.  Explain the midpoint circle drawing algorithm. Digitize a circle
+        with center at origin and radius 12 for the first octant.
+        Tabulate all decision parameters and the generated points.
+
+    b.  Write and explain the Scan Line Polygon Fill algorithm with a
+        diagram. How does it handle edges that share vertices?
+
+
+3.  a.  What is shearing transformation? Derive the shearing matrix for
+        both X-direction and Y-direction shearing. Apply X-shear with
+        shearing parameter 2 to the triangle (0, 0), (4, 0), (2, 3).
+
+    b.  Explain the Sutherland-Hodgman polygon clipping algorithm.
+        Illustrate the four possible cases of edge-window boundary
+        intersection with diagrams.
+
+
+4.  a.  Explain 3D translation, rotation, and scaling transformations
+        with their 4 x 4 homogeneous matrix representations.
+
+    b.  What are cubic spline curves? How do they differ from Bezier
+        curves in terms of continuity and control point influence?
+
+
+5.  a.  Explain the Scan Line method for visible surface detection with
+        a detailed example. How does it use edge tables and active edge
+        lists?
+
+    b.  Explain specular reflection and the Phong reflection model. How
+        does the shininess coefficient (n) affect the specular highlight
+        on a surface?
+
+
+6.  a.  Discuss the need for graphics file format standards. Compare
+        raster and vector graphics file formats with examples of each.
+
+    b.  What are the different projection functions available in OpenGL?
+        Explain gluPerspective() and glOrtho() with their parameters
+        and typical use cases.
+
+
+7.  Write short notes on (any TWO):
+        i.   Modern graphics hardware (GPU architecture)
+        ii.  Window-to-viewport transformation
+        iii. CMYK color model
+
+
+
+================================================================================
+                              SET 5 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  What are the major components of a raster graphics system?
+        Explain each component with a block diagram.
+
+                                      OR
+
+        Discuss the significance of computer graphics in Computer Aided
+        Design (CAD). How has CAD changed the engineering design process?
+
+    b.  Explain the working principle of a touch screen as an interactive
+        input device. How does a capacitive touch screen differ from a
+        resistive touch screen?
+
+
+2.  a.  Derive Bresenham's line drawing algorithm for a line with slope
+        greater than 1. Use it to digitize the line from (2, 1) to
+        (8, 13).
+
+    b.  Compare the midpoint circle and midpoint ellipse generation
+        algorithms. Why cannot the 8-way symmetry of the circle be
+        applied to the ellipse?
+
+
+3.  a.  What is composite transformation? Derive the composite matrix
+        for rotating an object about an arbitrary pivot point (px, py)
+        by angle theta.
+
+    b.  Derive the window-to-viewport coordinate transformation. If a
+        window is defined by (0, 0) to (20, 20) and viewport by
+        (100, 100) to (300, 300), map the point (5, 10).
+
+
+4.  a.  Explain polygon surface representation in 3D graphics. How are
+        polygon meshes stored using vertex lists and edge lists?
+
+    b.  Given four control points P0(0, 0), P1(2, 8), P2(6, 8),
+        P3(8, 0), calculate five points on the cubic Bezier curve at
+        t = 0, 0.25, 0.5, 0.75, 1.0. Tabulate the results.
+
+
+5.  a.  What is the Depth Sorting (Painter's) algorithm? Describe the
+        three overlap tests used to resolve ambiguity when surfaces
+        overlap in depth.
+
+    b.  Explain the concept of ambient light in the illumination model.
+        How is the total intensity at a surface point calculated using
+        the Phong model when multiple light sources are present?
+
+
+6.  a.  What is data visualization? Explain different techniques used
+        for visualizing scalar and vector datasets with examples.
+
+    b.  Explain how double buffering and animation are achieved in
+        OpenGL using GLUT. Describe the role of glutSwapBuffers() and
+        glutIdleFunc() in smooth animation.
+
+
+7.  Write short notes on (any TWO):
+        i.   Beam penetration vs. shadow mask CRT
+        ii.  Reflection transformation in 2D
+        iii. Depth cueing
+
+
+
+================================================================================
+                              SET 6 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Explain the architecture of a random scan (vector) display
+        system with a diagram. Why has it been largely replaced by
+        raster scan systems?
+
+    b.  What is the role of a display processor (graphics controller)
+        in a graphical system? Explain how the display file is used to
+        drive the display.
+
+
+2.  a.  Using the DDA algorithm, rasterize the line from (5, 5) to
+        (15, 9). Tabulate the pixel coordinates at each step. What are
+        the limitations of the DDA algorithm?
+
+    b.  Derive the decision parameters for the midpoint ellipse
+        generation algorithm in both Region 1 and Region 2. Explain
+        the transition condition between the two regions.
+
+
+3.  a.  Define 2D translation, rotation, and scaling transformations.
+        Write their 3 x 3 homogeneous transformation matrices and
+        explain the role of each element.
+
+    b.  Using the Cohen-Sutherland algorithm, clip the line from
+        P1(30, 60) to P2(60, 25) against the clipping window with
+        boundaries Xmin = 10, Xmax = 50, Ymin = 10, Ymax = 50. Show
+        all steps with region codes.
+
+
+4.  a.  Explain clipping in three dimensions. How is the Cohen-Sutherland
+        algorithm extended to 3D using 6-bit region codes?
+
+    b.  What is a Bezier surface? How is it constructed as a Cartesian
+        product of two Bezier curves? Write the mathematical equation
+        for a bi-cubic Bezier surface patch.
+
+
+5.  a.  Compare Back-Face Detection, Z-Buffer, and Depth Sorting methods
+        for hidden surface removal in terms of accuracy, memory usage,
+        and computational complexity.
+
+    b.  What is Gouraud shading? Derive the intensity interpolation
+        equations used in Gouraud shading along the edges and across
+        scan lines for a triangular polygon.
+
+
+6.  a.  Explain the concept of language binding in graphical standards.
+        What is the difference between GKS and PHIGS in terms of
+        capabilities and features?
+
+    b.  Describe the different output primitives available in OpenGL
+        (GL_POINTS, GL_LINES, GL_TRIANGLES, GL_QUADS, GL_POLYGON, etc.).
+        Write sample code to draw a filled triangle with per-vertex
+        coloring.
+
+
+7.  Write short notes on (any TWO):
+        i.   Midpoint ellipse generation algorithm
+        ii.  Fractal geometry methods
+        iii. OpenGL lighting and material setup
+
+
+
+================================================================================
+                              SET 7 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  What is scan conversion? Explain the role of the frame buffer
+        in the scan conversion process. If a display has a resolution
+        of 1920 x 1080 and uses 32-bit true color, calculate the frame
+        buffer size in megabytes.
+
+    b.  Describe the three modes of input handling (Request, Sample,
+        Event) used in interactive graphics systems. Give an example
+        of each mode.
+
+
+2.  a.  Derive Bresenham's line drawing algorithm for the first octant.
+        Digitize the line from (1, 1) to (8, 5). Show all intermediate
+        calculations in tabular form.
+
+    b.  Explain the Flood Fill algorithm using both 4-connected and
+        8-connected approaches. When would 8-connected be preferred
+        over 4-connected? Discuss with an example.
+
+
+3.  a.  Perform reflection of the triangle with vertices (1, 2), (4, 2),
+        (3, 5) about the Y-axis. Also perform reflection about the line
+        y = x. Show both results separately.
+
+    b.  Explain the Sutherland-Hodgman polygon clipping algorithm. Clip
+        a triangle with vertices (10, 10), (60, 10), (35, 70) against
+        the clipping window with Xmin = 20, Xmax = 50, Ymin = 15,
+        Ymax = 55. Show processing for each window edge.
+
+
+4.  a.  Derive the matrices for 3D rotation about the X-axis, Y-axis,
+        and Z-axis. Rotate the point (3, 4, 5) by 90 degrees about
+        the Z-axis.
+
+    b.  Find the coordinate on the cubic Bezier curve at t = 0.5 with
+        control points (0, 0), (1, 3), (5, 3), (6, 0). Show the
+        detailed calculation using the Bernstein polynomial form.
+
+
+5.  a.  Explain the A-Buffer method for hidden surface removal. How
+        does it handle transparent surfaces differently from the
+        Z-Buffer method?
+
+    b.  What is the difference between an illumination model and a
+        shading model? Explain constant (flat) shading and discuss its
+        limitations.
+
+
+6.  a.  Discuss the visualization of data sets. What role does computer
+        graphics play in scientific visualization? Give real-world
+        examples.
+
+    b.  How does OpenGL implement the Phong illumination model? Explain
+        the functions used to set up lights (glLightfv) and materials
+        (glMaterialfv) with their parameters.
+
+
+7.  Write short notes on (any TWO):
+        i.   Color CRT monitors (shadow mask vs. beam penetration)
+        ii.  3D clipping
+        iii. PHIGS standard
+
+
+
+================================================================================
+                              SET 8 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Classify display devices used in computer graphics. Explain the
+        working principles of LED and OLED display technologies. How
+        are they superior to traditional CRT displays?
+
+    b.  What is a GPU? Explain the stages of the graphics pipeline as
+        implemented in modern GPU hardware.
+
+
+2.  a.  What is scan conversion? Explain the DDA algorithm with its
+        advantages and disadvantages. Rasterize the line from (0, 0)
+        to (7, 3) using DDA.
+
+    b.  Derive the midpoint circle algorithm. Why is it computationally
+        efficient compared to directly using the circle equation
+        x^2 + y^2 = r^2?
+
+
+3.  a.  Derive the composite transformation matrix for scaling an object
+        about a fixed point (h, k) with scaling factors Sx and Sy.
+        Apply it to scale the triangle (1, 1), (3, 1), (2, 4) by
+        Sx = 2, Sy = 3 about fixed point (2, 2).
+
+    b.  What is the significance of clipping in computer graphics?
+        Explain the four region codes in Cohen-Sutherland algorithm
+        and the rules for trivial acceptance and trivial rejection.
+
+
+4.  a.  Compare parallel and perspective projections with examples and
+        diagrams. Derive the projection matrix for orthographic
+        parallel projection.
+
+    b.  Explain the 3D viewing pipeline from world coordinates to screen
+        coordinates. What is the significance of View Reference Point
+        (VRP) and View Plane Normal (VPN)?
+
+
+5.  a.  Explain the Depth Sorting (Painter's) algorithm step by step.
+        What are the limitations of this algorithm when surfaces
+        cyclically overlap?
+
+    b.  Derive the Phong illumination model. A surface has ambient
+        reflectivity ka = 0.3, diffuse reflectivity kd = 0.5, specular
+        reflectivity ks = 0.4, and shininess n = 32. If the ambient
+        light intensity Ia = 0.2 and a point light source of intensity
+        Ip = 0.8 makes an angle of 45 degrees with the normal, calculate
+        the total reflected intensity (assume viewer direction coincides
+        with the reflection direction).
+
+
+6.  a.  Compare RGB and CMYK color models. Explain how colors are
+        represented and converted between these two models.
+
+    b.  Explain the role of GLUT callback functions in OpenGL. Describe
+        glutDisplayFunc(), glutReshapeFunc(), glutKeyboardFunc(), and
+        glutMouseFunc() with their usage.
+
+
+7.  Write short notes on (any TWO):
+        i.   Joystick and trackball input devices
+        ii.  Homogeneous coordinate system
+        iii. Non-planar Bezier surfaces
+
+
+
+================================================================================
+                              SET 9 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Define computer graphics. Explain its applications in medicine,
+        education, and entertainment with examples.
+
+                                      OR
+
+        What are the recent trends in computer graphics? Discuss the
+        impact of real-time rendering, virtual reality, and augmented
+        reality on modern graphics applications.
+
+    b.  What is the difference between raster scan and random scan
+        architectures? Calculate the refresh rate achievable if a video
+        controller takes 15 ns per pixel for a 800 x 600 resolution
+        display.
+
+
+2.  a.  Compare the DDA and Bresenham's line drawing algorithms. Why is
+        Bresenham's algorithm preferred for hardware implementation?
+
+    b.  Explain the midpoint circle generation algorithm. Using the
+        algorithm, digitize the first octant of a circle with radius
+        15 (first five decision parameter iterations).
+
+
+3.  a.  What is composite transformation? A square with vertices
+        A(0, 0), B(2, 0), C(2, 2), D(0, 2) is first scaled by factor
+        2 about the origin, then rotated 45 degrees about the origin,
+        and finally translated by (5, 3). Find the final coordinates
+        using composite transformation matrix.
+
+    b.  Explain the 2D viewing pipeline. What are the mathematical
+        steps to convert world coordinates to device coordinates?
+
+
+4.  a.  What are 3D geometric transformations? Derive the 4 x 4 matrix
+        for 3D reflection about the XY plane, XZ plane, and YZ plane.
+
+    b.  Derive the cubic Bezier curve equation. Find the coordinate at
+        t = 0.4 for control points (2, 0), (4, 6), (7, 6), (9, 0).
+        Show complete calculation.
+
+
+5.  a.  Explain the Scan Line method for hidden surface removal. How
+        are the active edge table and the polygon table used in this
+        method?
+
+    b.  What is Fast Phong shading? How does it approximate Phong
+        shading to reduce computational cost while maintaining
+        acceptable visual quality?
+
+
+6.  a.  What are graphical software standards? Why is software
+        portability important in graphics programming? Explain with
+        reference to GKS and PHIGS.
+
+    b.  Write the structure of an OpenGL program to draw a 3D cube with
+        basic lighting. Explain the role of glEnable(GL_LIGHTING),
+        glEnable(GL_DEPTH_TEST), and gluLookAt() in the program.
+
+
+7.  Write short notes on (any TWO):
+        i.   Aspect ratio and resolution
+        ii.  Shearing transformation
+        iii. Area subdivision method for visible surface detection
+
+
+
+================================================================================
+                             SET 10 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Explain the concept of resolution, aspect ratio, and refresh
+        rate in a raster display system. How do these parameters affect
+        the quality of the displayed image?
+
+    b.  What are hard copy devices? Explain the working principles of
+        an inkjet printer and a laser printer. Compare their suitability
+        for graphics output.
+
+
+2.  a.  Digitize the line from (15, 5) to (25, 13) using Bresenham's
+        Line Drawing Algorithm. Show all intermediate calculations in
+        tabular form including the decision parameter at each step.
+
+    b.  Explain the Scan Line Polygon Fill algorithm with a diagram.
+        How are the edge table and active edge list initialized and
+        updated during the fill process?
+
+
+3.  a.  What are the different types of 2D geometric transformations?
+        Derive the transformation matrix for reflection about an
+        arbitrary line y = mx + c.
+
+                                      OR
+
+        Perform reflection of the object with vertices (1, 2), (5, 2),
+        (5, 6), (1, 6) about the line y = x - 2. Show all composite
+        transformation steps.
+
+    b.  Using the Cohen-Sutherland algorithm, clip the line from
+        P1(5, 25) to P2(50, 5) against the window with Xmin = 10,
+        Xmax = 40, Ymin = 10, Ymax = 30. Show all steps with region
+        codes and intersection calculations.
+
+
+4.  a.  What is fractal geometry? Explain the construction of the Koch
+        snowflake curve. How is fractal dimension computed?
+
+    b.  Explain the difference between one-point, two-point, and three-
+        point perspective projections with diagrams and real-life
+        examples. How do vanishing points affect the projected view?
+
+
+5.  a.  What is the Z-Buffer algorithm? Write the pseudocode and explain
+        how the depth buffer is initialized and updated during rendering.
+
+    b.  Explain the difference between Gouraud shading and Phong shading
+        in terms of what is interpolated, computational cost, and visual
+        quality. Illustrate the difference with a spherical object
+        example.
+
+
+6.  a.  What is the need for machine-independent graphical languages?
+        Discuss the features and architecture of OpenGL as a modern
+        graphical standard.
+
+    b.  How are perspective and orthographic projections set up in
+        OpenGL? Explain gluPerspective(), glOrtho(), and gluLookAt()
+        with their parameters and typical usage in a 3D scene.
+
+
+7.  Write short notes on (any TWO):
+        i.   Interactive input devices and their classification
+        ii.  Cubic spline curves
+        iii. RGB color model

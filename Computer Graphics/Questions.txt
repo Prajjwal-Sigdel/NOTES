@@ -1,0 +1,208 @@
+================================================================================
+                              SET 1 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Discuss video controller refresh operation with a neat diagram.
+        If on average, it takes 20 ns for a video controller to access a
+        pixel value from the frame buffer and glow on the screen, will it
+        produce a flickering effect? (Screen resolution is 640 × 480)
+
+                                      OR
+
+        Define computer graphics. Explain the applications of computer
+        graphics in Computer Simulation, Scientific Visualization, and CAD.
+
+    b.  Define CRT. Explain with a neat diagram the working principle of
+        the Shadow Mask method.
+
+
+2.  a.  What is the difference between DDA and Bresenham's Line Algorithm?
+        Discuss the "Midpoint Circle Drawing Algorithm" for 8 octants.
+        Derive an expression for the decision parameter for the conditions
+        mentioned below:
+            i.   Initial decision parameter P₀.
+            ii.  Decision parameter, when Pₖ < 0.
+            iii. Decision parameter, when Pₖ > 0.
+
+    b.  Explain the Boundary Fill algorithm in detail. How does this
+        approach differ from Flood Fill?
+
+
+3.  a.  Differentiate between window and viewport. Discuss the
+        2-Dimensional Viewing Pipeline with the different steps involved.
+        Further derivation is needed for the window-to-viewport coordinate
+        transformation.
+
+    b.  A mirror is placed vertically such that it passes through the
+        points (5, 0) and (0, 5). Find the reflected view of triangle ABC
+        with coordinates A(5, 30), B(30, 50), C(20, 60).
+
+                                      OR
+
+        What is the significance of clipping in computer graphics? Let ABCD
+        be the rectangular window A(20, 20), B(90, 20), C(90, 70), and
+        D(20, 70). Find the region code for the end points and use the
+        Cohen-Sutherland line clipping algorithm to clip the line P₁P₂
+        with P₁(10, 30) and P₂(80, 90).
+
+
+4.  a.  Discuss the difference between spline approximation curve versus
+        an interpolation curve. Derive an expression for perspective
+        projection with the necessary diagram.
+
+    b.  Derive the equation for the cubic Bezier curve and find the
+        coordinate at t = 0.2 with respect to the control points (1, 1),
+        (4, 6), (8, −3), and (12, 2).
+
+
+5.  a.  Why is the Depth Sorting method called Painter's Algorithm?
+        Explain the Scan Line method for visible surface detection with
+        an example.
+
+    b.  What is the difference between specular reflection versus diffuse
+        reflection? Briefly explain polygon surface shading methods.
+
+
+6.  a.  Discuss the need for machine-independent graphical languages.
+        Explain two different graphical software standards.
+
+    b.  What is the significance of OpenGL in computer graphics? Discuss
+        the Open Graphics Library in detail with the different features
+        associated with it.
+
+
+7.  Write short notes on (any TWO):
+        i.   Raster vs. Random Scan System
+        ii.  Graphics File Formats
+        iii. Color Models
+
+
+
+================================================================================
+                              SET 2 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  What are the basic components of a graphical system? List out the
+        areas of application of computer graphics by emphasizing your
+        answer on CAD.
+
+    b.  What role does a frame buffer play in graphical rendering? A raster
+        graphics system can produce a total number of 16,777,216 different
+        levels of intensities out of a single pixel on the screen. If the
+        total resolution of the screen is 1280 × 800, what is the required
+        size of the frame buffer of this system?
+
+
+2.  a.  Write the algorithm for both conditions of Bresenham's Line
+        Drawing Algorithm and derive the initial decision parameter for
+        slope less than 1.
+
+    b.  Why do circle and ellipse use different point symmetry? Digitize
+        the circle with radius 10.
+
+
+3.  a.  What will be the final coordinates of a triangle with vertices
+        A(5, 8), B(15, 8), C(10, 16) after rotating it about a fixed
+        point (10, 5) and then shifting it down by two units?
+
+    b.  Define window and viewport. Derive a matrix for window-to-viewport
+        transformation along with the necessary steps.
+
+
+4.  a.  Why is it required to map object descriptions from the world
+        coordinates to the device coordinates? Explain the mapping process
+        with the necessary equations.
+
+    b.  Differentiate between parallel and perspective projection with
+        real-life application examples.
+
+
+5.  a.  Why is the Depth Sorting method called Painter's Algorithm?
+        Explain the Scan Line method for visible surface detection with
+        an example.
+
+    b.  Define specular reflection. Calculate the total intensity due to
+        specular reflection caused by ambient light using the Phong model.
+
+
+6.  a.  Compare Constant, Gouraud, and Phong shading. Also conclude the
+        best model for shading and why.
+
+    b.  Why do we need a machine-independent graphical language? Explain
+        the rendering pipeline of OpenGL.
+
+
+7.  Write short notes on (any TWO):
+        i.   Raster vs. Random Scan Architecture
+        ii.  3D Representations
+        iii. Boundary Fill vs. Flood Fill Algorithm
+
+
+
+================================================================================
+                              SET 3 — QUESTION PAPER
+                         CMP 234: Computer Graphics (BE)
+                             Pokhara University
+================================================================================
+
+
+1.  a.  Define computer graphics with its types. How has the evolution of
+        computer graphics technology impacted the gaming industry in terms
+        of realism and player immersion?
+
+    b.  Graphical systems are composed of DAC and frame buffer
+        organization. Why? Explain the working principle of data gloves
+        with an example.
+
+
+2.  a.  How much time is spent scanning across each row of pixels during
+        screen refresh on a raster system with a resolution of 1280 × 1024
+        and a refresh rate of 60 frames per second?
+
+    b.  Why do circle and ellipse use different point symmetry? Explain
+        the Midpoint Circle Generation Algorithm by calculating its
+        initial decision parameter.
+
+
+3.  a.  What is uniform scaling? Reflect the object with vertices (2, 3),
+        (4, 3), (4, 5) about the line y = x + 1.
+
+    b.  How is the Scan Line algorithm different from the Flood Fill
+        algorithm for filling polygons? Explain.
+
+
+4.  a.  What do you understand by the term clipping? Explain the
+        Cohen-Sutherland Line Clipping Algorithm with a suitable example.
+
+    b.  Why do we need a machine-independent graphical language? Explain
+        two different graphical software standards.
+
+
+5.  a.  Define blobby objects with an example. What is a cubic Bezier
+        curve? Derive the equation of a cubic Bezier curve.
+
+    b.  Why is it required to detect visible surfaces in 3D viewing and
+        not in 2D? How is the Back-Face Detection approach different from
+        the Z-Buffer approach for detecting visible surfaces?
+
+
+6.  a.  Explain the 3D Viewing Pipeline. Briefly explain the significance
+        of World Coordinate System, Viewing Coordinate System, Normalized
+        Viewing Coordinate System, and Device Coordinate System in the
+        viewing pipeline.
+
+    b.  What is an illumination model? Differentiate between Phong Shading
+        and Gouraud Shading.
+
+
+7.  Write short notes on (any TWO):
+        i.   Specular Reflection
+        ii.  Parallel vs. Perspective Projection
+        iii. Area Subdivision Method
+    

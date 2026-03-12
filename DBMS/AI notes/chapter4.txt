@@ -340,7 +340,7 @@ Example 4: Grade validation trigger
   • **OLD**: Refers to the row being deleted or the old values before update.
 
   ┌───────────┬──────────────┬──────────────┐
-  │ Operation │ OLD available │ NEW available │
+  │ Operation │ OLD available│ NEW available│
   ├───────────┼──────────────┼──────────────┤
   │ INSERT    │ No           │ Yes          │
   │ UPDATE    │ Yes          │ Yes          │
@@ -691,7 +691,7 @@ A relation is in **1NF** if and only if:
 
   UNNORMALIZED (violates 1NF — multi-valued attribute):
   ┌─────────┬────────┬───────────────────────┐
-  │ emp_id  │ name   │ phone_numbers          │
+  │ emp_id  │ name   │ phone_numbers         │
   ├─────────┼────────┼───────────────────────┤
   │ 1       │ Hari   │ 9841000001, 9851000002│
   │ 2       │ Sita   │ 9861000003            │
@@ -924,12 +924,12 @@ Given from questions:
   │ NF   │ Condition                                                    │
   ├──────┼──────────────────────────────────────────────────────────────┤
   │ 1NF  │ All attributes atomic; no repeating groups; has PK           │
-  │ 2NF  │ 1NF + No partial dependencies (non-prime → part of PK)      │
-  │ 3NF  │ 2NF + No transitive dependencies (non-prime → non-prime)    │
-  │      │ OR for every X→A: X is superkey OR A is prime               │
-  │ BCNF │ For every non-trivial X→A: X must be a superkey             │
-  │ 4NF  │ BCNF + No non-trivial multi-valued dependencies             │
-  │ 5NF  │ 4NF + No join dependencies that aren't implied by keys      │
+  │ 2NF  │ 1NF + No partial dependencies (non-prime → part of PK)       │
+  │ 3NF  │ 2NF + No transitive dependencies (non-prime → non-prime)     │
+  │      │ OR for every X→A: X is superkey OR A is prime                │
+  │ BCNF │ For every non-trivial X→A: X must be a superkey              │
+  │ 4NF  │ BCNF + No non-trivial multi-valued dependencies              │
+  │ 5NF  │ 4NF + No join dependencies that aren't implied by keys       │
   └──────┴──────────────────────────────────────────────────────────────┘
 
 ■ INTERVIEW ESSENTIALS

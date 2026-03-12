@@ -78,14 +78,14 @@ At its core, a DBMS does the following:
   │ Domain                  │ Application Example                      │
   ├─────────────────────────┼──────────────────────────────────────────┤
   │ Banking & Finance       │ Account management, transactions, loans  │
-  │ Airlines                │ Reservations, flight scheduling           │
-  │ Universities            │ Student records, enrollment, grades       │
-  │ Telecommunications      │ Call records, billing, subscriber mgmt    │
-  │ E-Commerce              │ Product catalog, orders, payments         │
-  │ Healthcare              │ Patient records, prescriptions, billing   │
-  │ Social Media            │ User profiles, posts, relationships       │
-  │ Government              │ Citizen records, tax, census data         │
-  │ Manufacturing           │ Inventory, supply chain, production       │
+  │ Airlines                │ Reservations, flight scheduling          │
+  │ Universities            │ Student records, enrollment, grades      │
+  │ Telecommunications      │ Call records, billing, subscriber mgmt   │
+  │ E-Commerce              │ Product catalog, orders, payments        │
+  │ Healthcare              │ Patient records, prescriptions, billing  │
+  │ Social Media            │ User profiles, posts, relationships      │
+  │ Government              │ Citizen records, tax, census data        │
+  │ Manufacturing           │ Inventory, supply chain, production      │
   └─────────────────────────┴──────────────────────────────────────────┘
 
 ■ EVOLUTION OF DBMS
@@ -134,9 +134,9 @@ concurrency.
 ■ IN-DEPTH COMPARISON
 ──────────────────────
 
-  ┌──────────────────────┬────────────────────────┬─────────────────────────┐
+  ┌──────────────────────┬────────────────────────┬──────────────────────────┐
   │ Criteria             │ File System            │ Database System          │
-  ├──────────────────────┼────────────────────────┼─────────────────────────┤
+  ├──────────────────────┼────────────────────────┼──────────────────────────┤
   │ Data Redundancy      │ High (duplicate data   │ Low (centralized,        │
   │                      │   across files)        │   normalization)         │
   │ Data Consistency     │ Difficult to maintain  │ Enforced by constraints  │
@@ -151,7 +151,7 @@ concurrency.
   │ Relationships        │ Not supported          │ FK, joins, constraints   │
   │ Atomicity            │ Not guaranteed         │ Transaction-based (ACID) │
   │ Scalability          │ Limited                │ Designed for scale       │
-  └──────────────────────┴────────────────────────┴─────────────────────────┘
+  └──────────────────────┴────────────────────────┴──────────────────────────┘
 
 ■ PROBLEMS WITH FILE SYSTEMS
 ─────────────────────────────
@@ -215,18 +215,18 @@ Physical, Logical, and View.
   ┌─────────────────────────────────────────────────────────────────┐
   │                      VIEW LEVEL (External)                      │
   │   [View 1]    [View 2]    [View 3]    ...    [View n]           │
-  │   (Cashier)   (Manager)   (HR)               (Customer App)    │
+  │   (Cashier)   (Manager)   (HR)               (Customer App)     │
   ├─────────────────────────────────────────────────────────────────┤
-  │                    LOGICAL LEVEL (Conceptual)                    │
-  │                                                                  │
-  │   Full logical structure of the entire database                  │
-  │   Tables, relationships, constraints, types                      │
-  │   e.g., CREATE TABLE employee(id INT, name VARCHAR, ...)         │
+  │                    LOGICAL LEVEL (Conceptual)                   │
+  │                                                                 │
+  │   Full logical structure of the entire database                 │
+  │   Tables, relationships, constraints, types                     │
+  │   e.g., CREATE TABLE employee(id INT, name VARCHAR, ...)        │
   ├─────────────────────────────────────────────────────────────────┤
-  │                    PHYSICAL LEVEL (Internal)                     │
-  │                                                                  │
-  │   How data is actually stored on disk                            │
-  │   File structures, indexing, compression, block layout           │
+  │                    PHYSICAL LEVEL (Internal)                    │
+  │                                                                 │
+  │   How data is actually stored on disk                           │
+  │   File structures, indexing, compression, block layout          │
   │   e.g., B⁺ tree index on employee.id, heap file for records     │
   └─────────────────────────────────────────────────────────────────┘
 
@@ -338,7 +338,7 @@ higher level. It is a key benefit of the three-level architecture.
   │ Which level unaffected?  │ Logical + View       │ View (External)     │
   │ Difficulty               │ Easier               │ Harder              │
   │ Example                  │ Add index on column  │ Add new column      │
-  │ Managed by mapping       │ Internal ↔ Conceptual│ Conceptual ↔ Extern│
+  │ Managed by mapping       │ Internal ↔ Conceptual│ Conceptual ↔ Extern │
   └──────────────────────────┴──────────────────────┴─────────────────────┘
 
 ■ REAL-WORLD SCENARIO
@@ -461,10 +461,10 @@ operate on the METADATA (structure) of the database, NOT the data itself.
   │ Command      │ Purpose                                              │
   ├──────────────┼──────────────────────────────────────────────────────┤
   │ CREATE       │ Create a new table, database, view, index, etc.      │
-  │ ALTER        │ Modify the structure of an existing table             │
-  │ DROP         │ Delete a table, database, view, or index entirely     │
-  │ TRUNCATE     │ Remove all rows from a table (structure remains)      │
-  │ RENAME       │ Rename a table or column                              │
+  │ ALTER        │ Modify the structure of an existing table            │
+  │ DROP         │ Delete a table, database, view, or index entirely    │
+  │ TRUNCATE     │ Remove all rows from a table (structure remains)     │
+  │ RENAME       │ Rename a table or column                             │
   └──────────────┴──────────────────────────────────────────────────────┘
 
 ■ EXAMPLES
@@ -567,15 +567,15 @@ on which database objects.
 ■ SUMMARY TABLE
 ────────────────
   ┌──────┬──────────────────────┬──────────────────────────────────┐
-  │ Type │ Commands             │ Operates On                       │
+  │ Type │ Commands             │ Operates On                      │
   ├──────┼──────────────────────┼──────────────────────────────────┤
-  │ DDL  │ CREATE, ALTER, DROP  │ Schema / Structure (metadata)     │
-  │      │ TRUNCATE, RENAME     │                                   │
-  │ DML  │ SELECT, INSERT,      │ Data (rows/records)               │
-  │      │ UPDATE, DELETE       │                                   │
-  │ DCL  │ GRANT, REVOKE        │ Permissions / Access Control      │
-  │ TCL  │ COMMIT, ROLLBACK,    │ Transactions                      │
-  │      │ SAVEPOINT            │                                   │
+  │ DDL  │ CREATE, ALTER, DROP  │ Schema / Structure (metadata)    │
+  │      │ TRUNCATE, RENAME     │                                  │
+  │ DML  │ SELECT, INSERT,      │ Data (rows/records)              │
+  │      │ UPDATE, DELETE       │                                  │
+  │ DCL  │ GRANT, REVOKE        │ Permissions / Access Control     │
+  │ TCL  │ COMMIT, ROLLBACK,    │ Transactions                     │
+  │      │ SAVEPOINT            │                                  │
   └──────┴──────────────────────┴──────────────────────────────────┘
 
 ■ INTERVIEW ESSENTIALS
@@ -607,29 +607,29 @@ security, and handle transactions.
 ■ COMPONENTS OF DATABASE SYSTEM ARCHITECTURE
 
   ┌─────────────────────────────────────────────────────────────────┐
-  │                       DATABASE USERS                             │
-  │  [Naive Users] [App Programmers] [Sophisticated Users] [DBA]     │
+  │                       DATABASE USERS                            │
+  │  [Naive Users] [App Programmers] [Sophisticated Users] [DBA]    │
   ├─────────────────────────────────────────────────────────────────┤
-  │                     APPLICATION PROGRAMS                         │
-  │                     & QUERY INTERFACES                           │
+  │                     APPLICATION PROGRAMS                        │
+  │                     & QUERY INTERFACES                          │
   ├─────────────────────────────────────────────────────────────────┤
-  │                     QUERY PROCESSOR                              │
+  │                     QUERY PROCESSOR                             │
   │  ┌───────────────┐  ┌───────────────┐  ┌──────────────────┐     │
-  │  │ DDL Compiler   │  │ DML Compiler   │  │ Query Optimizer   │     │
-  │  │ (Interpreter)  │  │ & Parser       │  │ & Evaluation Eng  │     │
+  │  │ DDL Compiler  │  │ DML Compiler  │  │ Query Optimizer  │     │
+  │  │ (Interpreter) │  │ & Parser      │  │ & Evaluation Eng │     │
   │  └───────────────┘  └───────────────┘  └──────────────────┘     │
   ├─────────────────────────────────────────────────────────────────┤
-  │                     STORAGE MANAGER                              │
+  │                     STORAGE MANAGER                             │
   │  ┌────────────────┐ ┌────────────────┐ ┌────────────────────┐   │
-  │  │ Authorization   │ │ Transaction    │ │ File Manager       │   │
-  │  │ & Integrity Mgr │ │ Manager        │ │ & Buffer Manager   │   │
+  │  │ Authorization  │ │ Transaction    │ │ File Manager       │   │
+  │  │ & Integrity Mgr│ │ Manager        │ │ & Buffer Manager   │   │
   │  └────────────────┘ └────────────────┘ └────────────────────┘   │
   ├─────────────────────────────────────────────────────────────────┤
-  │                     DISK STORAGE                                 │
-  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │
-  │  │ Data Files│  │ Data Dict│  │ Indices  │  │ Statistical  │    │
-  │  │          │  │ (Catalog)│  │          │  │ Data         │    │
-  │  └──────────┘  └──────────┘  └──────────┘  └──────────────┘    │
+  │                     DISK STORAGE                                │
+  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐     │
+  │  │Data Files│  │ Data Dict│  │ Indices  │  │ Statistical  │     │
+  │  │          │  │ (Catalog)│  │          │  │ Data         │     │
+  │  └──────────┘  └──────────┘  └──────────┘  └──────────────┘     │
   └─────────────────────────────────────────────────────────────────┘
 
 ■ KEY COMPONENTS EXPLAINED
@@ -688,14 +688,14 @@ security, and handle transactions.
 ■ TWO-TIER ARCHITECTURE (Client-Server)
 ────────────────────────────────────────
 
-  ┌──────────────────┐         ┌──────────────────────┐
-  │   CLIENT TIER    │  SQL    │    SERVER TIER        │
+  ┌──────────────────┐        ┌───────────────────────┐
+  │   CLIENT TIER    │  SQL   │    SERVER TIER        │
   │                  │◄──────►│                       │
-  │  - Application   │  ODBC/ │  - DBMS Engine         │
-  │  - User Interface│  JDBC  │  - Query Processing    │
-  │  - Business Logic│        │  - Storage Management  │
-  │                  │        │  - Database Files       │
-  └──────────────────┘        └──────────────────────┘
+  │  - Application   │  ODBC/ │  - DBMS Engine        │
+  │  - User Interface│  JDBC  │  - Query Processing   │
+  │  - Business Logic│        │  - Storage Management │
+  │                  │        │  - Database Files     │
+  └──────────────────┘        └───────────────────────┘
 
 **How it works:**
   • The CLIENT contains both the user interface AND business logic.
@@ -723,11 +723,11 @@ directly to a central database server.
   ┌────────────────┐    ┌────────────────────┐    ┌─────────────────┐
   │ PRESENTATION   │    │  APPLICATION       │    │ DATA TIER       │
   │ TIER (Client)  │◄──►│  TIER (Server)     │◄──►│ (Database)      │
-  │                │HTTP│                    │SQL │                  │
-  │ - Web Browser  │    │ - Business Logic   │    │ - DBMS Engine    │
-  │ - Mobile App   │    │ - Application      │    │ - Data Storage   │
-  │ - UI rendering │    │   Server (API)     │    │ - Query Proc.    │
-  │                │    │ - Authentication   │    │                  │
+  │                │HTTP│                    │SQL │                 │
+  │ - Web Browser  │    │ - Business Logic   │    │ - DBMS Engine   │
+  │ - Mobile App   │    │ - Application      │    │ - Data Storage  │
+  │ - UI rendering │    │   Server (API)     │    │ - Query Proc.   │
+  │                │    │ - Authentication   │    │                 │
   └────────────────┘    └────────────────────┘    └─────────────────┘
 
 **How it works:**
@@ -774,15 +774,15 @@ graph LR
 ■ COMPARISON TABLE
 ──────────────────
   ┌──────────────────────┬─────────────────────┬────────────────────────┐
-  │ Feature              │ Two-Tier            │ Three-Tier              │
+  │ Feature              │ Two-Tier            │ Three-Tier             │
   ├──────────────────────┼─────────────────────┼────────────────────────┤
-  │ Client complexity    │ Fat (logic + UI)    │ Thin (UI only)          │
-  │ Security             │ Low (direct DB)     │ High (no direct DB)     │
-  │ Scalability          │ Limited             │ Highly scalable         │
-  │ Maintenance          │ Harder              │ Easier (centralized)    │
-  │ Network round-trips  │ Fewer               │ More (extra tier)       │
-  │ Cost                 │ Lower               │ Higher                  │
-  │ Use case             │ Small/desktop apps  │ Web/enterprise apps     │
+  │ Client complexity    │ Fat (logic + UI)    │ Thin (UI only)         │
+  │ Security             │ Low (direct DB)     │ High (no direct DB)    │
+  │ Scalability          │ Limited             │ Highly scalable        │
+  │ Maintenance          │ Harder              │ Easier (centralized)   │
+  │ Network round-trips  │ Fewer               │ More (extra tier)      │
+  │ Cost                 │ Lower               │ Higher                 │
+  │ Use case             │ Small/desktop apps  │ Web/enterprise apps    │
   └──────────────────────┴─────────────────────┴────────────────────────┘
 
 ■ INTERVIEW ESSENTIALS

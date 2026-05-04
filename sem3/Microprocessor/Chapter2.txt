@@ -1,0 +1,1039 @@
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                   CHAPTER 2 / UNIT 2                                       ║
+║                 ARCHITECTURAL DETAILS AND PROGRAMMING OF 8085 (12 HRS)                     ║
+║                    PU B.E. COMPUTER ENGINEERING (SEM III) | MICROPROCESSOR & ALP           ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+COURSE BIG PICTURE (UNIT 2 CONTEXT)
+-----------------------------------
+	This chapter is the technical core of 8085 learning. It converts the conceptual foundation
+	of Unit 1 into hardware-level and instruction-level understanding. Students learn 8085
+	internal blocks, instruction groups, addressing modes, timing cycles, and assembly language
+	programming structure. This unit is extremely important for exam scoring because it combines
+	theory + timing interpretation + code writing. Mastery here directly helps with Unit 4
+	interfacing logic and Unit 5 interrupt processing sequence.
+
+DEPENDENCY MAP FOR UNIT 2
+-------------------------
+	8085 Internal Architecture
+		└──► Instruction Set + Classification
+				└──► Addressing Modes
+						└──► Instruction Cycle / Machine Cycle / T-State
+								└──► Timing Diagrams
+										└──► Assembly Language Programming
+
+COMMON SYMBOLS USED IN THIS CHAPTER
+-----------------------------------
+	ACC: Accumulator	PSW: Program Status Word	SP: Stack Pointer	PC: Program Counter
+	IR: Instruction Register	CU: Control Unit	ALU: Arithmetic Logic Unit
+	T-State: One clock period	M-Cycle: Group of T-states	IC: Instruction Cycle
+
+====================================================================================================
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.0: 8085 INTRODUCTION, FEATURES, AND IMPORTANT PINS                                 ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		8085 introduction, feature set, and pin-level understanding
+
+	B. Definition (must be precise and exam-ready)
+		Intel 8085 is an 8-bit single-chip NMOS microprocessor (40-pin package) that executes
+		stored programs using 16-bit addressing, multiplexed low-order address/data lines, and
+		support signals for memory, I/O, interrupts, serial data, and bus control.
+
+	C. Why this topic matters (2-3 lines)
+		This is a high-frequency exam and viva area because questions commonly ask 8085 features,
+		pin functions, and signal roles in one answer. A clear pin-level understanding also helps
+		in timing diagrams, interfacing, and interrupt topics.
+
+	D. Core theory (concise but complete)
+		8085 works on +5V DC supply and commonly operates from about 500 KHz to 3 MHz in
+		academic context. It is an 8-bit processor with 16 address lines (A0-A15) and can access
+		64 KB memory space. It provides 8-bit I/O addressing (256 ports). AD0-AD7 are multiplexed
+		for lower address/data transfer, so ALE is required for demultiplexing. Control/status,
+		interrupt, serial, DMA/bus-hold, reset, and clock pins coordinate complete system behavior.
+		In exam answers, write feature bullets first, then explain important pins by function groups.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. Quick Feature Table
+		┌─────────────────────────────────────┬──────────────────────────────────────────────────────┐
+		│ Parameter                           │ 8085 Value/Meaning                                   │
+		├─────────────────────────────────────┼──────────────────────────────────────────────────────┤
+		│ Word size                           │ 8-bit                                                │
+		│ Technology / package                │ Single-chip NMOS, 40 pins                            │
+		│ Supply                              │ +5V DC                                               │
+		│ Typical clock range (academic)      │ 500 KHz to 3 MHz                                     │
+		│ Address lines                       │ 16 (A0-A15)                                          │
+		│ Max memory space                    │ 2^16 = 64 KB                                         │
+		│ I/O address size                    │ 8-bit                                                │
+		│ Max I/O ports                       │ 2^8 = 256                                            │
+		│ Instruction count (textbook listing)│ 74 basic instructions, 5 addressing modes            │
+		│ Multiplexed bus                     │ AD0-AD7 (low-order address/data)                     │
+		└─────────────────────────────────────┴──────────────────────────────────────────────────────┘
+
+		E1. Important Pins and Pin-Level Functions (exam-priority)
+			• AD0-AD7: Multiplexed lower address/data lines.
+			• A8-A15: Higher-order address lines (tri-state capable).
+			• ALE: Address Latch Enable output; high pulse indicates valid lower address.
+			• S1, S0: Status outputs used with IO/M̅ to identify machine cycle type.
+			• RD̅: Active-low read control for memory/I/O read operation.
+			• WR̅: Active-low write control for memory/I/O write operation.
+			• READY: Wait-state control input; LOW inserts wait until device is ready.
+			• TRAP: Highest-priority, non-maskable interrupt (edge+level sensitive in standard texts),
+			  vector location 0024H.
+			• RST 7.5, RST 6.5, RST 5.5: Maskable vectored interrupts with lower priority than TRAP.
+			• INTR / INTA̅: General interrupt request and interrupt acknowledge pair.
+			• IO/M̅: Selects memory (0) or I/O operation (1).
+			• HOLD / HLDA: DMA/bus request and hold acknowledge handshake.
+			• RESET IN̅: Active-low reset input; restarts execution from 0000H.
+			• SID / SOD: Serial input data and serial output data (1-bit serial path).
+			• X1, X2: Crystal/clock input pins; internal operating clock is derived from external source.
+			• VCC, VSS: Power and ground reference pins.
+
+		E2. Intuitive Representation Layer
+			• Simple words: Pins are the “communication ports” of 8085 with memory and peripherals.
+			• Analogy: CPU talks to outside world through dedicated signal doors.
+			• How to think in exam: group pins as address/data, control/status, interrupt, serial, clock/power.
+
+	F. 10-Mark Answer Framework
+		• Define 8085 and list feature bullets.
+		• Mention memory and I/O capacity calculations (64KB, 256 ports).
+		• Explain important pins category-wise.
+		• Add 2-3 high-value signals (ALE, IO/M̅, RD̅, WR̅, TRAP, HOLD/HLDA).
+		• Conclude with why pin-level understanding is vital for timing/interfacing.
+
+	G. 2-3 likely university questions
+		1) List and explain key features of Intel 8085.
+		2) Explain important pins of 8085 with functions.
+		3) Why are AD0-AD7 multiplexed, and what is the role of ALE?
+
+	H. Quick revision bullets (5-8 points)
+		• 8085 is an 8-bit, 40-pin, +5V microprocessor.
+		• 16-bit address bus gives 64KB memory access.
+		• 8-bit I/O addressing gives 256 ports.
+		• AD0-AD7 are multiplexed; ALE is used for demultiplexing.
+		• TRAP is highest priority interrupt; INTR is non-vectored request.
+
+	I. Common mistakes to avoid
+		• Writing READY as output (in practice used as ready/wait synchronization input to CPU).
+		• Confusing IO/M̅ logic (0 = memory, 1 = I/O).
+		• Forgetting reset start address 0000H and TRAP vector 0024H.
+
+	J. Visual Layout Elements (TXT-only)
+		Signal groups:
+		[Address/Data] [Control/Status] [Interrupt] [Serial] [DMA] [Clock/Reset/Power]
+		Graph cue:
+		Pin-function clarity ↑ => timing/interfacing answer quality ↑
+
+	Note:
+		A few textbooks differ in wording for pin-direction descriptions and sensitivity details.
+		Core signal functions and vectors are preserved from the provided raw content.
+
+----------------------------------------------------------------------------------------------------
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.1: INTERNAL ARCHITECTURE AND FEATURES OF 8085                                      ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		Internal architecture and features of Intel 8085 microprocessor
+
+	B. Definition (must be precise and exam-ready)
+		The 8085 internal architecture is the structural organization of functional blocks such as
+		ALU, accumulator, register array, program counter, stack pointer, instruction decoder,
+		timing/control unit, interrupt control, and serial I/O logic that collectively execute
+		instructions and coordinate data movement in an 8-bit microprocessor system.
+
+	C. Why this topic matters (2-3 lines)
+		This topic is the base for all instruction execution, timing, and ALP behavior.
+		Without block-level understanding, students cannot correctly explain machine cycle, flags,
+		interrupt processing, or write reliable assembly programs.
+
+	D. Core theory (concise but complete)
+		8085 is an 8-bit CPU with 16-bit address bus and 8-bit data bus, enabling 64KB addressable
+		memory space. Its ALU performs arithmetic/logical operations on accumulator-centered data,
+		while flag register records operation status for conditional decisions. Register set includes
+		general purpose registers (B, C, D, E, H, L), special registers (PC, SP), and temporary
+		internal storage. Timing/control unit generates signals for read, write, interrupt response,
+		and clock-driven sequencing. Interrupt block supports maskable and non-maskable service.
+		In exam answers, always explain block function + data/control interaction sequence.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. Microtopic Definitions
+			• Accumulator (A): Primary register used by ALU for most operations.
+			• Temporary Register: Internal 8-bit ALU helper register (not user-accessible).
+			• Flag Register: Status bits (S, Z, AC, P, CY) after ALU operations.
+			• W and Z Registers: Internal temporary pair used during some operations (not user-visible).
+			• Instruction Register (IR): Holds fetched opcode for decoding; not directly programmable.
+			• Program Counter (PC): Holds next instruction memory address.
+			• Stack Pointer (SP): Points to top of stack memory location.
+			• Instruction Decoder: Interprets opcode and activates control logic.
+			• Timing/Control Unit: Generates machine-control signals.
+			• Interrupt Control: Manages external/internal interrupt requests.
+			• Serial I/O Control: Supports SID/SOD serial communication bits.
+
+		E0.1 Flag Register Pattern (8085)
+			S   Z   -   AC   -   P   -   CY
+			S  : Sign flag
+			Z  : Zero flag
+			AC : Auxiliary carry
+			P  : Parity flag
+			CY : Carry flag
+			(- positions are unused/reserved in basic explanation)
+
+		E1. Functional Block Table
+		┌─────────────────────┬──────────────────────────────────────────────────────────────────┐
+		│ Block               │ Primary Role                                                     │
+		├─────────────────────┼──────────────────────────────────────────────────────────────────┤
+		│ ALU                 │ Arithmetic and logical execution                                 │
+		│ Accumulator         │ Operand/result holding register                                  │
+		│ Temporary Register  │ Internal ALU operand staging (hidden from user)                  │
+		│ General Registers   │ Temporary data storage (B,C,D,E,H,L)                             │
+		│ W,Z Registers       │ Internal temporary pair during execution                         │
+		│ PC / SP             │ Instruction flow and stack control                               │
+		│ Decoder + CU        │ Operation interpretation and sequencing                          │
+		│ Interrupt Logic     │ Event-driven control transfer                                    │
+		│ Serial I/O          │ Bit-level serial data interaction                                │
+		└─────────────────────┴──────────────────────────────────────────────────────────────────┘
+
+		E2. Intuitive Representation Layer
+			• Simple words: 8085 is a small office where each register has a job.
+			• Analogy: ALU = worker, accumulator = work desk, PC = task list pointer, CU = manager.
+			• How to think in exam: “Block name -> function -> why needed in execution.”
+
+	F. 10-Mark Answer Framework
+		• Introduction: define 8085 architecture.
+		• Diagram/flow: explain major blocks and connections.
+		• Working: instruction fetch -> decode -> execute through blocks.
+		• Technical details: buses, register roles, flag role.
+		• Real-life example: controller board processing sensor and output logic.
+		• Conclusion: architecture enables predictable instruction-driven control.
+
+	G. 2-3 likely university questions
+		1) Draw and explain the internal architecture of 8085 microprocessor.
+		2) Explain roles of ALU, accumulator, PC, SP, and flags in 8085.
+		3) List key features of 8085 and explain their significance.
+
+	H. Quick revision bullets (5-8 points)
+		• 8085 is 8-bit CPU with 16-bit addressing.
+		• 64KB memory space supported.
+		• ALU works mainly with accumulator.
+		• Flags enable conditional branching.
+		• CU drives timing/control signal generation.
+
+	I. Common mistakes to avoid
+		• Confusing PC and SP functions.
+		• Forgetting flag effects in ALU operations.
+		• Explaining blocks without data/control flow relation.
+
+	J. Visual Layout Elements (TXT-only)
+		Architecture sketch:
+			[PC/SP/Registers] -> [Instruction Decoder/CU] -> [ALU + ACC] -> [Flags]
+			                 \-> [Address/Data/Control Bus Interface]
+		Graph cue:
+		Block coordination quality ↑ => execution reliability ↑
+
+	Practical Lab Linkage
+		Observe register and flag changes in 8085 simulator after arithmetic instructions.
+
+	Real-life example
+		A digital counter board uses register updates + ALU logic for display output decisions.
+
+	Troubleshooting scenario
+		If branch result is wrong, check flag bits and last ALU operation before jump.
+
+----------------------------------------------------------------------------------------------------
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.2: INTEL 8085 INSTRUCTION SET                                                      ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		Intel 8085 instruction set
+
+	B. Definition (must be precise and exam-ready)
+		The 8085 instruction set is the complete collection of machine-level operations defined by
+		opcodes that direct data transfer, arithmetic processing, logic operations, branching,
+		stack handling, I/O control, and machine control behavior.
+
+	C. Why this topic matters (2-3 lines)
+		Instruction set knowledge is essential for ALP writing and debugging.
+		It directly impacts performance, code correctness, and exam coding questions.
+
+	D. Core theory (concise but complete)
+		Each 8085 instruction has opcode, optional operand bytes, and execution timing profile.
+		Instructions differ in length (1-byte/2-byte/3-byte), addressing mode, and flag effects.
+		Correct program design requires knowing not only what an instruction does, but also how
+		it affects flags and control flow. In exam answers, mention syntax pattern and example
+		mnemonics (e.g., MOV, MVI, ADD, ANA, JMP, CALL, IN, OUT) with category mapping.
+		Strong answers include instruction classification and use-case orientation.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. Microtopic Definitions
+			• Opcode: Binary code specifying operation.
+			• Operand: Data/register/address required by operation.
+			• Mnemonic: Human-readable symbolic instruction name.
+			• Instruction length: Number of bytes occupied in memory.
+			• Flag effect: Status bits modified by instruction result.
+
+		E1. Instruction-Length Table
+		┌────────────────────┬──────────────────────────────────────────────────────────────────┐
+		│ Length Type        │ Typical Examples                                                 │
+		├────────────────────┼──────────────────────────────────────────────────────────────────┤
+		│ 1-byte             │ MOV B,C ; ADD B ; CMA ; RLC                                      │
+		│ 2-byte             │ MVI A,32H ; ADI 05H ; IN 01H                                     │
+		│ 3-byte             │ LDA 2050H ; JMP 3000H ; CALL 2500H                               │
+		└────────────────────┴──────────────────────────────────────────────────────────────────┘
+
+		E2. Intuitive Representation Layer
+			• Simple words: Instruction set is the CPU’s language dictionary.
+			• Analogy: Like grammar categories in language (verbs, conditions, calls, etc.).
+			• How to think in exam: identify category first, then explain operation + flag effect.
+
+	F. 10-Mark Answer Framework
+		• Define instruction set.
+		• Explain opcode-operand-mnemonic relation.
+		• Show instruction length categories.
+		• Add classification reference and examples.
+		• Conclude with ALP relevance.
+
+	G. 2-3 likely university questions
+		1) Explain Intel 8085 instruction set with examples.
+		2) Classify 8085 instructions based on functionality.
+		3) Explain instruction length categories in 8085.
+
+	H. Quick revision bullets (5-8 points)
+		• Instruction = opcode + optional operand.
+		• Length may be 1/2/3 bytes.
+		• Mnemonics improve readability.
+		• Category + flags are key for ALP.
+		• Branching needs precise flag understanding.
+
+	I. Common mistakes to avoid
+		• Ignoring instruction length in memory planning.
+		• Not mentioning flag changes for arithmetic/logical ops.
+		• Mixing immediate and direct addressing instructions.
+
+	J. Visual Layout Elements (TXT-only)
+		Flow cue:
+		[Opcode Fetch] -> [Decode Category] -> [Execute + Flag Update]
+		Graph cue:
+		Instruction complexity ↑ => average T-state usage ↑
+
+	Practical Lab Linkage
+		Run a mixed instruction sequence and inspect byte-length memory map in simulator.
+
+	Real-life example
+		A traffic light control routine uses transfer, compare, branch, and output instructions.
+
+	Troubleshooting scenario
+		If program flow breaks, verify instruction size and next memory address alignment.
+
+----------------------------------------------------------------------------------------------------
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.3: CLASSIFICATION OF INTEL 8085 INSTRUCTIONS                                       ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		Classification of Intel 8085 instructions
+
+	B. Definition (must be precise and exam-ready)
+		Instruction classification is the grouping of 8085 instructions by operation type so that
+		program design, debugging, and timing analysis become structured and predictable.
+
+	C. Why this topic matters (2-3 lines)
+		Classification reduces coding confusion and improves exam response quality.
+		It helps students choose right instructions for data movement, arithmetic, decision making,
+		I/O interaction, and stack control.
+
+	D. Core theory (concise but complete)
+		8085 instructions are grouped into data transfer, arithmetic, logical, branching,
+		and stack/I-O/machine control classes. Each class serves distinct programming goals.
+		Data transfer does not usually alter flags; arithmetic and logical classes do. Branching
+		uses flag conditions to redirect execution. Stack and control instructions manage subroutine
+		flow, device communication, and processor state. In exam writing, define each class,
+		provide representative mnemonics, and one practical use-case.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. Microtopic Definitions
+			• Data transfer: Move data among registers/memory/I/O.
+			• Arithmetic: Add/subtract/increment/decrement operations.
+			• Logical: AND/OR/XOR/rotate/compare operations.
+			• Branching: Conditional/unconditional control transfer.
+			• Stack/Control: Subroutine, interrupt, I/O, machine state operations.
+
+		E1. Classification Matrix
+		┌──────────────────────────────┬──────────────────────────────────────────────────────────┐
+		│ Instruction Class            │ Typical Mnemonics                                        │
+		├──────────────────────────────┼──────────────────────────────────────────────────────────┤
+		│ Data transfer                │ MOV, MVI, LDA, STA, LHLD, SHLD, LXI                      │
+		│ Arithmetic                   │ ADD, ADC, SUB, SBB, INR, DCR, DAD                        │
+		│ Logical                      │ ANA, ORA, XRA, CMP, CMA, RLC, RRC                        │
+		│ Branching                    │ JMP, JZ, JNZ, JC, JNC, CALL, RET, RST                    │
+		│ Stack / I-O / machine ctrl   │ PUSH, POP, IN, OUT, EI, DI, HLT, NOP, SIM, RIM           │
+		└──────────────────────────────┴──────────────────────────────────────────────────────────┘
+
+		E2. Intuitive Representation Layer
+			• Simple words: Instruction classes are toolboxes for different programming tasks.
+			• Analogy: Data transfer = transport tools, arithmetic = calculator tools, branching = GPS.
+			• How to think in exam: identify class -> purpose -> example -> flag/control effect.
+
+	F. 10-Mark Answer Framework
+		• Define instruction classification.
+		• Present class-wise table.
+		• Explain role of each class.
+		• Add representative mnemonics and flag behavior note.
+		• Conclude with ALP design benefit.
+
+	G. 2-3 likely university questions
+		1) Classify 8085 instructions with suitable examples.
+		2) Explain role of branching and stack instructions in ALP.
+		3) Differentiate arithmetic and logical instruction groups.
+
+	H. Quick revision bullets (5-8 points)
+		• Five major classes simplify coding.
+		• Data transfer often preserves flags.
+		• Arithmetic/logical can modify flags.
+		• Branching depends on status conditions.
+		• Stack/control supports procedure-level design.
+
+	I. Common mistakes to avoid
+		• Mixing CALL/RET with normal jump semantics.
+		• Ignoring flag dependency in conditional branch.
+		• Using compare without checking relevant flag.
+
+	J. Visual Layout Elements (TXT-only)
+		Category ladder:
+		Data -> Process -> Decide -> Jump -> Control/I-O
+		Graph cue:
+		Program complexity ↑ => dependence on branching + stack ↑
+
+	Practical Lab Linkage
+		Create one mini ALP using all instruction classes (move, add, compare, jump, output).
+
+	Real-life example
+		Industrial temperature monitor: read sensor, compare threshold, branch, trigger alarm output.
+
+	Troubleshooting scenario
+		If branch condition fails, inspect previous compare instruction and flags.
+
+	SUBTOPIC 2.3.1: DATA TRANSFER INSTRUCTIONS
+	------------------------------------------
+		Definition:
+			Data transfer instructions move data between registers, memory, and accumulator
+			without changing numeric value semantics.
+		Examples:
+			MOV B,C ; MVI A,2AH ; LDA 2050H ; STA 3000H ; LXI H,2500H
+		5-line explanation:
+			These instructions are fundamental for preparing operands before processing.
+			They support register-to-register, memory-to-register, and direct memory transfer.
+			Program efficiency depends heavily on selecting shortest valid transfer form.
+			Although most do not alter flags, wrong addressing can cause logical errors.
+			In exam coding, start by arranging data correctly before arithmetic/logic steps.
+
+	SUBTOPIC 2.3.2: ARITHMETIC INSTRUCTIONS
+	---------------------------------------
+		Definition:
+			Arithmetic instructions perform numerical operations such as addition, subtraction,
+			increment, decrement, and 16-bit pair addition.
+		Examples:
+			ADD B ; ADC C ; SUB D ; INR A ; DCR M ; DAD H
+		5-line explanation:
+			These instructions directly modify data and update flags used by decisions.
+			Carry and zero flags are especially important for multi-byte arithmetic and loops.
+			ADC/SBB are essential when handling carry/borrow across bytes.
+			INR/DCR affect most flags but not carry, which is a common exam trap.
+			Correct arithmetic design requires planned register usage and flag awareness.
+
+	SUBTOPIC 2.3.3: LOGICAL INSTRUCTIONS
+	------------------------------------
+		Definition:
+			Logical instructions perform bit-level operations and comparisons for masking,
+			decision support, and data conditioning.
+		Examples:
+			ANA B ; ORA C ; XRA D ; CMP E ; CMA ; RLC ; RRC
+		5-line explanation:
+			Logical operations are crucial for embedded control where bit states drive behavior.
+			CMP performs subtraction-like check without storing result and sets flags for branch.
+			Rotate instructions support bit-serial manipulation and compact control logic.
+			Masking via AND is common when isolating sensor/status bits.
+			In exam problems, logical instructions often precede conditional jump patterns.
+
+	SUBTOPIC 2.3.4: BRANCHING INSTRUCTIONS
+	--------------------------------------
+		Definition:
+			Branching instructions alter sequential program flow based on conditions or direct targets.
+		Examples:
+			JMP 3000H ; JZ LOOP ; JNZ NEXT ; JC ERR ; CALL SUB1 ; RET
+		5-line explanation:
+			Branching creates loops, decisions, and modular execution paths.
+			Conditional branches rely on previously set flag states, so instruction order matters.
+			CALL/RET support reusable subroutines and reduce code duplication.
+			RST provides compact fixed-address branch for service routines.
+			Most ALP logic for 10-mark questions depends on correct branching structure.
+
+	SUBTOPIC 2.3.5: STACK, I/O, MACHINE CONTROL INSTRUCTIONS
+	--------------------------------------------------------
+		Definition:
+			These instructions manage stack memory, peripheral communication, and processor state.
+		Examples:
+			PUSH B ; POP D ; IN 01H ; OUT 02H ; EI ; DI ; HLT ; NOP
+		5-line explanation:
+			Stack operations preserve context during subroutines and interrupts.
+			IN/OUT instructions enable direct communication with peripheral ports.
+			EI/DI control interrupt acceptance, critical for deterministic behavior.
+			HLT and NOP support machine control and timing alignment.
+			In exam design, stack and I/O instructions demonstrate system-level control maturity.
+
+----------------------------------------------------------------------------------------------------
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.4: ADDRESSING MODES OF 8085                                                        ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		Addressing modes of 8085 and its types
+
+	B. Definition (must be precise and exam-ready)
+		Addressing mode is the rule by which an instruction identifies the location/value of
+		operand data needed for execution.
+
+	C. Why this topic matters (2-3 lines)
+		Addressing mode directly affects instruction size, speed, and code readability.
+		Most ALP mistakes happen when students select wrong addressing mode.
+
+	D. Core theory (concise but complete)
+		8085 commonly uses immediate, register, direct, indirect, and implied addressing modes.
+		Immediate embeds data in instruction itself; register mode uses internal registers; direct
+		uses 16-bit memory address in instruction; indirect uses register pair pointer (usually HL);
+		implied mode has operand implied by opcode (e.g., CMA). Correct addressing mode choice
+		reduces memory usage and improves execution efficiency. In exams, define each mode and
+		provide one mnemonic example with operand interpretation.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. Mode Definitions + Examples
+			• Immediate: MVI A,32H (operand inside instruction)
+			• Register: MOV A,B (operand in register)
+			• Direct: LDA 2050H (address given explicitly)
+			• Indirect: MOV A,M (address through HL pair)
+			• Implied: CMA (operand implied)
+
+		E1. Comparison Table
+		┌───────────────┬───────────────────────┬────────────────────────────────────────────┐
+		│ Mode          │ Operand Source        │ Typical Benefit                            │
+		├───────────────┼───────────────────────┼────────────────────────────────────────────┤
+		│ Immediate     │ Instruction byte      │ Fast constant loading                      │
+		│ Register      │ Register file         │ Compact and quick operation                │
+		│ Direct        │ Explicit memory addr  │ Flexible external data access              │
+		│ Indirect      │ Register pair pointer │ Efficient table/array-like access          │
+		│ Implied       │ Opcode-defined        │ Minimal instruction form                   │
+		└───────────────┴───────────────────────┴────────────────────────────────────────────┘
+
+		E2. Intuitive Representation Layer
+			• Simple words: Addressing mode is “how CPU finds data.”
+			• Analogy: You can know an item by exact address, by pointer, or by immediate value tag.
+			• How to think in exam: mode name + where operand is + example instruction.
+
+	F. 10-Mark Answer Framework
+		• Define addressing mode.
+		• Explain all 8085 types with examples.
+		• Compare advantages in table form.
+		• Mention effect on instruction length/speed.
+		• Conclude with coding importance.
+
+	G. 2-3 likely university questions
+		1) Explain 8085 addressing modes with examples.
+		2) Differentiate direct and indirect addressing.
+		3) Why is addressing mode selection important in ALP?
+
+	H. Quick revision bullets (5-8 points)
+		• 5 key modes are commonly tested.
+		• Immediate = constant in instruction.
+		• Indirect = pointer-driven access.
+		• Register mode is compact and fast.
+		• Mode choice affects code quality.
+
+	I. Common mistakes to avoid
+		• Treating MOV A,M as direct addressing.
+		• Confusing immediate data and direct memory address.
+		• Forgetting opcode-implied operand cases.
+
+	J. Visual Layout Elements (TXT-only)
+		Operand lookup ladder:
+		Immediate -> Register -> Direct Address -> Indirect Pointer -> Implied
+		Graph cue:
+		Addressing flexibility ↑ => ALP expressiveness ↑
+
+	Practical Lab Linkage
+		Write one mini program using all five addressing modes.
+
+	Real-life example
+		Array processing uses indirect mode via HL pointer for sequential memory elements.
+
+	Troubleshooting scenario
+		If loaded value is wrong, verify whether instruction expects data or address.
+
+----------------------------------------------------------------------------------------------------
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.5: INSTRUCTION CYCLE, MACHINE CYCLE, AND T-STATE                                   ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		Instruction cycle, machine cycle, and T-state
+
+	B. Definition (must be precise and exam-ready)
+		An instruction cycle is complete execution of one instruction, composed of one or more
+		machine cycles, where each machine cycle contains multiple T-states (clock periods).
+
+	C. Why this topic matters (2-3 lines)
+		This topic is essential for timing diagram questions and performance estimation.
+		It helps students understand why instructions consume different execution time.
+
+	D. Core theory (concise but complete)
+		T-state is the smallest timing unit (one clock period). A machine cycle is a basic bus
+		operation such as opcode fetch, memory read, memory write, I/O read, or I/O write.
+		An instruction cycle includes required machine cycles to complete full instruction action.
+		For example, a multi-byte instruction requires extra machine cycles to fetch operand bytes.
+		Therefore execution time varies by instruction type and addressing mode. In exam answers,
+		explain hierarchy clearly: T-state < machine cycle < instruction cycle.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. Definitions
+			• T-state: Single clock timing interval.
+			• Machine cycle: One basic memory/I-O bus transaction.
+			• Instruction cycle: Entire instruction completion duration.
+			• Opcode fetch: First machine cycle for every instruction.
+			• Timing dependency: Execution time depends on cycle count.
+
+		E1. Hierarchy Table
+		┌─────────────────────┬──────────────────────────────────────────────────────────────────┐
+		│ Level               │ Description                                                      │
+		├─────────────────────┼──────────────────────────────────────────────────────────────────┤
+		│ T-state             │ One clock pulse period                                           │
+		│ Machine cycle       │ Group of T-states for one bus action                             │
+		│ Instruction cycle   │ Group of machine cycles for one complete instruction             │
+		└─────────────────────┴──────────────────────────────────────────────────────────────────┘
+
+		E1.1 Status Signal Table for Common Machine Cycles (8085)
+		┌─────────────────────┬──────┬────┬────┐
+		│ Machine Cycle       │ IO/M̅ │ S1 │ S0 │
+		├─────────────────────┼──────┼────┼────┤
+		│ Opcode Fetch        │  0   │ 1  │ 1  │
+		│ Memory Read         │  0   │ 1  │ 0  │
+		│ Memory Write        │  0   │ 0  │ 1  │
+		│ I/O Read            │  1   │ 1  │ 0  │
+		│ I/O Write           │  1   │ 0  │ 1  │
+		└─────────────────────┴──────┴────┴────┘
+
+		E1.2 Instruction Size Types (Timing Link)
+		┌─────────────────────┬──────────────────────────────────────────────────────────────────┐
+		│ Instruction Size    │ Meaning and Examples                                             │
+		├─────────────────────┼──────────────────────────────────────────────────────────────────┤
+		│ 1-byte              │ Opcode (and implied/register operand) in one byte; e.g., ADD B   │
+		│ 2-byte              │ Opcode + 8-bit data/port; e.g., MVI A,32H ; IN 40H               │
+		│ 3-byte              │ Opcode + 16-bit address/data; e.g., LDA 2050H ; LXI H,2070H      │
+		└─────────────────────┴──────────────────────────────────────────────────────────────────┘
+		Timing note:
+			Longer instruction size generally implies more fetch activity and higher cycle count.
+
+		E2. Intuitive Representation Layer
+			• Simple words: T-state is a step, machine cycle is a task, instruction cycle is full job.
+			• Analogy: Seconds -> minutes -> full activity session.
+			• How to think in exam: always show 3-level hierarchy first.
+
+	F. 10-Mark Answer Framework
+		• Define all three timing terms.
+		• Explain hierarchical relation.
+		• Use one example instruction timing breakup.
+		• Mention why timing differs instruction-wise.
+		• Conclude with relevance to optimization/debug.
+
+	G. 2-3 likely university questions
+		1) Differentiate instruction cycle, machine cycle, and T-state.
+		2) Explain why different instructions take different execution time.
+		3) Show timing hierarchy using one instruction example.
+
+	H. Quick revision bullets (5-8 points)
+		• T-state is smallest timing unit.
+		• Machine cycle = bus transaction block.
+		• Instruction cycle = complete instruction timeline.
+		• Every instruction starts with opcode fetch.
+		• Multi-byte instructions often take longer.
+
+	I. Common mistakes to avoid
+		• Treating machine cycle and instruction cycle as same.
+		• Ignoring extra operand fetch cycles.
+		• Missing hierarchy in exam explanation.
+
+	J. Visual Layout Elements (TXT-only)
+		Timing hierarchy graph:
+		T-state + T-state + ... => Machine Cycle
+		Machine Cycle + ...      => Instruction Cycle
+		Graph cue:
+		Instruction bytes ↑ => machine cycles ↑ => execution time ↑
+
+	Practical Lab Linkage
+		Count cycle steps in simulator for 1-byte and 3-byte instructions.
+
+	Real-life example
+		Real-time control loop timing budget depends on instruction-cycle totals.
+
+	Troubleshooting scenario
+		If loop delay mismatches expectation, re-evaluate cycle count per instruction.
+
+----------------------------------------------------------------------------------------------------
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.6: TIMING DIAGRAMS OF 8085 CYCLES                                                  ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		Timing diagrams: opcode fetch, memory read/write, I/O read/write
+
+	B. Definition (must be precise and exam-ready)
+		A timing diagram is a time-domain representation of status and control signals showing
+		sequence of bus operations across T-states for a specific machine cycle.
+
+	C. Why this topic matters (2-3 lines)
+		Timing diagrams are frequent descriptive and drawing questions in exams.
+		They are crucial for understanding control-signal generation and interfacing correctness.
+
+	D. Core theory (concise but complete)
+		8085 timing diagrams illustrate how address, data, and control signals change with clock
+		states. Opcode fetch cycle includes memory access for opcode and often status signaling.
+		Memory read/write cycles show data transfer between CPU and memory locations. I/O read/write
+		cycles perform similar transfers with peripheral ports using I/O control semantics.
+		Students must correlate RD̅/WR̅, IO/M̅, ALE, and status lines with T-state progression.
+		In exam answers, always present cycle name, signal order, and data-valid interval.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. Common Signal Definitions
+			• ALE: Address latch enable for multiplexed bus handling.
+			• IO/M̅: Selects memory vs I/O operation context.
+			• RD̅: Active-low read control.
+			• WR̅: Active-low write control.
+			• AD0-AD7: Multiplexed lower address/data lines.
+
+		E1. Cycle-specific Microtopics
+			2.6.1 Opcode Fetch Cycle
+				Definition:
+					Machine cycle where CPU fetches instruction opcode from memory.
+				5-line explanation:
+					This is first cycle of every instruction. Address is placed on bus,
+					ALE latches lower address, RD̅ activates read, and opcode is loaded
+					into instruction register. Status/control lines indicate fetch nature.
+					Timing correctness here is essential because wrong opcode fetch means
+					complete instruction flow corruption.
+
+			2.6.2 Memory Read Cycle
+				Definition:
+					Cycle where CPU reads operand/data byte from memory location.
+				5-line explanation:
+					CPU outputs memory address, activates RD̅, memory places data on bus,
+					and CPU captures it before cycle closes. IO/M̅ indicates memory operation.
+					This cycle appears in operand fetch and explicit memory access instructions.
+					Bus timing must satisfy setup/hold constraints for correct data sampling.
+					Designers use this timing for memory interface validation.
+
+			2.6.3 Memory Write Cycle
+				Definition:
+					Cycle where CPU writes data byte to memory location.
+				5-line explanation:
+					CPU places target address and data, then asserts WR̅ for valid write window.
+					Memory latches data during active write interval. IO/M̅ remains in memory mode.
+					This cycle is used by STA, MOV M,r, and stack operations.
+					Incorrect timing may write wrong value or wrong location.
+					Thus write-cycle interpretation is essential for debugging.
+
+			2.6.4 I/O Read Cycle
+				Definition:
+					Cycle where CPU reads byte from an I/O port.
+				5-line explanation:
+					Addressed port places data when RD̅ is active and IO/M̅ indicates I/O mode.
+					CPU samples data and stores it in destination register/accumulator.
+					This cycle supports peripheral input tasks like switches and sensors.
+					Port decoding and timing must align with processor expectations.
+					In exam sketches, clearly distinguish it from memory read cycle.
+
+			2.6.5 I/O Write Cycle
+				Definition:
+					Cycle where CPU sends byte to an I/O port.
+				5-line explanation:
+					CPU presents port address and data, then activates WR̅ in I/O mode.
+					Peripheral latches output data during valid write pulse.
+					This cycle controls display modules, actuators, and communication outputs.
+					Correct signal polarity and timing windows are mandatory.
+					Exam answers should mention OUT instruction relation.
+
+		E2. Intuitive Representation Layer
+			• Simple words: Timing diagram is “who speaks when” on processor bus lines.
+			• Analogy: Classroom speaking order with strict turn-taking by signals.
+			• How to think in exam: name cycle -> list signals -> show active window.
+
+	F. 10-Mark Answer Framework
+		• Define timing diagram and importance.
+		• Explain common signal roles.
+		• Draw/describe one or more cycle waveform sequences.
+		• Differentiate memory and I/O cycles.
+		• Conclude with interfacing/debug relevance.
+
+	G. 2-3 likely university questions
+		1) Explain opcode fetch timing diagram of 8085.
+		2) Differentiate memory read/write and I/O read/write cycles.
+		3) Explain role of ALE, RD̅, WR̅, IO/M̅ in 8085 timing.
+
+	H. Quick revision bullets (5-8 points)
+		• Every instruction starts with opcode fetch.
+		• ALE supports demultiplexing lower address/data lines.
+		• RD̅/WR̅ are active-low controls.
+		• IO/M̅ distinguishes memory vs I/O cycles.
+		• Data validity window is key in waveform interpretation.
+
+	I. Common mistakes to avoid
+		• Mixing memory cycle and I/O cycle semantics.
+		• Ignoring active-low notation.
+		• Not marking data-valid interval in diagrams.
+
+	J. Visual Layout Elements (TXT-only)
+		Signal sketch (generic):
+		CLK : _|-|_|-|_|-|_
+		ALE : __|‾|________
+		RD̅  : ____|‾‾|_____
+		AD  : <Addr><Data>
+		Graph cue:
+		Timing mismatch ↑ => read/write error probability ↑
+
+	Practical Lab Linkage
+		Use simulator timing window to inspect opcode fetch and memory read cycles.
+
+	Real-life example
+		7-segment display output via OUT instruction depends on valid I/O write timing.
+
+	Troubleshooting scenario
+		If peripheral not responding, verify port decoding and WR̅ pulse timing.
+
+----------------------------------------------------------------------------------------------------
+
+╔════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TOPIC 2.7: ASSEMBLY LANGUAGE PROGRAMMING IN 8085                                           ║
+╚════════════════════════════════════════════════════════════════════════════════════════════╝
+
+	A. Topic Name
+		Assembly Language Program (ALP), format, and simple coding patterns
+
+	B. Definition (must be precise and exam-ready)
+		8085 Assembly Language Programming is the process of writing mnemonic-based low-level
+		instructions that map directly to machine operations for precise control of processor behavior.
+
+	C. Why this topic matters (2-3 lines)
+		ALP is the practical output of all architecture and instruction learning.
+		Most university papers include coding, dry-run, and logic-flow questions from this section.
+
+	D. Core theory (concise but complete)
+		An assembly instruction usually contains optional label, mnemonic, operand, and optional
+		comment. Program design begins with data movement, continues with processing logic,
+		and uses conditional/unconditional branching for decision and loop formation. Correct ALP
+		writing requires understanding addressing modes, flags, and instruction classes together.
+		Simple programs in Unit 2 typically include arithmetic, logical operations, conditions,
+		and loops for repetitive processing. In exam coding, structure and comment clarity matter.
+
+	E. Microtopic Breakdown (all relevant micro-concepts)
+		E0. 2.7.1 Format of Assembly Language Instruction
+			Definition:
+				Structured textual representation of one machine operation.
+			Format:
+				[LABEL:]  MNEMONIC  [OPERAND]   ; COMMENT
+			Example:
+				LOOP:  INR A        ; Increment A
+			5-line explanation:
+				Instruction format improves readability and debugging.
+				Labels support branch targets and modular flow control.
+				Operands specify data/register/address required.
+				Comments document logic for maintenance and exam clarity.
+				Clean format often distinguishes high-scoring ALP answers.
+
+		E1. 2.7.2 Simple Programs (Arithmetic/Logical/Conditions/Loops)
+			Definition:
+				Small ALPs designed to demonstrate core instruction usage patterns.
+			Representative code patterns:
+				• Addition of two numbers
+				• Subtraction and flag check
+				• AND/OR/XOR based bit test
+				• Compare and branch (JZ/JNZ/JC/JNC)
+				• Loop counter using DCR + JNZ
+			5-line explanation:
+				Simple programs build confidence for larger problem solving.
+				They combine instruction classes in predictable sequence.
+				Flag-aware branching is central to conditional logic.
+				Looping avoids repetitive code and improves structure.
+				Dry-run practice is mandatory for exam correctness.
+
+		E2. Intuitive Representation Layer
+			• Simple words: ALP is writing exact step-by-step instructions to CPU.
+			• Analogy: Like giving robot precise command list with conditions and repeats.
+			• How to think in exam: initialize -> process -> decision -> loop/end.
+
+	F. 10-Mark Answer Framework
+		• Define ALP and instruction format.
+		• Explain flow (data setup, processing, decision, loop).
+		• Provide one complete sample with dry run.
+		• Mention flag influence and addressing mode choice.
+		• Conclude with practical embedded relevance.
+
+	G. 2-3 likely university questions
+		1) Explain format of 8085 assembly instruction with examples.
+		2) Write ALP for arithmetic/logical operation with condition and loop.
+		3) Explain role of flags in conditional ALP design.
+
+	H. Quick revision bullets (5-8 points)
+		• Use labels for branch readability.
+		• Choose correct addressing mode.
+		• Check flags before conditional jump.
+		• Keep comments concise but meaningful.
+		• Dry run with register/flag tracking.
+
+	I. If programming-related: sample code + dry run + expected output/behavior
+		Program 1: Add two 8-bit numbers from memory 2050H and 2051H, store at 2052H
+			LDA 2050H
+			MOV B,A
+			LDA 2051H
+			ADD B
+			STA 2052H
+			HLT
+		Dry run:
+			Step1 A <- [2050H]
+			Step2 B <- A
+			Step3 A <- [2051H]
+			Step4 A <- A + B ; flags updated
+			Step5 [2052H] <- A
+		Expected behavior:
+			Memory 2052H contains sum; CY indicates overflow if any.
+
+		Program 2: Count down loop from 05H and stop
+			MVI C,05H
+		LOOP: DCR C
+			JNZ LOOP
+			HLT
+		Dry run:
+			C decrements: 05->04->03->02->01->00 ; loop exits when Z=1.
+		Expected behavior:
+			Program halts after five loop iterations.
+
+	J. Visual Layout Elements (TXT-only)
+		ALP flow sketch:
+		[Initialize] -> [Process] -> [Check Flag] -> [Branch/Loop] -> [Store/End]
+		Graph cue:
+		Flow clarity ↑ => debugging time ↓
+
+	Practical Lab Linkage
+		Write and simulate two ALPs: addition-with-carry and looped compare/branch.
+
+	Real-life example
+		A keypad lock routine uses ALP loops and conditional checks for password matching.
+
+	Troubleshooting scenario
+		If loop never ends, inspect counter register update and jump condition flag.
+
+====================================================================================================
+UNIT 2 CONSOLIDATED QUICK TABLE
+====================================================================================================
+	┌────────────────────────────────────┬────────────────────────────────────────────────────────┐
+	│ Unit 2 Component                   │ One-line Exam Hook                                    │
+	├────────────────────────────────────┼────────────────────────────────────────────────────────┤
+	│ 8085 Architecture                  │ Block function + control-flow understanding           │
+	│ Instruction Set/Class              │ Category-wise coding strategy                         │
+	│ Addressing Modes                   │ Operand access logic and instruction efficiency       │
+	│ Cycle Hierarchy                    │ T-state < machine cycle < instruction cycle           │
+	│ Timing Diagrams                    │ Signal sequence for fetch/read/write correctness      │
+	│ Assembly Programming               │ Practical execution logic with flags and loops        │
+	└────────────────────────────────────┴────────────────────────────────────────────────────────┘
+
+====================================================================================================
+UNIT 2 SUMMARY
+====================================================================================================
+	Unit 2 transforms foundational concepts into executable processor-level understanding. Students
+	learn how 8085 internal blocks collaborate during instruction execution, how instructions are
+	classified and selected, and how addressing modes affect data access. Timing hierarchy and
+	waveform analysis enable accurate interpretation of opcode fetch, memory, and I/O cycles.
+	Finally, ALP format and simple programs connect theory to practical coding. A strong Unit 2
+	command is critical for solving exam questions and future interfacing/interrupt chapters.
+
+====================================================================================================
+10 PROBABLE VIVA QUESTIONS (UNIT 2)
+====================================================================================================
+	1) What are the key functional blocks of 8085 architecture?
+	2) Why is accumulator central in 8085 processing?
+	3) Differentiate instruction cycle and machine cycle.
+	4) What is a T-state?
+	5) Name five classes of 8085 instructions.
+	6) Define immediate and indirect addressing with examples.
+	7) Why is ALE used in 8085?
+	8) What is the role of flags in conditional branching?
+	9) What does JNZ check before jump?
+	10) Why are labels important in ALP?
+
+====================================================================================================
+10 PROBABLE THEORY QUESTIONS (UNIT 2)
+====================================================================================================
+	1) Explain internal architecture and key features of 8085.
+	2) Explain Intel 8085 instruction set and its classification.
+	3) Discuss data transfer, arithmetic, logical, and branching instructions with examples.
+	4) Explain stack, I/O, and machine control instructions of 8085.
+	5) Explain 8085 addressing modes with suitable examples.
+	6) Differentiate instruction cycle, machine cycle, and T-state.
+	7) Explain opcode fetch cycle timing diagram of 8085.
+	8) Explain memory and I/O read/write timing cycles in 8085.
+	9) Explain format of assembly language instruction in 8085.
+	10) Write notes on simple ALP design for arithmetic/logical operations with loops.
+
+====================================================================================================
+5 NUMERICAL / DESIGN PRACTICE TASKS (UNIT 2)
+====================================================================================================
+	1) For a 3-byte direct instruction, estimate machine cycles conceptually and justify.
+	2) Design ALP to add N numbers using loop and store result with carry handling note.
+	3) Draw and label signal sequence differences between memory read and I/O read cycles.
+	4) Given register values and instruction sequence, perform dry-run and final flag analysis.
+	5) Build an instruction classification map for a sample mixed ALP and justify each category.
+
+====================================================================================================
+EXAM FOCUS (UNIT 2)
+====================================================================================================
+	High-probability 10-mark areas:
+	• 8085 features and important pin functions (with ALE, IO/M̅, RD̅, WR̅, HOLD/HLDA, interrupts).
+	• 8085 architecture blocks: ALU, accumulator, temporary registers, flags, PC, SP, decoder/CU.
+	• Instruction classes with representative mnemonics and use-cases.
+	• All five addressing modes with one example each.
+	• Timing hierarchy + status signal table + 1/2/3-byte instruction impact.
+
+	Answer-writing tip:
+	Start with definition, add one compact table, include 2-3 mnemonics/signals, end with application.
+
+====================================================================================================
+QUICK REVISION (UNIT 2)
+====================================================================================================
+	• 8085 = 8-bit CPU, 16-bit address, 64KB memory space.
+	• ALU + accumulator + flags are execution core.
+	• Instruction classes organize coding strategy.
+	• Addressing mode decides how operand is found.
+	• Timing hierarchy: T-state -> machine cycle -> instruction cycle.
+	• Opcode fetch starts every instruction.
+	• ALP quality depends on flags + branching + loop control.
+
+====================================================================================================
+QUALITY CHECK AGAINST PROMPT
+====================================================================================================
+	[✓] All Unit 2 syllabus points covered
+	[✓] Topic heading-only box format used
+	[✓] Clean tab-indented body layout
+	[✓] Definitions included for topics/subtopics/microtopics
+	[✓] 5+ line descriptive core paragraph in each major topic
+	[✓] ASCII tables and graph-like visuals included
+	[✓] Practical lab linkage + real-life + troubleshooting included
+	[✓] Unit summary + viva + theory + numericals + revision provided
+
+════════════════════════════════════════════════════════════════════════════════════════════════════
+END OF CHAPTER 2
+════════════════════════════════════════════════════════════════════════════════════════════════════

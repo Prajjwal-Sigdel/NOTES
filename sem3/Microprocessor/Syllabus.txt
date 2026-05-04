@@ -1,0 +1,251 @@
+╔══════════════════════════════════════════════════════════════════════════════════════╗
+║                      POKHARA UNIVERSITY (PU) – FST                                   ║
+║                    B.E. Computer Engineering | Semester III                          ║
+║                         DETAILED COURSE SYLLABUS                                     ║
+╠══════════════════════════════════════════════════════════════════════════════════════╣
+║ Course Title      : Microprocessor and ALP                                           ║
+║ Course Code       : CMP XXX (as listed in source document)                           ║
+║ Credit            : 3                                                                ║
+║ Nature            : Theory + Practical                                               ║
+║ Level             : Undergraduate                                                    ║
+║ Year/Semester     : Second Year / III Semester                                       ║
+║ Full Marks        : 100                                                              ║
+║ Pass Marks        : 45                                                               ║
+║ Total Lectures    : 45 Hours                                                         ║
+║ Tutorial          : 15 Hours                                                         ║
+║ Practical         : 30 Hours                                                         ║
+║ Program           : B.E. (Computer Engineering)                                      ║
+╚══════════════════════════════════════════════════════════════════════════════════════╝
+
+NOTE:
+This syllabus layout is prepared from the provided PU 3rd semester microprocessor
+content and aligned with the commonly used PU-style course format.
+
+========================================================================================
+1. COURSE DESCRIPTION
+========================================================================================
+This course introduces microprocessor architecture and microcomputer systems,
+including memory and input/output interfacing devices. It includes assembly language
+programming, bus architecture, bus cycle types, I/O systems, memory systems,
+and interrupts. The course explores the inner workings of a microprocessor from the
+programmer’s perspective, supported by laboratory work using assembly language.
+
+========================================================================================
+2. GENERAL OBJECTIVES
+========================================================================================
+By the end of this course, students should be able to:
+
+  • Understand architecture, organization, and addressing modes of INTEL
+    microprocessors (8085/8086).
+  • Explain basic operations, programming concepts, and applications of
+    microprocessors.
+  • Design and analyze ALP using branching, loops, flags, stack, procedures,
+    macros, and interrupts.
+  • Interface memory and I/O devices with microprocessors.
+  • Build conceptual understanding of microprocessor operation as a foundation
+    for automation and control applications.
+
+========================================================================================
+3. METHODS OF INSTRUCTION
+========================================================================================
+  • Lecture
+  • Tutorial
+  • Discussion
+  • Laboratory Work
+
+========================================================================================
+4. SPECIFIC OBJECTIVES ↔ UNIT-WISE CONTENT MAP
+========================================================================================
+
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ UNIT 1: INTRODUCTION TO MICROPROCESSOR                                      (3 Hrs)  │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+Specific Objective(s):
+  • State and interpret the block diagram of a microprocessor-based system.
+  • Explain the function of each component and communication bus lines.
+
+Detailed Content:
+  1.1 Historical evolution of INTEL series microprocessors
+  1.2 Bus organization of a microprocessor
+  1.3 Microcontroller and its applications
+  1.4 Microcomputer
+      1.4.1 Von Neumann and Harvard architecture
+  1.5 Concept of fetch, decode, and execution
+
+----------------------------------------------------------------------------------------
+
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ UNIT 2: ARCHITECTURAL DETAILS & PROGRAMMING OF 8085                        (12 Hrs)  │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+Specific Objective(s):
+  • Describe each block of the 8085 microprocessor.
+  • Explain bus timing while fetching instruction from memory.
+  • Explain addressing modes.
+  • Explain data transfer, arithmetic, logical, conditional, and unconditional
+    instructions.
+  • Write basic ALP and understand generation of control signals.
+
+Detailed Content:
+  2.1 Internal architecture and features of 8085 microprocessor
+  2.2 Intel 8085 instruction set
+  2.3 Classification of Intel 8085 instructions
+      2.3.1 Data transfer instructions
+      2.3.2 Arithmetic instructions
+      2.3.3 Logical instructions
+      2.3.4 Branching instructions
+      2.3.5 Stack, I/O, and machine control instructions
+  2.4 Addressing modes of 8085 and types
+  2.5 Instruction cycle, machine cycle, and T-state
+  2.6 Timing diagram
+      2.6.1 Opcode fetch cycle
+      2.6.2 Memory read cycle
+      2.6.3 Memory write cycle
+      2.6.4 I/O read cycle
+      2.6.5 I/O write cycle
+  2.7 Assembly language programming
+      2.7.1 Format of assembly language instruction
+      2.7.2 Simple programs (arithmetic, logical, conditionals, loops)
+
+----------------------------------------------------------------------------------------
+
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ UNIT 3: ARCHITECTURAL DETAILS & PROGRAMMING OF 8086                        (10 Hrs)  │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+Specific Objective(s):
+  • Interpret the block diagram of 8086 and explain each component.
+  • Understand memory segmentation, physical addressing, and effective addressing.
+  • Distinguish real instructions and pseudo-instructions.
+  • Write advanced ALP.
+  • Analyze modular programming concepts.
+
+Detailed Content:
+  3.1 Internal architecture and features of 8086 microprocessor
+      3.1.1 BIU and EU
+      3.1.2 Memory segmentation
+      3.1.2.1 Segment and offset address
+  3.2 Intel 8086 instruction set
+  3.3 Classification of Intel 8086 instructions
+      3.3.1 Data transfer instructions
+      3.3.2 Arithmetic instructions
+      3.3.3 Logical instructions
+      3.3.4 Branching instructions
+      3.3.5 String manipulation instructions
+      3.3.6 Machine control instructions
+  3.4 Addressing modes of 8086 and types
+  3.5 Assembly language program
+      3.5.1 Format of an assembly language instruction
+      3.5.2 ALP development tools: editor, assembler, linker, debugger,
+            locator, emulator
+      3.5.3 Assembler directives
+      3.5.4 DOS interrupt functions (keyboard and display services)
+      3.5.5 Simple programs: arithmetic, logical, string I/O, conditionals, loops
+      3.5.6 Stack procedures
+      3.5.7 Macro program design
+
+----------------------------------------------------------------------------------------
+
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ UNIT 4: BUS STRUCTURE, MEMORY, I/O & INTERFACING                            (12 Hrs) │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+Specific Objective(s):
+  • Understand memory types and bus connections with microprocessors.
+  • Explain peripheral-mapped and memory-mapped techniques.
+  • Interface I/O devices using logic gates and MSI chips (decoder, latch, buffer).
+  • Explain full and partial address decoding.
+  • Describe 8255 PPI elements, operating modes, and control word.
+  • Explain DMA and functions of Intel 8237 components.
+
+Detailed Content:
+  4.1 Bus structure
+      4.1.1 Synchronous bus
+      4.1.2 Asynchronous bus
+  4.2 Memory device classification and hierarchy
+  4.3 Interfacing I/O and memory
+      4.3.1 Address decoding
+      4.3.2 Unique and non-unique address decoding
+      4.3.3 I/O mapped I/O and memory mapped I/O
+      4.3.4 I/O address decoding (8085)
+      4.3.5 Memory address decoding (8085)
+  4.4 Parallel interface
+      4.4.1 Modes: simple I/O, strobe I/O, single handshaking, double handshaking
+      4.4.2 Programmable Peripheral Interface (PPI)
+      4.4.2.1 Architecture of Intel 8255 (PPI)
+  4.5 Serial interface
+      4.5.1 Synchronous and asynchronous transmission
+      4.5.2 Programmable communication interface
+      4.5.2.1 USART (8251)
+  4.6 DMA and Intel 8237A DMA controller
+
+----------------------------------------------------------------------------------------
+
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│ UNIT 5: INTERRUPT OPERATION                                                  (8 Hrs) │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+Specific Objective(s):
+  • Analyze interrupt process and maskable vs non-maskable interrupts.
+  • Explain `EI`, `DI`, `RST` and their roles in 8085 interrupt processing.
+  • Develop interrupt subroutine concepts and processing flow.
+  • Understand features of Intel 8259 PIC.
+
+Detailed Content:
+  5.1 Interrupts: sources and classification
+  5.2 Interrupt processing sequence in 8085/8086
+  5.3 Interrupt instruction
+      5.3.1 Interrupt pins and priorities
+      5.3.2 Interrupt service procedure
+      5.3.3 Interrupt vector table
+      5.3.4 Multiple interrupt handling
+      5.3.4.1 Polled and vectored interrupt
+      5.3.5 Programmable Interrupt Controller (PIC) Intel 8259 and architecture
+
+========================================================================================
+5. TUTORIAL PLAN (15 HOURS)
+========================================================================================
+(For a group of maximum 24 students)
+
+  T1. Timing diagrams of 8085
+  T2. Calculation of starting and ending memory address (8085)
+  T3. Interfacing circuit/address decoding design for different memory sizes (8085)
+  T4. Input-output interfacing design with 8085
+  T5. Assembly language programming exercises in 8085 and 8086
+
+========================================================================================
+6. PRACTICAL WORKS / LAB PLAN (30 HOURS)
+========================================================================================
+(For a group of maximum 24 students)
+
+  P1. Assembly language programs using 8085 and 8086 microprocessor kit/simulator.
+      Programs should include all major instruction types and addressing modes.
+
+  Suggested minimum lab coverage:
+    - Data transfer and arithmetic operations
+    - Logical operation and bit manipulation
+    - Looping and branching
+    - Stack operations and subroutines
+    - String instructions (8086)
+    - Interrupt handling basics
+    - I/O interfacing demonstrations
+
+========================================================================================
+7. UNIT-WISE HOUR SUMMARY
+========================================================================================
+  Unit 1  :  3 Hours
+  Unit 2  : 12 Hours
+  Unit 3  : 10 Hours
+  Unit 4  : 12 Hours
+  Unit 5  :  8 Hours
+  --------------------------------
+  Total   : 45 Lecture Hours
+
+========================================================================================
+8. QUICK REVISION CHECKLIST (FOR STUDENTS)
+========================================================================================
+  [ ] 8085 architecture, instruction classes, timing cycles, ALP basics
+  [ ] 8086 architecture (BIU/EU), segmentation, addressing modes
+  [ ] Interface concepts: memory mapped vs I/O mapped
+  [ ] Address decoding (unique/non-unique), 8255 and 8251 basics
+  [ ] DMA (8237A), interrupt flow (8085/8086), PIC 8259
+
+════════════════════════════════════════════════════════════════════════════════════════
+End of Syllabus
+════════════════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,850 @@
+================================================================================
+  CHAPTER 4: KERNEL                                                [2 Hours]
+  Pokhara University — BE Computer Engineering
+  Encyclopedic Study Notes
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  4.1  Introduction
+  4.2  Architecture of the Kernel
+  4.3  Types of Kernels
+  4.4  Context Switching
+       4.4.1  Kernel and User Mode
+       4.4.2  Kernel Implementation Processes
+  ── Arch Linux: Hands-on Implementation ──
+
+================================================================================
+4.1  INTRODUCTION
+================================================================================
+
+The kernel is the core component of an operating system. It is the first
+program loaded into memory during boot and remains resident in memory for the
+entire duration of the computer's operation. The kernel is the bridge between
+applications and the actual data processing done at the hardware level. It
+manages the system's resources and provides the lowest-level abstraction layer
+for the hardware.
+
+The word "kernel" comes from the German word "Kern," meaning "core" or "seed."
+Just as a seed contains the essential blueprint for a plant, the kernel
+contains the essential code for operating the computer system.
+
+The kernel's responsibilities include:
+  - Process management (creation, scheduling, termination)
+  - Memory management (virtual memory, page tables, allocation)
+  - Device management (device drivers, I/O operations)
+  - System call interface (the API between user space and kernel space)
+  - Inter-process communication
+  - File system management
+  - Network protocol stack
+  - Security and access control
+
+The kernel runs in a privileged execution mode (Ring 0 on x86, EL1 on ARM)
+with direct access to all hardware and memory. Application programs run in an
+unprivileged mode (Ring 3 on x86, EL0 on ARM) and must request kernel services
+through system calls.
+
+    Micro-topic: The Boot Process and Kernel Loading
+    ─────────────────────────────────────────────────
+    On an Arch Linux system with UEFI and systemd-boot (or GRUB):
+
+      1. UEFI Firmware: Initializes hardware (POST), finds the EFI System
+         Partition (ESP), and loads the bootloader.
+
+      2. Bootloader (systemd-boot or GRUB): Presents boot options, loads
+         the Linux kernel image (vmlinuz-linux) and the initial RAM
+         filesystem (initramfs-linux.img) into memory.
+
+      3. Kernel Initialization: The kernel decompresses itself, sets up the
+         GDT, IDT, page tables, initializes memory management, detects
+         hardware, initializes drivers, and mounts the initial RAM
+         filesystem.
+
+      4. initramfs: A temporary root filesystem in RAM containing essential
+         drivers and tools needed to mount the real root filesystem. It
+         handles tasks like loading file system drivers (ext4, btrfs),
+         decrypting LUKS volumes, and assembling RAID arrays.
+
+      5. Root Filesystem Mount: The kernel switches from initramfs to the
+         actual root filesystem (/) and executes /sbin/init (which is
+         systemd on Arch Linux, PID 1).
+
+      6. systemd: The init system takes over, starts services according to
+         unit files, mounts filesystems from /etc/fstab, starts the login
+         manager, etc.
+
+        Deeper: vmlinuz — The Compressed Kernel Image
+        ──────────────────────────────────────────────
+        vmlinuz is a compressed Linux kernel image. The name comes from:
+          - vm: Virtual Memory (the kernel supports VM)
+          - linu: Linux
+          - z: zlib/gzip compressed (or zstd on modern systems)
+
+        On Arch Linux, it is located at /boot/vmlinuz-linux. The actual
+        uncompressed kernel can be quite large (30-50 MB), but vmlinuz is
+        typically 10-15 MB. During boot, a small decompression stub at the
+        start of vmlinuz decompresses the rest of the kernel into memory.
+
+        The kernel configuration for Arch's stock kernel is available at:
+          $ zcat /proc/config.gz | less
+
+
+================================================================================
+4.2  ARCHITECTURE OF THE KERNEL
+================================================================================
+
+The architecture of a kernel determines how its various components interact
+and how functionality is distributed between kernel space and user space.
+
+The kernel can be conceptually divided into several major subsystems:
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │                        USER SPACE                                    │
+  │   Applications, Libraries (glibc), Shell, GUI                        │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                   SYSTEM CALL INTERFACE                              │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                        KERNEL SPACE                                  │
+  │                                                                      │
+  │  ┌──────────────┐  ┌────────────────┐  ┌────────────────────┐        │
+  │  │   Process    │  │    Memory      │  │   File System      │        │
+  │  │  Management  │  │   Management   │  │   Management       │        │
+  │  │  (Scheduler) │  │  (VM, Paging)  │  │  (VFS, ext4, etc.) │        │
+  │  └──────────────┘  └────────────────┘  └────────────────────┘        │
+  │                                                                      │
+  │  ┌──────────────┐  ┌────────────────┐  ┌────────────────────┐        │
+  │  │   I/O &      │  │   Network      │  │   Security         │        │
+  │  │   Device     │  │   Stack        │  │   (SELinux, caps,  │        │
+  │  │   Drivers    │  │   (TCP/IP)     │  │    namespaces)     │        │
+  │  └──────────────┘  └────────────────┘  └────────────────────┘        │
+  │                                                                      │
+  │  ┌─────────────────────────────────────────────────────────┐         │
+  │  │            Architecture-Dependent Code                  │         │
+  │  │    (arch/x86, arch/arm64: interrupt handling, MMU,      │         │
+  │  │     context switching, boot code)                       │         │
+  │  └─────────────────────────────────────────────────────────┘         │
+  ├──────────────────────────────────────────────────────────────────────┤
+  │                        HARDWARE                                      │
+  │   CPU, Memory, Disk, NIC, GPU, USB, etc.                             │
+  └──────────────────────────────────────────────────────────────────────┘
+
+LINUX KERNEL SOURCE TREE STRUCTURE:
+
+The Linux kernel source (downloadable from kernel.org) is organized into:
+
+  linux/
+  ├── arch/           # Architecture-dependent code (x86, arm64, riscv)
+  ├── block/          # Block device I/O layer
+  ├── crypto/         # Cryptographic API
+  ├── Documentation/  # Kernel documentation
+  ├── drivers/        # Device drivers (largest directory!)
+  │   ├── gpu/
+  │   ├── net/
+  │   ├── usb/
+  │   ├── nvme/
+  │   └── ...
+  ├── fs/             # File system implementations
+  │   ├── ext4/
+  │   ├── btrfs/
+  │   ├── xfs/
+  │   └── proc/       # The /proc filesystem
+  ├── include/        # Header files
+  ├── init/           # Kernel initialization (main.c → start_kernel())
+  ├── ipc/            # Inter-process communication
+  ├── kernel/         # Core kernel code
+  │   ├── sched/      # CPU scheduler
+  │   ├── locking/    # Locking primitives
+  │   └── ...
+  ├── lib/            # Kernel utility libraries
+  ├── mm/             # Memory management
+  ├── net/            # Networking stack
+  │   ├── ipv4/
+  │   ├── ipv6/
+  │   └── core/
+  ├── security/       # Security frameworks (SELinux, AppArmor)
+  ├── sound/          # Sound subsystem (ALSA)
+  └── tools/          # Kernel tools (perf, bpf)
+
+    Micro-topic: The start_kernel() Function
+    ─────────────────────────────────────────
+    The entry point of the Linux kernel (after architecture-specific boot
+    code) is start_kernel() in init/main.c. This function initializes
+    every major kernel subsystem in order:
+
+      start_kernel()
+        ├── setup_arch()          # Architecture-specific setup
+        ├── mm_init()             # Memory management initialization
+        ├── sched_init()          # Scheduler initialization
+        ├── init_IRQ()            # Interrupt system initialization
+        ├── time_init()           # Timer system initialization
+        ├── vfs_caches_init()     # VFS initialization
+        ├── signals_init()        # Signal system
+        ├── ...
+        └── rest_init()           # Creates kernel_init (PID 1) and
+                                  # kthreadd (PID 2) threads
+
+    kernel_init() eventually calls run_init_process() which exec's
+    /sbin/init (systemd on Arch Linux).
+
+        Deeper: kthreadd and Kernel Threads
+        ────────────────────────────────────
+        kthreadd (PID 2) is the kernel thread daemon. All kernel threads
+        are children of kthreadd. Kernel threads run entirely in kernel
+        space (they have no user-space address space, mm = NULL). Examples:
+
+          - kswapd: The swap daemon, handles page reclamation.
+          - kcompactd: Memory compaction daemon.
+          - ksoftirqd: Handles soft interrupts (deferred interrupt work).
+          - kworker: Worker threads for the kernel's workqueue mechanism.
+          - migration/N: Per-CPU threads for process migration between CPUs.
+          - rcu_preempt: Read-Copy-Update grace period management.
+
+        You can see them: $ ps aux | grep "\[.*\]"
+        (Kernel threads are shown with names in square brackets.)
+
+
+================================================================================
+4.3  TYPES OF KERNELS
+================================================================================
+
+The fundamental classification of kernels is based on how much functionality
+runs in kernel space versus user space. This design decision profoundly
+affects the kernel's performance, reliability, and security.
+
+────────────────────────────────────────────────────
+4.3.1  Monolithic Kernel
+────────────────────────────────────────────────────
+
+A monolithic kernel runs all operating system services (process management,
+memory management, file systems, device drivers, network stack) in a single
+large process in kernel space. All components share the same address space
+and can call each other directly through function calls.
+
+  [As deeply covered in Chapter 1, Section 1.3.1]
+
+Key characteristics:
+  - All kernel code runs in Ring 0 with full hardware access.
+  - Communication between components is via direct function calls (fast).
+  - A bug in any component (e.g., a device driver) can crash the entire
+    system.
+  - Loadable kernel modules provide modularity without the overhead of
+    message passing.
+
+Examples: Linux, FreeBSD, Solaris (traditional UNIX kernels).
+
+Real-World Context: The Linux kernel is approximately 30+ million lines of
+code (as of kernel 6.x), with device drivers comprising over 60% of the
+codebase. Despite being monolithic, its modular design (LKMs, well-defined
+subsystem interfaces) makes it remarkably maintainable.
+
+    Micro-topic: Kernel Locking in Monolithic Kernels
+    ──────────────────────────────────────────────────
+    Since all kernel code shares the same address space in a monolithic
+    kernel, concurrent access to shared data structures requires locking:
+
+      - Spinlocks (spin_lock_t): Busy-wait locks for short critical
+        sections. The waiting CPU spins (wastes cycles) until the lock is
+        available. Used when the critical section is very short and sleeping
+        is not allowed (e.g., in interrupt context).
+
+      - Mutexes (struct mutex): Sleeping locks for longer critical sections.
+        If the lock is not available, the calling thread sleeps (releases
+        the CPU) and is woken up when the lock becomes available. Can only
+        be used in process context (not in interrupts).
+
+      - Read-Write Locks (rwlock_t, struct rw_semaphore): Allow multiple
+        concurrent readers but exclusive writer access.
+
+      - RCU (Read-Copy-Update): A synchronization mechanism that allows
+        readers to access shared data without any locks. Writers create a
+        new copy of the data, update the pointer atomically, and wait for
+        all existing readers to finish (grace period) before freeing the
+        old copy. RCU is extensively used in the Linux kernel for
+        performance-critical read-mostly data structures.
+
+        Deeper: The Big Kernel Lock (BKL) and its Removal
+        ──────────────────────────────────────────────────
+        Early Linux (up to 2.6.x) had a Big Kernel Lock (BKL), a single
+        global lock that serialized all kernel execution. This was simple
+        but became a massive bottleneck on multiprocessor systems. The BKL
+        was gradually replaced with fine-grained locks over many years and
+        was completely removed in Linux 2.6.39 (2011). This was one of the
+        most significant engineering efforts in Linux history.
+
+────────────────────────────────────────────────────
+4.3.2  Microkernel
+────────────────────────────────────────────────────
+
+  [As deeply covered in Chapter 1, Section 1.3.5]
+
+A microkernel includes only the minimum necessary functionality:
+  - IPC (Inter-Process Communication)
+  - Basic scheduling
+  - Low-level address space management (page table manipulation)
+
+Everything else (device drivers, file systems, network stack, etc.) runs as
+user-space server processes.
+
+Performance consideration: Every interaction between components requires IPC
+(message passing), which involves at least two context switches (client →
+kernel → server, then server → kernel → client). First-generation microkernels
+(like Mach) suffered significant performance overhead (~50-100% slower than
+monolithic kernels for system calls).
+
+Modern microkernels (seL4, L4) have dramatically reduced IPC overhead through
+careful engineering: L4's IPC takes about 100 CPU cycles, making the overhead
+negligible for many workloads.
+
+────────────────────────────────────────────────────
+4.3.3  Hybrid Kernel
+────────────────────────────────────────────────────
+
+A hybrid kernel attempts to combine the performance advantages of a monolithic
+kernel with the modularity and reliability advantages of a microkernel. It
+runs some services (that need high performance) in kernel space while keeping
+others in user space.
+
+Examples:
+  - Windows NT kernel: Has a monolithic core (Executive) with a microkernel
+    component (the actual "microkernel" handles scheduling, interrupt
+    dispatching, and synchronization). Device drivers and subsystems run
+    in kernel space, but the architecture supports "subsystem servers" in
+    user space (Win32 subsystem, POSIX subsystem).
+  - XNU (macOS/iOS): Combines a Mach microkernel (for IPC, VM, scheduling)
+    with a BSD monolithic layer (for POSIX APIs, networking, file system)
+    in the same address space. It's a hybrid because the BSD code runs in
+    kernel space alongside Mach.
+
+────────────────────────────────────────────────────
+4.3.4  Nanokernel and Exokernel
+────────────────────────────────────────────────────
+
+NANOKERNEL: An even more minimal kernel than a microkernel. It provides only
+the most primitive hardware abstraction—essentially just a hardware
+abstraction layer for interrupt and exception handling. All other OS
+functionality, including IPC and scheduling, runs in user space.
+
+EXOKERNEL: [As covered in Chapter 1, Section 1.3.5] Provides direct access
+to hardware with minimal abstraction. Uses library operating systems (libOS)
+for traditional OS functionality.
+
+    Micro-topic: Unikernel — The Extreme of Kernel Minimalism
+    ──────────────────────────────────────────────────────────
+    A unikernel compiles a single application together with the minimum
+    required OS functionality into a single-purpose machine image. There is
+    no separate kernel and application—they are one binary. Key projects:
+
+      - MirageOS: Written in OCaml, targets Xen hypervisor.
+      - IncludeOS: Written in C++, boots in ~300ms.
+      - Unikraft: A modular unikernel framework that can target multiple
+        hypervisors and bare-metal.
+
+    Unikernels are gaining traction in cloud environments where microservice
+    architecture benefits from minimal, single-purpose VMs.
+
+  ┌───────────────────────────────────────────────────────────────────┐
+  │  KERNEL TYPE COMPARISON                                           │
+  ├──────────┬──────────┬──────────┬──────────┬──────────┬────────────┤
+  │ Feature  │Monolithic│ Micro    │ Hybrid   │ Exo      │ Unikernel  │
+  ├──────────┼──────────┼──────────┼──────────┼──────────┼────────────┤
+  │ Perf.    │ Highest  │ Lower    │ High     │ Highest  │ Very High  │
+  │ Reliab.  │ Lower    │ Highest  │ Medium   │ App-dep. │ N/A*       │
+  │ Security │ Lower    │ Higher   │ Medium   │ Varies   │ Minimal    │
+  │ Complex. │ High     │ Moderate │ High     │ Moderate │ Low        │
+  │ Examples │ Linux    │ seL4, QNX│ Windows  │ MIT Exo  │ MirageOS   │
+  │          │ FreeBSD  │ MINIX 3  │ macOS    │          │ Unikraft   │
+  └──────────┴──────────┴──────────┴──────────┴──────────┴────────────┘
+  * Unikernels have no multi-process isolation (single application)
+
+
+================================================================================
+4.4  CONTEXT SWITCHING
+================================================================================
+
+A context switch is the mechanism by which the CPU switches from executing one
+process (or thread) to another. It is one of the most fundamental operations
+in a multitasking operating system and happens hundreds to thousands of times
+per second.
+
+During a context switch, the kernel must:
+  1. Save the state (context) of the currently running process.
+  2. Load the state of the next process to run.
+  3. Transfer control to the new process.
+
+The "context" of a process includes:
+  - CPU registers (general-purpose: RAX, RBX, ..., R15 on x86-64)
+  - Program counter (RIP)
+  - Stack pointer (RSP)
+  - Flags register (RFLAGS)
+  - Floating-point/SIMD state (FPU, SSE, AVX registers)
+  - Memory management registers (CR3 — page table base)
+  - Kernel stack
+
+COST OF A CONTEXT SWITCH:
+
+A context switch is expensive for several reasons:
+  1. Direct cost: Saving and restoring registers takes ~1-5 microseconds.
+  2. Indirect cost (more significant): The new process has a "cold" cache
+     and TLB. Cache lines and TLB entries populated by the old process are
+     useless for the new process. The new process experiences many cache
+     misses and TLB misses until its working set is loaded, which can take
+     tens of microseconds to milliseconds.
+
+Typical context switch overhead on modern Linux:
+  - Thread switch (same process): ~2-5 μs (no TLB flush needed)
+  - Process switch: ~5-15 μs (TLB flush required, cache cold)
+
+    Micro-topic: PCID (Process Context Identifiers)
+    ────────────────────────────────────────────────
+    Modern Intel CPUs (since Haswell) support PCID, which tags TLB entries
+    with a process identifier. This allows TLB entries from different
+    processes to coexist in the TLB, eliminating the need to flush the
+    entire TLB on a context switch. The Linux kernel enables PCID on
+    supported processors, significantly reducing context switch overhead.
+
+    On x86-64, CR3 loads can be performed with the NOFLUSH bit set (bit 63
+    of the new CR3 value), preserving existing TLB entries tagged with
+    different PCIDs.
+
+        Deeper: KPTI (Kernel Page Table Isolation) and Its Impact
+        ─────────────────────────────────────────────────────────
+        In response to the Meltdown vulnerability (2018), Linux implemented
+        KPTI (Kernel Page Table Isolation), also known as KAISER. KPTI uses
+        separate page tables for user space and kernel space:
+          - User-mode page table: Contains only user-space mappings plus a
+            minimal set of kernel pages needed for system call entry/exit.
+          - Kernel-mode page table: Contains both kernel and user mappings.
+
+        On every system call or interrupt, the page table is switched (CR3
+        write), which invalidates TLB entries (partially mitigated by PCID).
+        This increases system call overhead by approximately 5-30%,
+        depending on the workload. KPTI is enabled by default on affected
+        CPUs and can be checked:
+          $ dmesg | grep "page tables isolation"
+
+────────────────────────────────────────────────────
+4.4.1  Kernel Mode and User Mode
+────────────────────────────────────────────────────
+
+Modern CPUs provide at least two execution modes to enforce protection:
+
+KERNEL MODE (Privileged Mode, Ring 0, Supervisor Mode):
+  - Full access to all hardware and memory.
+  - Can execute any CPU instruction, including privileged instructions
+    (e.g., HLT, LGDT, MOV to CR3, IN/OUT for I/O ports, CLI/STI).
+  - Can access any memory address (kernel space and user space).
+  - The kernel runs in this mode.
+
+USER MODE (Unprivileged Mode, Ring 3):
+  - Restricted access to hardware.
+  - Cannot execute privileged instructions (attempting to do so causes a
+    trap/exception).
+  - Can only access memory mapped in the user portion of the address space.
+  - Application programs run in this mode.
+
+x86 PROTECTION RINGS:
+  Ring 0: Kernel (most privileged)
+  Ring 1: Device drivers (rarely used in practice)
+  Ring 2: Device drivers (rarely used in practice)
+  Ring 3: User applications (least privileged)
+
+  Most operating systems (including Linux) use only Ring 0 and Ring 3.
+  Rings 1 and 2 are unused.
+
+ARM EXCEPTION LEVELS:
+  EL0: User applications
+  EL1: OS kernel
+  EL2: Hypervisor
+  EL3: Secure monitor (ARM TrustZone)
+
+TRANSITIONS BETWEEN MODES:
+
+  User Mode → Kernel Mode:
+    1. System call (software interrupt / SYSCALL instruction)
+    2. Exception (e.g., page fault, division by zero, segmentation fault)
+    3. Hardware interrupt (timer, keyboard, disk, network)
+
+  Kernel Mode → User Mode:
+    1. Return from system call (SYSRET / IRET instruction)
+    2. Return from exception handler
+    3. Return from interrupt handler
+    4. Starting a new user-space process (after fork/exec)
+
+When a transition from user to kernel mode occurs:
+  1. The CPU saves the user-space registers (RIP, RSP, RFLAGS, CS, SS) on
+     the kernel stack (automatically for interrupts; via SYSCALL for system
+     calls).
+  2. The CPU switches to the kernel stack (each process has its own kernel
+     stack, typically 16 KB on x86-64 Linux).
+  3. The interrupt/exception handler or system call handler runs.
+  4. On return, the saved registers are restored, and the CPU switches back
+     to user mode.
+
+    Micro-topic: The Kernel Stack
+    ──────────────────────────────
+    Each process (and each thread) has its own kernel stack, separate from
+    its user-space stack. On x86-64 Linux, the kernel stack is typically
+    16 KB (4 pages). It is allocated when the process is created and freed
+    when it exits.
+
+    The kernel stack is used during:
+      - System call handling
+      - Interrupt handling
+      - Exception handling
+      - Context switch code
+
+    Stack overflow in kernel space is a serious vulnerability (kernel stack
+    overflow can corrupt adjacent memory). Linux uses:
+      - CONFIG_VMAP_STACK: Virtual memory-based stack allocation with guard
+        pages to detect overflow.
+      - Stack canaries (CONFIG_STACKPROTECTOR): Magic values placed at the
+        bottom of the stack; if overwritten, the kernel panics.
+
+        Deeper: Interrupt Stack and IST (Interrupt Stack Table)
+        ───────────────────────────────────────────────────────
+        For critical exceptions (NMI, double fault, machine check), using
+        the current process's kernel stack may not be safe (the stack itself
+        might be corrupted). x86-64 provides the IST (Interrupt Stack
+        Table), configured via the TSS (Task State Segment), which allows
+        specific interrupt vectors to switch to dedicated stacks. Linux uses
+        IST entries for:
+          - NMI (Non-Maskable Interrupt)
+          - Double Fault
+          - Machine Check
+          - Debug exceptions
+
+────────────────────────────────────────────────────
+4.4.2  Kernel Implementation of Context Switching
+────────────────────────────────────────────────────
+
+The context switch in the Linux kernel is implemented in two main parts:
+
+1. SCHEDULE() FUNCTION (kernel/sched/core.c):
+   The schedule() function is the main entry point for the scheduler. It
+   is called:
+     - When a timer interrupt fires and the current task's time slice expires.
+     - When a task voluntarily yields the CPU (e.g., calls sleep(), wait()).
+     - When a task blocks on I/O.
+     - When a higher-priority task becomes runnable.
+
+   schedule() selects the next task to run (via the scheduling class's
+   pick_next_task() function) and calls context_switch().
+
+2. CONTEXT_SWITCH() FUNCTION (kernel/sched/core.c):
+   Performs the actual context switch in two steps:
+
+   a. switch_mm(): Switches the memory context.
+      - Loads the new process's page table base address into CR3.
+      - This changes the entire virtual address space visible to the CPU.
+      - On same-process thread switches, this is a no-op (same mm_struct).
+      - Uses PCID to avoid full TLB flush on supported CPUs.
+
+   b. switch_to(): Switches the CPU register state.
+      - Calls __switch_to_asm() (arch/x86/entry/entry_64.S), which:
+        * Pushes the current task's callee-saved registers (RBX, RBP, R12-R15)
+          onto the current kernel stack.
+        * Switches the kernel stack pointer (RSP) to the new task's stack.
+        * Pops the new task's callee-saved registers from its kernel stack.
+        * Returns (RET pops the new task's return address → execution
+          continues where the new task left off).
+      - Calls __switch_to() (arch/x86/kernel/process_64.c), which:
+        * Saves/restores the FPU/SSE/AVX state.
+        * Switches the FS/GS segment base (for TLS).
+        * Updates the TSS (kernel stack pointer for the new task).
+        * Manages debug registers if needed.
+
+CONTEXT SWITCH FLOW:
+
+    Timer interrupt fires (or task blocks)
+           │
+           ▼
+    scheduler_tick() / schedule()
+           │
+           ▼
+    pick_next_task()  ← CFS picks task with lowest vruntime
+           │
+           ▼
+    context_switch(prev, next)
+           │
+           ├── switch_mm(prev->mm, next->mm)
+           │      └── Load CR3 with next's page table
+           │
+           └── switch_to(prev, next)
+                  └── __switch_to_asm:
+                         PUSH prev's registers onto prev's kernel stack
+                         Switch RSP to next's kernel stack
+                         POP next's registers from next's kernel stack
+                         RET → next resumes execution
+
+    Micro-topic: Lazy FPU Context Switching
+    ────────────────────────────────────────
+    Saving and restoring the full FPU/SIMD state (XMM, YMM, ZMM registers
+    for SSE/AVX/AVX-512) is expensive. Historically, Linux used "lazy FPU
+    switching":
+      - On context switch, set the TS (Task Switched) flag in CR0, which
+        causes the CPU to raise a Device Not Available (#NM) exception on
+        the first FPU instruction.
+      - If the new process uses FPU: handle the #NM exception by saving
+        the old FPU state and loading the new FPU state.
+      - If the new process never uses FPU: the save/restore is skipped.
+
+    However, since nearly all modern applications use SIMD (even printf uses
+    SSE for floating-point), lazy switching added overhead (exception for
+    every context switch). Modern Linux (4.x+) uses "eager FPU switching":
+    always save/restore FPU state on context switch, using the efficient
+    XSAVE/XRSTOR instructions.
+
+        Deeper: XSAVE and Extended State
+        ──────────────────────────────────
+        The XSAVE instruction saves processor extended state components
+        (FPU, SSE, AVX, AVX-512, MPX, etc.) into a memory region. The size
+        of the save area varies depending on which extensions are present:
+          - x87 FPU: 160 bytes
+          - SSE (XMM0-XMM15): 256 bytes
+          - AVX (YMM0-YMM15 upper halves): 256 bytes
+          - AVX-512: Up to 2688 bytes
+        Total save area can exceed 4 KB for AVX-512-capable CPUs!
+
+        The kernel uses XSAVEOPT/XSAVEC (optimized variants) to minimize
+        the amount of state saved, only saving components that have been
+        modified.
+
+    Micro-topic: Voluntary vs. Involuntary Context Switches
+    ────────────────────────────────────────────────────────
+    Linux tracks both types:
+      - Voluntary switches: The task willingly gives up the CPU (e.g.,
+        calling sleep(), reading from a pipe, waiting on a lock).
+      - Involuntary switches: The task is preempted by the scheduler
+        (timer interrupt, higher-priority task arrives).
+
+    You can see these counts in /proc/<pid>/status:
+      voluntary_ctxt_switches: <count>
+      nonvoluntary_ctxt_switches: <count>
+
+    A high number of involuntary switches indicates the process is being
+    preempted frequently, which might suggest it needs higher priority or
+    a real-time scheduling policy.
+
+
+================================================================================
+  ARCH LINUX: HANDS-ON IMPLEMENTATION
+================================================================================
+
+────────────────────────────────────────
+Lab 4.1: Kernel Information
+────────────────────────────────────────
+
+# View kernel version
+    $ uname -r
+    # e.g., 6.7.4-arch1-1
+
+# Detailed kernel information
+    $ uname -a
+
+# View kernel boot messages
+    $ dmesg | head -50
+    # Shows hardware detection, driver initialization, etc.
+
+# View kernel command line parameters
+    $ cat /proc/cmdline
+
+# View kernel configuration
+    $ zcat /proc/config.gz | less
+    # Search for specific options: /CONFIG_PREEMPT
+
+# Check kernel preemption model
+    $ zcat /proc/config.gz | grep PREEMPT
+    # CONFIG_PREEMPT_VOLUNTARY=y (default on Arch's stock kernel)
+    # For lowest latency: CONFIG_PREEMPT=y (linux-zen kernel)
+
+────────────────────────────────────────
+Lab 4.2: Kernel and User Mode Transitions
+────────────────────────────────────────
+
+# Count system calls (user→kernel transitions) for a command
+    $ strace -c ls /tmp 2>&1
+
+# Measure context switch overhead
+# Save as ctx_switch_bench.c:
+# ────────────────────────────────────────────────────
+#   #include <stdio.h>
+#   #include <stdlib.h>
+#   #include <unistd.h>
+#   #include <time.h>
+#   #include <sched.h>
+#
+#   #define ITERATIONS 100000
+#
+#   int main() {
+#       int pipe1[2], pipe2[2];
+#       pipe(pipe1);
+#       pipe(pipe2);
+#
+#       pid_t pid = fork();
+#
+#       if (pid == 0) {
+#           // Child
+#           char buf;
+#           for (int i = 0; i < ITERATIONS; i++) {
+#               read(pipe1[0], &buf, 1);
+#               write(pipe2[1], "x", 1);
+#           }
+#           exit(0);
+#       }
+#
+#       // Parent
+#       struct timespec start, end;
+#       clock_gettime(CLOCK_MONOTONIC, &start);
+#
+#       char buf;
+#       for (int i = 0; i < ITERATIONS; i++) {
+#           write(pipe1[1], "x", 1);
+#           read(pipe2[0], &buf, 1);
+#       }
+#
+#       clock_gettime(CLOCK_MONOTONIC, &end);
+#
+#       double elapsed = (end.tv_sec - start.tv_sec)
+#                       + (end.tv_nsec - start.tv_nsec) / 1e9;
+#       printf("Total time: %.3f seconds\n", elapsed);
+#       printf("Per context switch: %.2f microseconds\n",
+#              elapsed / ITERATIONS * 1e6 / 2);
+#
+#       return 0;
+#   }
+# ────────────────────────────────────────────────────
+#
+#   $ gcc -O2 -o ctx_switch_bench ctx_switch_bench.c
+#   $ ./ctx_switch_bench
+#   Per context switch: ~2-8 microseconds (varies by CPU)
+
+────────────────────────────────────────
+Lab 4.3: Context Switch Monitoring
+────────────────────────────────────────
+
+# View context switch counts for a process
+    $ cat /proc/$$/status | grep ctxt
+    # voluntary_ctxt_switches: 42
+    # nonvoluntary_ctxt_switches: 8
+
+# System-wide context switch rate
+    $ vmstat 1
+    # 'cs' column shows context switches per second
+    # Typical: 1000-10000 cs/s on a desktop
+
+# Use perf to measure context switches
+    $ sudo perf stat -e context-switches,cpu-migrations sleep 5
+    # Shows total context switches and CPU migrations during 5 seconds
+
+# Watch context switches per process in real-time
+    $ pidstat -w 1
+    # Shows cswch/s (voluntary) and nvcswch/s (involuntary) per process
+
+────────────────────────────────────────
+Lab 4.4: Kernel Threads and Process Types
+────────────────────────────────────────
+
+# List kernel threads (shown in brackets)
+    $ ps aux | grep "\[" | head -20
+    # [kthreadd], [rcu_preempt], [kswapd0], [ksoftirqd/0], etc.
+
+# View kthreadd's children (all kernel threads)
+    $ pstree -p 2 | head -20
+    # Shows the kernel thread tree
+
+# View per-CPU kernel threads
+    $ ps -eo pid,comm | grep migration
+    $ ps -eo pid,comm | grep ksoftirqd
+
+────────────────────────────────────────
+Lab 4.5: Protection Rings in Action
+────────────────────────────────────────
+
+# View the CPL (Current Privilege Level) during a system call
+# Strace shows system calls (which execute in Ring 0)
+    $ strace echo "Hello" 2>&1 | head -5
+
+# Check if your CPU supports hardware virtualization
+# (Ring -1 / VMX root mode)
+    $ grep -E "vmx|svm" /proc/cpuinfo
+    # vmx = Intel VT-x, svm = AMD-V
+
+# Check KPTI status
+    $ dmesg | grep -i "page tables isolation"
+    # "Kernel/User page tables isolation: enabled"
+
+# Check for Meltdown/Spectre mitigations
+    $ cat /sys/devices/system/cpu/vulnerabilities/*
+    # Shows mitigation status for each vulnerability
+
+────────────────────────────────────────
+Lab 4.6: Building a Custom Kernel on Arch Linux
+────────────────────────────────────────
+
+# (Advanced — for reference)
+# Arch Linux makes custom kernel building straightforward:
+#
+# 1. Get the kernel source:
+#    $ sudo pacman -S base-devel bc xmlto
+#    $ wget https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.x.tar.xz
+#    $ tar xf linux-6.x.tar.xz && cd linux-6.x
+#
+# 2. Copy current config:
+#    $ zcat /proc/config.gz > .config
+#
+# 3. Modify configuration (e.g., change preemption model):
+#    $ make menuconfig
+#    # Navigate to: General setup → Preemption Model → Preemptible Kernel
+#
+# 4. Build:
+#    $ make -j$(nproc)
+#
+# 5. Install modules and kernel:
+#    $ sudo make modules_install
+#    $ sudo cp arch/x86/boot/bzImage /boot/vmlinuz-linux-custom
+#    $ sudo mkinitcpio -k <version> -g /boot/initramfs-linux-custom.img
+#
+# 6. Add boot entry (systemd-boot):
+#    $ sudo nano /boot/loader/entries/linux-custom.conf
+#    # title   Arch Linux (Custom Kernel)
+#    # linux   /vmlinuz-linux-custom
+#    # initrd  /initramfs-linux-custom.img
+#    # options root=UUID=<your-root-uuid> rw
+#
+# Alternatively, use the linux-zen package for a prebuilt optimized kernel:
+#    $ sudo pacman -S linux-zen linux-zen-headers
+
+
+================================================================================
+  CHAPTER 4 SUMMARY
+================================================================================
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │  Key Takeaways:                                                        │
+  │                                                                        │
+  │  1. The KERNEL is the core of the OS, loaded first and resident in     │
+  │     memory permanently. It manages all hardware resources.             │
+  │                                                                        │
+  │  2. KERNEL ARCHITECTURE: Major subsystems include process mgmt,        │
+  │     memory mgmt, file systems, device drivers, network stack.          │
+  │     Linux source tree: arch/, kernel/, mm/, fs/, drivers/, net/.       │
+  │                                                                        │
+  │  3. KERNEL TYPES trade off performance vs. reliability:                │
+  │     Monolithic (Linux) — fast but less isolated.                       │
+  │     Microkernel (seL4, QNX) — isolated but IPC overhead.              │
+  │     Hybrid (Windows NT, XNU) — compromise.                            │
+  │     Exokernel — minimal abstraction, max app control.                  │
+  │                                                                        │
+  │  4. CONTEXT SWITCHING saves/restores CPU state (registers, page        │
+  │     tables, FPU) when switching between processes. Linux uses          │
+  │     schedule() → context_switch() → switch_mm() + switch_to().        │
+  │     Cost: ~2-15 μs direct + cache/TLB cold start.                     │
+  │                                                                        │
+  │  5. KERNEL vs. USER MODE: Ring 0 (full access) vs. Ring 3             │
+  │     (restricted). Transitions via system calls, interrupts,            │
+  │     exceptions. KPTI adds isolation for Meltdown mitigation.          │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+  END OF CHAPTER 4
+================================================================================

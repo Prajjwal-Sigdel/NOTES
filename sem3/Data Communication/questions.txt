@@ -1,0 +1,83 @@
+1 a . define simple, half duplex and full duplex mode of data transmission. briefly explain digital communication system with the help of general block diagram
+
+1 b. differentitate between different types of transimission modes. briefly explain Rs-232 C.
+
+2 a. define signal. berifly explain periodic and non periodic sigals, energy and power signals, determisnistic and random signals, continuous and discrete time signals,
+
+2 b. define unit step signal with necessary mathematical expresion and graphical illustration. check the follwing for linearity, causality, static and dynamic and time invariance
+    y(n) = Ax(n) + b
+
+3 a. Compare and contranst between OSI and TCP/IP with necessary figures.
+
+3 b. Define guided and unguided transimmison media. state the advantages of optical fiber over other guided media.
+
+4 a. why burst error is difficult to handle than single error ? explain why CRC is better than parity method of error detection.
+
+OR
+
+explain various transmission impairments of a communication system.
+
+4 b. compare and contrast between lossless and lossy compression.
+
+5 a. explain the importance of flow control. briefly explain sliding window flow control mechanism.
+
+5 b. explain the multiplexing technique applied in digital telephony with their significance, application and multiplexing hierarchy.
+
+6 a. Is switching and routing same ? differentitate betwen message switching, circuit switching and packet switching
+
+6 b. differentitate between psk , ask , and fsk modulation technique with necessary diagram
+
+Or 
+encode the bit stream 011010001 using the follwoing scheme.
+i. NRZ-i
+ii. NRZ - L
+iii. Manchester
+iv. differential Manchester
+
+7 . write short notes on  (any two) 
+a. cellular telephony
+b. point to point protocol
+c. QPSK
+
+
+
+1 a. explain the five essential components of a data communication system. how does each component contribute to successful communication? explain with suitable diagram.
+
+1 b. what is serial and parallel data transimission? differentiate between synchronous and asynchronous data transmission.
+
+2 a. check whether the given system is linear, time invariant and casual or not.
+    i. y(t) = logx(t)
+    ii. y(t) = t2X(t)
+
+2 b. differentiate between enery and power signal. calculate whether ramp signal is power signal or energy.
+
+3 a. why frame relay is faster than X.25? explain tcp/ip layers and compare it with OSI reference model.
+
+3 b. what is the purpose of cladding in an optical fibre ? explain the modes of propagation used in the optical fibre.
+
+4 a. define transmission impairments. and explain the causes of transimission impairments in details.
+
+4 b. if the 7 bit hamming codeword received by a receiver is 1011011. assuming the even parity, state whether the received codeword is correct or wrong. if wrong, decode the correct data word and locate the bit in error.
+
+or
+compress "engineering" using huffman codes and find its efficiency and redundancy.
+
+5 a. what is arq? what are the two types of window arq error control. Explain.
+
+5 b. what do you mean by multiplexing? how is TDM different from FDM? 
+
+6 a. why do we need modulation in data communication? explain.
+
+or
+calculate the rate of a 500 baud 8-QAM signal with a constellation diagram.
+
+6 b. represent the given bit stream 10011100001101 using.
+i. polar NRZ
+ii. differential Manchester
+iii. HDB3
+
+7 a. write short notes: (any two)
+a. standards organization
+b. noise and its types
+c. HDLC protocol vs point to point protocol
+

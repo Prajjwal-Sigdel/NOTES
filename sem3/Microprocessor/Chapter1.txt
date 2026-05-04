@@ -1,0 +1,351 @@
+====================================================================
+CHAPTER 1 / UNIT 1: INTRODUCTION TO MICROPROCESSORS
+PU B.E. COMPUTER ENGINEERING (SEM III) | MICROPROCESSOR AND ALP
+====================================================================
+
+1.1 MICROPROCESSOR: DEFINITION AND FUNDAMENTALS
+-----------------------------------------------
+Definition:
+A microprocessor is a multipurpose, programmable, clock-driven, register-based
+electronic device that reads binary instructions from memory, accepts binary
+data as input, processes data according to those instructions, and provides
+results as output.
+
+Core understanding:
+- It is a semiconductor IC device (typically built using LSI/VLSI techniques).
+- It works as CPU logic (ALU + control + register organization) on a chip.
+- It follows stored-program operation: instruction and data are fetched from memory.
+- By itself, microprocessor is not a complete computer; memory and I/O are needed.
+
+
+1.2 PROGRAMMABLE MACHINE CONCEPT (MPU + MEMORY + I/O)
+------------------------------------------------------
+Definition:
+A programmable machine (system) is formed by three interacting units:
+Microprocessor Unit (MPU), Memory, and Input/Output (I/O).
+
+Conceptual block:
+
+              +-----------+
+              |   MPU     |
+              +-----+-----+
+                    |
+          +---------+---------+
+          |                   |
+      +---+---+           +---+---+
+      |Memory |           |  I/O  |
+      +-------+           +-------+
+
+How these three units work together:
+1) Program and required data are stored in memory.
+2) MPU fetches instruction, decodes it, and executes it.
+3) I/O interfaces provide input from external world and output results.
+4) The three units collectively perform the required task as a complete system.
+
+Typical programmed tasks:
+- Traffic light control
+- Mathematical computation
+- Guidance/monitoring type control tasks
+
+MPU application categories:
+- Reprogrammable systems: e.g., microcomputers used for general computing.
+- Embedded systems: MPU integrated inside final product for dedicated function.
+
+
+1.3 MICROCOMPUTER
+-----------------
+Definition:
+A microcomputer is a small computer built around a microprocessor, along with
+memory, I/O interfaces, clock, and software.
+
+Key points:
+- Can range from small controller-class systems (4-bit class) to larger systems.
+- Powerful microcomputers can provide features similar to older minicomputers.
+
+Examples:
+- Intel 8051 controller-based single-board computer
+- IBM PC
+- Apple Macintosh computer
+
+
+1.4 MICROCONTROLLER
+-------------------
+Definition:
+A microcontroller is a single-chip microcomputer used mainly for dedicated
+control tasks.
+
+Key points:
+- It usually integrates MPU + RAM (R/W memory) + ROM + I/O lines in one chip.
+- Used as dedicated controller or slave in distributed processing.
+- Most classical microcontrollers are 8-bit class.
+- Typical specs (classical context): at least 64 bytes R/W memory and 1 KB ROM.
+- I/O lines commonly vary from 16 to 40.
+
+Examples:
+- Intel 8051
+- AT89C51
+- AT89C52
+- Zilog Z8
+
+
+1.5 APPLICATIONS OF MICROPROCESSOR
+----------------------------------
+Common applications (exam list):
+- Microcomputers
+- Industrial control
+- Robotics
+- Traffic lights
+- Washing machines
+- Microwave oven
+- Security systems
+- On-board systems
+
+
+1.6 MICROPROCESSOR VS MICROCONTROLLER (TABULAR DIFFERENCE)
+-----------------------------------------------------------
++----+-----------------------------------------------+-----------------------------------------------+
+| No | Microprocessor                                | Microcontroller                               |
++----+-----------------------------------------------+-----------------------------------------------+
+| 1  | Silicon chip with ALU, register and control   | Silicon chip with microprocessor, memory and  |
+|    | circuits (CPU-focused).                       | I/O in one package.                           |
+| 2  | Requires external memory and I/O for complete | Has built-in memory/peripherals; compact      |
+|    | system.                                       | single-chip system.                           |
+| 3  | Used for general-purpose computing (CPU role).| Used for specific embedded-purpose control.   |
+| 4  | Higher performance/clock speed (MHz to GHz).  | Relatively lower speed (about 3-33 MHz in     |
+|    |                                               | common classical devices).                    |
+| 5  | External RAM/ROM/I/O make system bulkier and  | Integrated peripherals make system less bulky |
+|    | typically more expensive.                     | and cheaper.                                  |
+| 6  | More versatile: designer can choose RAM/ROM/  | Less versatile to end user: RAM/ROM/I/O are   |
+|    | I/O size externally.                          | fixed on chip.                                |
++----+-----------------------------------------------+-----------------------------------------------+
+
+Representative examples:
+- Microprocessor: Intel 8085, 8086, Motorola 68000, Intel Core i7
+- Microcontroller: AT89C51, ATmega32, AT89S52
+
+
+1.7 EVOLUTION OF INTEL MICROPROCESSORS
+--------------------------------------
+Definition:
+Evolution of Intel microprocessors describes chronological advancement in word
+size, architecture, speed, integration level, and application capability.
+
+1.7.1 4-bit microprocessors
+---------------------------
+Intel 4004 (1971)
+- First Intel microprocessor
+- 4-bit
+- Clock speed: 740 KHz
+- Transistors: about 2,300
+- Execution speed: around 60,000 instructions/second
+- Application: calculators
+
+Intel 4040 (1974)
+- 4-bit microprocessor
+- Transistors: about 3,000
+- Clock speed: 740 KHz
+- Interrupt feature available
+
+1.7.2 8-bit microprocessors
+---------------------------
+Intel 8008 (1972)
+- First 8-bit microprocessor
+- Clock speed: 500 KHz
+- Around 50,000 instructions/second
+- Applications: computer terminals, calculators, bottling machines, industrial robots
+
+Intel 8080 (1974)
+- 8-bit microprocessor
+- Clock speed: 2 MHz
+- Transistors: about 6,000
+- About 10 times faster than 8008
+- Around 500,000 instructions/second
+- Applications: calculators, industrial robots
+
+Intel 8085 (1976)
+- 8-bit microprocessor
+- Clock speed: 3 MHz
+- Data bus: 8-bit, Address bus: 16-bit
+- Transistors: about 6,500
+- Around 769,230 instructions/second
+- Addressable memory: 64 KB
+- Instruction count listed: 246
+- Applications: early PC, on-board instrument data processors
+
+1.7.3 16-bit microprocessors
+----------------------------
+Intel 8086 (1978)
+- First 16-bit Intel microprocessor
+- Clock speed: 5 to 10 MHz
+- Data bus: 16-bit, Address bus: 20-bit
+- Transistors: about 29,000
+- Around 2.5 million instructions/second
+- Addressable memory: 1 MB
+- Instruction count listed: 22,000
+- Application: CPU of microcomputers
+
+Intel 8088 (1979)
+- 16-bit internal processor with 8-bit external data bus
+- Developed as cheaper version of 8086
+- Around 2.5 million instructions/second
+- Became very popular when used in first IBM PC
+
+Intel 80286 (1982)
+- 16-bit microprocessor
+- Clock speed: 8 MHz
+- Data bus: 16-bit, Address bus: 24-bit
+- Addressable memory: 16 MB
+- Transistors: about 134,000
+- Around 4 million instructions/second
+
+1.7.4 32-bit microprocessors
+----------------------------
+Intel 80386 (1986)
+- First 32-bit Intel microprocessor
+- Data bus: 32-bit, Address bus: 32-bit
+- Addressable memory: 4 GB
+- Transistors: about 275,000
+- Clock speed range: 16 MHz to 33 MHz
+- Versions: 80386DX, 80386SX, 80386SL
+
+Intel 80486 (1989)
+- 32-bit microprocessor
+- Transistors: about 1.2 million
+- Clock speed range: 16 MHz to 100 MHz
+- 8 KB cache introduced
+- Versions: 80486DX, 80486SX, 80486DX2, 80486SL, 80486DX4
+
+Pentium (1993)
+- 32-bit microprocessor
+- Clock speed: 66 MHz
+- Data bus: 32-bit, Address bus: 32-bit
+- Addressable memory: 4 GB
+- Around 110 million instructions/second
+- Cache: 8 KB instruction cache + 8 KB data cache
+- Upgraded version: Pentium Pro
+
+Pentium II (1997)
+- 32-bit microprocessor
+- Clock speed: 233 to 450 MHz
+- MMX supported
+- L2 cache and processor on one circuit
+- Upgraded version: Pentium II Xeon
+
+Pentium III (1999)
+- 32-bit microprocessor
+- Clock speed: 500 MHz to 1.4 GHz
+- Transistors: about 9.5 million
+
+Pentium IV (2000)
+- 32-bit microprocessor
+- Clock speed: 1.3 GHz to 3.8 GHz
+- L1 cache: 32 KB, L2 cache: 256 KB
+- Transistors: about 42 million
+
+Intel Dual Core (2006)
+- Listed as 32-bit/64-bit class microprocessor family
+- Two cores
+- Each core has own internal bus and L1 cache
+- External bus and L2 cache shared
+- Support for simultaneous multithreading mentioned in source
+
+1.7.5 64-bit microprocessors
+----------------------------
+Intel Core 2 (2006)
+- 64-bit microprocessor
+- Clock speed: 1.2 GHz to 3 GHz
+- Transistors: about 291 million
+- L1 cache: 64 KB per core
+- L2 cache: 4 MB
+- Versions: Core 2 Duo, Core 2 Quad, Core 2 Extreme
+
+Intel Core i7 (2008)
+- 64-bit microprocessor
+- 4 physical cores
+- Clock speed: 2.66 GHz to 3.33 GHz
+- Transistors: about 781 million
+- L1 cache: 64 KB per core
+- L2 cache: 256 KB
+- L3 cache: 4 MB
+
+Intel Core i5 (2009)
+- 64-bit microprocessor
+- 4 physical cores
+- Clock speed: 2.40 GHz to 3.60 GHz
+- Transistors: about 781 million
+- L1 cache: 64 KB per core
+- L2 cache: 256 KB
+- L3 cache: 8 MB
+
+Intel Core i3 (2010)
+- 64-bit microprocessor
+- 2 physical cores
+- Clock speed: 2.93 GHz to 3.33 GHz
+- Transistors: about 781 million
+- L1 cache: 64 KB per core
+- L2 cache: 512 KB
+- L3 cache: 4 MB
+
+Quick sequence memory aid:
+4004 -> 4040 -> 8008 -> 8080 -> 8085 -> 8086 -> 8088 -> 80286 -> 80386 -> 80486
+-> Pentium -> Pentium II -> Pentium III -> Pentium IV -> Dual Core -> Core 2 -> i7 -> i5 -> i3
+
+Note:
+Some values (for example listed instruction counts/family-level features) may vary across
+device variants and textbook editions. Above values are preserved from the provided raw content.
+
+
+1.8 BUS ORGANIZATION (FOUNDATION)
+---------------------------------
+Definition:
+Bus organization is the set of shared communication paths used to transfer address,
+data, and control information.
+
+Three basic buses:
+- Address bus: carries address information.
+- Data bus: carries data/instruction values.
+- Control bus: carries control signals (READ, WRITE, INTERRUPT, etc.).
+
+
+1.9 FETCH-DECODE-EXECUTE CYCLE
+------------------------------
+Definition:
+The fetch-decode-execute cycle is the repeated CPU process used to run instructions.
+
+Steps:
+1) Fetch instruction from memory.
+2) Decode opcode and identify operation.
+3) Execute operation using ALU/control logic.
+4) Store result and update program flow.
+
+
+====================================================================
+EXAM FOCUS (UNIT 1)
+====================================================================
+Most probable long-answer areas:
+1) Define microprocessor and explain programmable machine (MPU + Memory + I/O).
+2) Differentiate microprocessor and microcontroller in tabular form.
+3) Explain microcomputer and microcontroller with examples.
+4) Write applications of microprocessor.
+5) Explain evolution of Intel microprocessors from 4004 to Core i3/i5/i7 classes.
+
+How to score in 10-mark answers:
+- Start with exact definition.
+- Draw/write neat block representation (MPU, Memory, I/O).
+- Add one comparison or evolution table with values.
+- End with 2-3 practical applications.
+
+
+====================================================================
+QUICK REVISION (UNIT 1)
+====================================================================
+- Microprocessor: programmable, clock-driven CPU chip requiring external memory/I/O.
+- Programmable machine = MPU + Memory + I/O working as one system.
+- Microcomputer: complete small computer around MPU.
+- Microcontroller: single-chip dedicated controller with built-in memory and I/O.
+- Microprocessor vs microcontroller: flexibility vs integration.
+- Must remember Intel order: 4004, 4040, 8008, 8080, 8085, 8086, 8088, 80286, 80386,
+  80486, Pentium series, Dual Core, Core 2, Core i7/i5/i3.
+- Core cycle: Fetch -> Decode -> Execute.
+
+==================== END OF CHAPTER 1 ====================

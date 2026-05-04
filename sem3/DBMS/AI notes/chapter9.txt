@@ -1,0 +1,562 @@
+================================================================================
+           CHAPTER 9: CRASH RECOVERY
+                            [3 Hours]
+================================================================================
+
+TABLE OF CONTENTS
+─────────────────
+  9.1  Failure Classification
+  9.2  Recovery and Atomicity
+       9.2.1  Log Records
+       9.2.2  Database Modification Techniques
+       9.2.3  Concurrency Control and Recovery
+       9.2.4  Transaction Commit
+  9.3  Redo and Undo Operations Using Log
+  9.4  Checkpoints
+  9.5  Recovery Algorithm
+       9.5.1  Transaction Rollback
+       9.5.2  Recovery After System Crash
+       9.5.3  Optimizing Commit
+  9.6  Remote Backup Systems
+  9.7  Shadow Paging
+
+================================================================================
+9.1  FAILURE CLASSIFICATION
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **failure** (or crash) is any event that prevents the normal execution
+of a transaction or the database system. Failures are classified based
+on their nature, severity, and the recovery mechanism required.
+
+■ TYPES OF FAILURES
+─────────────────────
+
+  ┌────────────────────────┬─────────────────────────────────────────────┐
+  │ Failure Type           │ Description                                 │
+  ├────────────────────────┼─────────────────────────────────────────────┤
+  │ 1. Transaction Failure │ A single transaction cannot proceed.        │
+  │    a) Logical Error    │ Internal error: bad input, data not found,  │
+  │                        │ overflow, constraint violation, resource     │
+  │                        │ limit exceeded.                              │
+  │    b) System Error     │ DBMS terminates the transaction (deadlock   │
+  │                        │ victim, timeout, serialization failure).     │
+  │                        │ Can be restarted.                            │
+  │                        │                                              │
+  │ 2. System Crash        │ Hardware/software malfunction causes the     │
+  │    (Soft Crash)        │ system to halt. Content of volatile memory   │
+  │                        │ (RAM buffer) is LOST. Non-volatile storage   │
+  │                        │ (disk) is assumed to SURVIVE.                │
+  │                        │ Examples: power failure, OS crash, DBMS bug. │
+  │                        │                                              │
+  │ 3. Disk Failure        │ A disk block loses its content permanently.  │
+  │    (Hard Crash /       │ Data on disk is destroyed.                   │
+  │     Media Failure)     │ Examples: head crash, fire, flood.           │
+  │                        │ Requires backup/archival recovery.           │
+  └────────────────────────┴─────────────────────────────────────────────┘
+
+■ ASSUMPTIONS FOR RECOVERY
+────────────────────────────
+  1. System crash does NOT corrupt disk data (fail-stop assumption).
+  2. Data written to disk persists across system crashes.
+  3. The log (journal) is stored on stable storage (disk + backup).
+  4. Write-Ahead Logging (WAL) is followed.
+
+
+================================================================================
+9.2  RECOVERY AND ATOMICITY
+================================================================================
+
+The recovery system ensures **Atomicity** (all-or-nothing) and
+**Durability** (committed changes survive crashes) by maintaining a
+**log** of all database modifications.
+
+────────────────────────────────────────────────
+9.2.1  LOG RECORDS
+────────────────────────────────────────────────
+
+■ FORMAL DEFINITION
+────────────────────
+A **log** (also called journal or write-ahead log) is a sequential file
+on **stable storage** that records every modification made by every
+transaction. It is the PRIMARY mechanism for crash recovery.
+
+■ TYPES OF LOG RECORDS
+───────────────────────
+
+  ┌──────────────────────────────┬──────────────────────────────────────┐
+  │ Log Record Type              │ Description                          │
+  ├──────────────────────────────┼──────────────────────────────────────┤
+  │ <Tᵢ, START>                  │ Transaction Tᵢ has started.          │
+  │                              │                                      │
+  │ <Tᵢ, X, V_old, V_new>        │ Transaction Tᵢ has updated data      │
+  │                              │ item X from old value V_old to       │
+  │                              │ new value V_new.                     │
+  │                              │                                      │
+  │ <Tᵢ, COMMIT>                 │ Transaction Tᵢ has committed.        │
+  │                              │                                      │
+  │ <Tᵢ, ABORT>                  │ Transaction Tᵢ has aborted.          │
+  │                              │                                      │
+  │ <CHECKPOINT L>               │ Checkpoint with list L of active     │
+  │                              │ transactions at checkpoint time.     │
+  └──────────────────────────────┴──────────────────────────────────────┘
+
+■ EXAMPLE LOG
+──────────────
+  <T₁, START>
+  <T₁, A, 1000, 950>          -- T₁ updated A from 1000 to 950
+  <T₁, B, 2000, 2050>         -- T₁ updated B from 2000 to 2050
+  <T₁, COMMIT>
+  <T₂, START>
+  <T₂, C, 700, 600>           -- T₂ updated C from 700 to 600
+  *** SYSTEM CRASH ***
+
+  At recovery: T₁ is committed → REDO T₁'s changes.
+               T₂ is NOT committed → UNDO T₂'s changes.
+
+────────────────────────────────────────────────
+9.2.2  DATABASE MODIFICATION TECHNIQUES
+────────────────────────────────────────────────
+
+■ DEFERRED MODIFICATION (NO-UNDO / REDO)
+──────────────────────────────────────────
+  • Changes are NOT written to the database until the transaction
+    COMMITS.
+  • All updates are recorded in the log first.
+  • At commit time, log entries are used to apply changes to the DB.
+  • If crash before commit: nothing to undo (changes never reached DB).
+  • If crash after commit: REDO using the log.
+
+  Advantage: No UNDO needed. Simple recovery.
+  Disadvantage: All modifications must fit in the log buffer until
+  commit. Not practical for large transactions.
+
+■ IMMEDIATE MODIFICATION (UNDO / REDO)
+────────────────────────────────────────
+  • Changes are written to the database as they occur (even before
+    commit), BUT the log record is ALWAYS written FIRST.
+  • This is the **Write-Ahead Logging (WAL)** protocol.
+  • If crash before commit: UNDO changes using old values in the log.
+  • If crash after commit: REDO changes using new values in the log.
+
+  This is the STANDARD approach used by most modern DBMS.
+
+■ WRITE-AHEAD LOGGING (WAL) RULE
+──────────────────────────────────
+  **Before any data block is written to disk, the corresponding log
+  records must be written to stable storage FIRST.**
+
+  Two sub-rules:
+  1. **Undo Rule**: Before a data item's new value is written to disk,
+     the OLD value must be written to the log (for undo).
+  2. **Redo Rule**: Before a transaction commits, ALL its log records
+     (including the commit record) must be written to stable storage
+     (for redo).
+
+────────────────────────────────────────────────
+9.2.3  CONCURRENCY CONTROL AND RECOVERY
+────────────────────────────────────────────────
+
+  When multiple transactions run concurrently:
+  • Strict 2PL is typically used for concurrency control.
+  • Each transaction has its own set of log records.
+  • Log records from different transactions are interleaved in the log.
+  • Recovery must handle committed AND uncommitted transactions.
+
+  With Strict 2PL + WAL:
+  • Committed transactions are REDONE (effects may not be on disk).
+  • Uncommitted transactions are UNDONE (effects may be on disk).
+
+────────────────────────────────────────────────
+9.2.4  TRANSACTION COMMIT
+────────────────────────────────────────────────
+
+  A transaction is considered **committed** when its COMMIT log record
+  is written to **stable storage** (disk).
+
+  The actual database changes may or may not be on disk yet — that
+  doesn't matter. As long as the commit log record is on stable storage,
+  the recovery system can always REDO the changes.
+
+  ┌──────────────────────────────────────────────────────────────────┐
+  │ COMMIT POINT:                                                    │
+  │ The moment <Tᵢ, COMMIT> is flushed to the log on disk.          │
+  │                                                                  │
+  │ Before commit point: crash → UNDO (transaction never happened)  │
+  │ After commit point:  crash → REDO (transaction is permanent)    │
+  └──────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+9.3  REDO AND UNDO OPERATIONS USING LOG
+================================================================================
+
+■ UNDO OPERATION
+──────────────────
+  **Purpose**: Reverse the effects of a transaction that did NOT commit.
+
+  For each log record <Tᵢ, X, V_old, V_new> of an uncommitted
+  transaction Tᵢ (processed in REVERSE order):
+    → Set data item X back to V_old.
+    → Write a **compensation log record (CLR)**: <Tᵢ, X, V_old>
+
+  After all undo operations: write <Tᵢ, ABORT> to the log.
+
+■ REDO OPERATION
+──────────────────
+  **Purpose**: Re-apply the effects of a transaction that DID commit
+  (in case its changes weren't flushed to disk before the crash).
+
+  For each log record <Tᵢ, X, V_old, V_new> of a committed
+  transaction Tᵢ (processed in FORWARD order):
+    → Set data item X to V_new.
+
+■ EXAMPLE: REDO AND UNDO
+──────────────────────────
+
+  LOG (before crash):
+    <T₁, START>
+    <T₁, A, 1000, 950>
+    <T₂, START>
+    <T₂, B, 2000, 2050>
+    <T₁, C, 700, 600>
+    <T₁, COMMIT>
+    <T₂, D, 500, 450>
+    *** CRASH ***
+
+  Analysis:
+    T₁: Has <COMMIT> record → REDO T₁
+    T₂: No <COMMIT> record → UNDO T₂
+
+  REDO (forward scan):
+    Apply T₁: A = 950, C = 600   (ensure T₁'s changes are on disk)
+
+  UNDO (backward scan):
+    Reverse T₂: D = 500 (was 450), B = 2000 (was 2050)
+    Write <T₂, ABORT>
+
+  Final state: T₁'s changes are permanent. T₂ never happened.
+
+
+================================================================================
+9.4  CHECKPOINTS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **Checkpoint** is a periodic operation that forces all modified data
+(dirty buffers) and log records to disk, creating a known "safe point"
+from which recovery can begin. It limits the amount of log that must
+be scanned during recovery.
+
+■ WHY CHECKPOINTS?
+────────────────────
+Without checkpoints, recovery requires scanning the ENTIRE log from
+the beginning — impractical for large databases. Checkpoints establish
+a boundary: only log records AFTER the last checkpoint need scanning.
+
+■ CHECKPOINT PROCEDURE
+────────────────────────
+  1. Temporarily STOP accepting new transactions (or pause writes).
+  2. Force all log records in memory to stable storage (log flush).
+  3. Force all modified (dirty) buffer blocks to disk.
+  4. Write a <CHECKPOINT L> record to the log, where L is the list of
+     all transactions that are ACTIVE at checkpoint time.
+  5. Resume normal transaction processing.
+
+■ FUZZY CHECKPOINTS
+─────────────────────
+  A **fuzzy checkpoint** does NOT force all dirty pages to disk
+  immediately. Instead:
+  1. Write <CHECKPOINT L> to log.
+  2. Note the list of dirty pages.
+  3. Continue normal operations.
+  4. Dirty pages are flushed in the background over time.
+
+  Advantage: Less disruption to normal operations.
+  Disadvantage: Recovery is slightly more complex.
+
+■ RECOVERY WITH CHECKPOINTS — EXAMPLE
+───────────────────────────────────────
+
+  Timeline:
+  ─────────────────────────────────────────────────────────────────
+  T₁ ├──────────┤
+  T₂      ├──────────────────────────────────┤
+  T₃            ├─────────────────────┤
+  T₄                              ├─────────────────────────────┤
+  T₅                                              ├─────────┤
+  ─────────────────────────────────────────────────────────────────
+              Checkpoint                        Crash
+             (Tc)                              (Tf)
+
+  At Checkpoint Tc: Active transactions = {T₂, T₃}
+  At Crash Tf:
+
+  ┌─────────────┬──────────────────────────────────────────────────┐
+  │ Transaction │ Action Required                                  │
+  ├─────────────┼──────────────────────────────────────────────────┤
+  │ T₁          │ IGNORE — committed before checkpoint. Already   │
+  │             │ safely on disk (checkpoint flushed all dirty     │
+  │             │ pages).                                           │
+  │ T₂          │ REDO — started before checkpoint, committed     │
+  │             │ after checkpoint but before crash. Committed     │
+  │             │ changes may not be on disk.                       │
+  │ T₃          │ UNDO — started before checkpoint, was active at │
+  │             │ crash time. Never committed.                      │
+  │ T₄          │ UNDO — started after checkpoint, was active at  │
+  │             │ crash time. Never committed.                      │
+  │ T₅          │ REDO — started after checkpoint, committed      │
+  │             │ before crash. Changes may not be on disk.        │
+  └─────────────┴──────────────────────────────────────────────────┘
+
+  Wait — let me re-examine the timeline:
+  • T₁: committed BEFORE checkpoint → no action (already on disk).
+  • T₂: started before Tc, committed after Tc but before Tf → REDO.
+  • T₃: started before Tc, committed between Tc and Tf → REDO.
+  • T₄: started after Tc, still active at Tf → UNDO.
+  • T₅: started after Tc, still active at Tf → UNDO.
+
+  (Whether T₃ needs redo or undo depends on whether it committed
+  before the crash. In the diagram, T₃ ended before T₄ started, which
+  is before the crash, so T₃ committed → REDO.)
+
+  GENERAL RULE:
+    → If transaction committed BEFORE crash: REDO
+    → If transaction did NOT commit before crash: UNDO
+    → If transaction committed BEFORE checkpoint: IGNORE (already safe)
+
+
+================================================================================
+9.5  RECOVERY ALGORITHM
+================================================================================
+
+The standard recovery algorithm has two phases: **Analysis + Redo**
+followed by **Undo** (often called **ARIES-style** recovery).
+
+────────────────────────────────────────────────
+9.5.1  TRANSACTION ROLLBACK (NORMAL UNDO)
+────────────────────────────────────────────────
+
+When a transaction Tᵢ aborts (not due to crash, just normal abort):
+
+  1. Scan the log BACKWARD from the end.
+  2. For each log record <Tᵢ, X, V_old, V_new> belonging to Tᵢ:
+     a. Write X = V_old to the database (restore old value).
+     b. Write a compensation log record (CLR).
+  3. Continue until <Tᵢ, START> is found.
+  4. Write <Tᵢ, ABORT> to the log.
+
+────────────────────────────────────────────────
+9.5.2  RECOVERY AFTER SYSTEM CRASH
+────────────────────────────────────────────────
+
+The recovery algorithm upon restart:
+
+  **PHASE 1: REDO PHASE (Repeat History)**
+  Scan log FORWARD from the last checkpoint:
+    1. Build two sets:
+       - **Redo set**: transactions with <COMMIT> records.
+       - **Undo set**: transactions with <START> but no <COMMIT>.
+    2. For EVERY update log record (regardless of committed or not):
+       → Re-apply the operation (set X = V_new).
+       This restores the database to the state just before the crash.
+
+  **PHASE 2: UNDO PHASE (Rollback Incomplete Transactions)**
+  Scan log BACKWARD:
+    1. For each log record belonging to a transaction in the undo set:
+       → Reverse the operation (set X = V_old).
+       → Write a compensation log record.
+    2. When <START> is found for an undo transaction, write <ABORT>.
+    3. Continue until all undo transactions are fully rolled back.
+
+  After both phases: database is in a consistent state.
+
+■ SUMMARY OF RECOVERY ALGORITHM
+─────────────────────────────────
+  ┌──────────────────┬────────────────────────────────────────────────┐
+  │ Phase            │ Action                                         │
+  ├──────────────────┼────────────────────────────────────────────────┤
+  │ 1.Redo (Forward) │ Re-apply ALL logged operations from last       │
+  │                  │ checkpoint forward. Rebuilds the pre-crash     │
+  │                  │ state. Handles BOTH committed and uncommitted. │
+  │                  │                                                │
+  │ 2.Undo (Backward)│ Reverse operations of uncommitted              │
+  │                  │ transactions. Removes their effects.           │
+  └──────────────────┴────────────────────────────────────────────────┘
+
+────────────────────────────────────────────────
+9.5.3  OPTIMIZING COMMIT
+────────────────────────────────────────────────
+
+■ GROUP COMMIT
+───────────────
+  Instead of flushing the log to disk for EVERY transaction commit,
+  batch multiple commit records together and flush once.
+  • Reduces the number of disk writes (expensive I/O).
+  • Slightly increases latency for individual transactions but greatly
+    improves throughput.
+
+■ LOG BUFFER
+─────────────
+  Log records are first written to an in-memory **log buffer**, which
+  is periodically flushed to disk:
+    • When the buffer is full.
+    • At commit time (WAL rule).
+    • At checkpoint time.
+    • When a transaction references a dirty data page that needs
+      to be written to disk.
+
+
+================================================================================
+9.6  REMOTE BACKUP SYSTEMS
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+A **Remote Backup System** maintains a copy (backup) of the database at
+a geographically separate site to ensure availability and durability in
+case of catastrophic failures (fire, earthquake, disk destruction) at
+the primary site.
+
+■ HOW IT WORKS
+───────────────
+  Primary Site                     Remote Backup Site
+  ┌──────────────┐                ┌──────────────────┐
+  │  Active DB   │ ── Log Shipping ──> │ Standby DB  │
+  │  + Log       │                │    + Replayed Log │
+  └──────────────┘                └──────────────────┘
+
+  1. All log records from the primary are sent to the remote site.
+  2. The remote site replays log records to keep a near-current copy.
+  3. If the primary fails, the remote site takes over (**failover**).
+
+■ SYNCHRONOUS vs ASYNCHRONOUS REPLICATION
+───────────────────────────────────────────
+
+  ┌──────────────────┬─────────────────────────┬───────────────────────┐
+  │ Aspect           │ Synchronous             │ Asynchronous          │
+  ├──────────────────┼─────────────────────────┼───────────────────────┤
+  │ When log sent    │ BEFORE commit at primary│ AFTER commit (delayed)│
+  │ Data loss risk   │ Zero (no data loss)     │ Some recent data may  │
+  │                  │                         │ be lost               │
+  │ Performance      │ Slower (wait for remote │ Faster (don't wait)   │
+  │                  │ acknowledgement)        │                       │
+  │ Use case         │ Financial systems       │ General applications  │
+  └──────────────────┴─────────────────────────┴───────────────────────┘
+
+■ REAL-WORLD SCENARIO
+──────────────────────
+  PostgreSQL uses **Streaming Replication** for remote backup. A primary
+  server streams WAL (Write-Ahead Log) records to one or more standby
+  servers. If the primary fails, a standby can be promoted to primary.
+
+  MySQL uses **Group Replication** or **MySQL InnoDB Cluster** for
+  similar high-availability setups.
+
+
+================================================================================
+9.7  SHADOW PAGING
+================================================================================
+
+■ FORMAL DEFINITION
+────────────────────
+**Shadow Paging** is a recovery technique that maintains TWO page tables
+during transaction execution: the **current page table** and the
+**shadow page table**. The shadow table is a copy of the page table as
+it was at the start of the transaction.
+
+■ HOW IT WORKS
+───────────────
+  Before Transaction:
+    Shadow Page Table    Current Page Table
+    ┌──────────────┐    ┌──────────────┐
+    │ Page 1 → D1  │    │ Page 1 → D1  │
+    │ Page 2 → D2  │    │ Page 2 → D2  │
+    │ Page 3 → D3  │    │ Page 3 → D3  │
+    └──────────────┘    └──────────────┘
+           │                    │
+           ▼                    ▼
+    ┌──────┬──────┬──────┐
+    │  D1  │  D2  │  D3  │  (Disk blocks)
+    └──────┴──────┴──────┘
+
+  During Transaction (modifying Page 2):
+    Shadow Page Table    Current Page Table
+    ┌──────────────┐    ┌──────────────┐
+    │ Page 1 → D1  │    │ Page 1 → D1  │
+    │ Page 2 → D2  │    │ Page 2 → D2' │  ← points to NEW copy
+    │ Page 3 → D3  │    │ Page 3 → D3  │
+    └──────────────┘    └──────────────┘
+                                │
+                                ▼
+                        ┌──────┐
+                        │  D2' │  (New disk block with modified data)
+                        └──────┘
+
+  COMMIT: Make the current page table the new shadow page table.
+          (Atomic operation: single pointer swap.)
+          Free old pages that are no longer referenced.
+
+  ABORT: Discard the current page table. The shadow page table
+         (unchanged) becomes the active page table. No undo needed!
+
+■ ADVANTAGES
+─────────────
+  ✓ No undo or redo log needed for simple cases.
+  ✓ Recovery is instant: just revert to shadow page table.
+  ✓ Commit is fast: single pointer swap (atomic).
+
+■ DISADVANTAGES
+────────────────
+  ✗ **Data fragmentation**: modified pages written to new locations →
+    pages become scattered on disk → poor locality.
+  ✗ **Garbage collection**: old pages must be freed after commit.
+  ✗ **Single transaction only**: difficult to extend to concurrent
+    transactions. Does not scale well.
+  ✗ **Expensive for large transactions**: many pages may be copied.
+  ✗ **Not used in modern DBMS**: WAL-based recovery is preferred.
+
+■ SHADOW PAGING vs LOG-BASED RECOVERY
+───────────────────────────────────────
+  ┌─────────────────────┬────────────────────┬──────────────────────┐
+  │ Aspect              │ Shadow Paging      │ Log-Based (WAL)      │
+  ├─────────────────────┼────────────────────┼──────────────────────┤
+  │ Undo mechanism      │ Revert page table  │ Undo log records     │
+  │ Redo mechanism      │ Not needed (pages  │ Redo log records     │
+  │                     │ already on disk)   │                      │
+  │ Concurrency         │ Difficult          │ Well-supported       │
+  │ Performance         │ Fragmentation      │ Sequential log writes│
+  │ Modern usage        │ Rarely used        │ Standard approach    │
+  │ Complexity          │ Simple concept     │ More complex         │
+  └─────────────────────┴────────────────────┴──────────────────────┘
+
+■ INTERVIEW ESSENTIALS
+───────────────────────
+  Q: What is WAL (Write-Ahead Logging)?
+  A: WAL requires that log records be written to stable storage BEFORE
+     the corresponding data modifications are written to disk. This
+     ensures that the log always has enough information to undo or redo
+     any changes, even if a crash occurs during a disk write.
+
+  Q: What is the difference between REDO and UNDO?
+  A: REDO re-applies changes of committed transactions (forward from
+     log) to ensure durability. UNDO reverses changes of uncommitted
+     transactions (backward from log) to ensure atomicity.
+
+  Q: What is the purpose of checkpoints?
+  A: Checkpoints force all dirty data and log records to disk, creating
+     a known recovery point. This limits the amount of log to scan
+     during recovery, making recovery faster.
+
+  Q: Why is shadow paging not used in practice?
+  A: Shadow paging causes data fragmentation (pages scattered on disk),
+     doesn't handle concurrent transactions well, and requires garbage
+     collection. WAL-based recovery is more efficient, supports
+     concurrency, and writes sequentially (better disk performance).
+
+
+================================================================================
+                     END OF CHAPTER 9 NOTES
+================================================================================

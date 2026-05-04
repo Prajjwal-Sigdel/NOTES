@@ -1,0 +1,358 @@
+╔══════════════════════════════════════════════════════════════════════════════════════╗
+║                        MASTER PLAN + MASTER PROMPT                                   ║
+║         (For Creating Complete Notes: PU B.E. Computer Engg, Sem III)                ║
+║                        Subject: Microprocessor and ALP                               ║
+╚══════════════════════════════════════════════════════════════════════════════════════╝
+
+PURPOSE
+=======
+Use this plan as a high-quality prompt blueprint to generate complete notes for
+all units, topics, subtopics, sub-subtopics, and microtopics of the syllabus.
+The final notes must support 10-mark descriptive answers with real-life,
+practically feasible examples.
+
+----------------------------------------------------------------------------------------
+SECTION A: MASTER PROMPT (COPY-PASTE READY)
+----------------------------------------------------------------------------------------
+
+You are an expert professor of Microprocessor and Assembly Language Programming,
+teaching Pokhara University B.E. Computer Engineering (Semester III).
+
+Your task is to create exam-oriented, conceptually strong, and application-focused
+notes for the entire syllabus of “Microprocessor and ALP”.
+
+IMPORTANT REQUIREMENTS:
+1) Cover every unit, topic, subtopic, sub-subtopic, and necessary microtopic.
+2) For each microtopic, provide brief but complete explanation so a student can
+   write a strong 10-mark answer.
+3) Include practical and real-life examples for every major concept.
+4) Keep explanations technically accurate for 8085/8086, with interface ICs
+   (8255, 8251, 8237, 8259) and interrupt/bus/memory concepts.
+5) Use clear headings, bullet points, flowcharts in text form, and tables.
+6) For architecture/timing/interfacing topics, include text diagrams using
+   ASCII symbols.
+7) For ALP topics, provide representative instruction patterns and short
+   example programs (8085/8086) with line-by-line explanation.
+8) Do NOT skip any syllabus point.
+9) Include memory aids: common mistakes, exam traps, and quick revision lines.
+10) Maintain language simple enough for students but deep enough for university
+    exam answers.
+11) Enforce proper layout formatting in plain .txt using special characters
+    (e.g., ╔═╗, ┌─┐, │, ├─┤, →, *), with visually neat section boxes.
+12) Wherever comparison/data is present, use fixed-width ASCII tables.
+13) Wherever trend/relationship is relevant, include text-based graphs/charts
+    (ASCII bar chart, timeline, signal sketch, ranking ladder), since output is .txt.
+14) Keep alignment clean and readable in monospaced text editors.
+15) Be highly descriptive for every single topic and subtopic; explain ideas in a
+   student-friendly, intuitive way without skipping conceptual links.
+16) Add super-intuitive representation for each topic using simple analogies,
+   step-wise thought flow, and visual-friendly text structures.
+17) Give a clear definition for every topic, subtopic, and microtopic before
+   detailed explanation.
+18) For every topic/subtopic, write at least one big descriptive paragraph of
+   minimum 5 lines (in plain .txt wrapping style) so answers feel complete.
+19) Use proper tab-space indentation for hierarchy clarity: Topic -> Subtopic ->
+   Microtopic -> bullet details.
+20) Keep only the topic heading/title inside a visible text box container
+   (ASCII/Unicode box); do NOT box the entire topic content.
+
+OUTPUT FORMAT (STRICT):
+For EACH topic/subtopic, follow this structure:
+0. Topic Box Container:
+   - Start with a boxed topic header
+   - Keep only the topic heading boxed; body content should be clean text with
+     proper indentation, spacing, and separators for readability
+A. Topic Name
+B. Definition (must be precise and exam-ready)
+C. Why this topic matters (2-3 lines)
+D. Core theory (concise but complete)
+   - Include at least one descriptive paragraph of minimum 5 lines
+E. Microtopic Breakdown (all relevant micro-concepts)
+E1. Intuitive Representation Layer:
+   - Explain the same concept in very simple words
+   - Add one analogy from daily life/engineering practice
+   - Add "How to think about this in exam" guidance
+F. 10-Mark Answer Framework:
+   - Definition/Introduction
+   - Diagram/Architecture/Flow
+   - Working principle / steps
+   - Key equations/relationships (if any)
+   - Advantages / limitations
+   - Real-life example(s)
+   - Conclusion line for exam
+F. 2-3 likely university questions (short + long)
+G. Quick revision bullets (5-8 points)
+H. Common mistakes to avoid
+I. If programming-related: sample code + dry run + expected output/behavior
+J. Visual Layout Elements (TXT-only):
+   - One boxed heading using special characters
+   - One table (comparison/specification/steps)
+   - One graph-like visual (timeline/bar/signal/flow sketch as applicable)
+
+SPECIAL INSTRUCTIONS:
+- Every unit must end with:
+  (i) Unit summary,
+  (ii) 10 probable viva questions,
+  (iii) 10 probable theory questions,
+  (iv) 5 numericals/design problems where applicable,
+  (v) last-minute revision sheet.
+- Provide at least one practical lab linkage for each major topic.
+- Use comparisons where useful (e.g., 8085 vs 8086, I/O mapped vs memory mapped,
+  maskable vs non-maskable, synchronous vs asynchronous bus).
+- Ensure terminology consistency and corrected naming where needed.
+- Ensure all visuals are text-native (no images), readable in plain .txt files,
+  and consistently formatted with aligned spacing.
+- Never leave any topic with shallow coverage: every topic must have descriptive,
+  intuitive explanation and exam-usable interpretation.
+- Mandatory depth rule: every topic must start with a definition and must include
+   a minimum 5-line explanatory paragraph.
+- Formatting rule: maintain tab-indented hierarchy and boxed topic containers for
+   every topic heading (not full content) so organization is immediately visible
+   in plain .txt with a clean visual layout.
+
+Syllabus to cover exactly:
+Unit 1: Introduction to Microprocessor
+- Historical evolution of Intel series microprocessors
+- Bus organization
+- Microcontroller and applications
+- Microcomputer
+- Von Neumann and Harvard architecture
+- Fetch, decode, execute concept
+
+Unit 2: Architectural Details and Programming of 8085
+- Internal architecture and features of 8085
+- Instruction set and classification
+- Addressing modes
+- Instruction cycle, machine cycle, T-state
+- Timing diagrams: opcode fetch, memory read/write, I/O read/write
+- Assembly language format and simple ALP (arithmetic/logical/conditions/loops)
+
+Unit 3: Architectural Details and Programming of 8086
+- Internal architecture and features (BIU, EU)
+- Memory segmentation, segment:offset
+- Instruction set and classification
+- Addressing modes
+- ALP tools, directives, DOS interrupts
+- Programs: arithmetic/logical/string I/O/conditions/loops
+- Stack procedures and macros
+
+Unit 4: Bus Structure, Memory, I/O and Interfacing
+- Synchronous and asynchronous bus
+- Memory hierarchy/classification
+- I/O and memory interfacing
+- Address decoding: unique/non-unique, full/partial
+- I/O mapped vs memory mapped I/O
+- 8085 I/O and memory address decoding
+- Parallel interfacing, handshaking modes
+- 8255 PPI architecture and control word
+- Serial interfacing, synchronous/asynchronous transmission
+- 8251 USART
+- DMA and 8237A DMA controller
+
+Unit 5: Interrupt Operation
+- Interrupt concepts, sources, and classification
+- Interrupt processing sequence in 8085/8086
+- Interrupt instructions and priorities
+- ISR procedure
+- Interrupt vector table
+- Multiple interrupt handling
+- Polled vs vectored interrupts
+- 8259 PIC architecture/features
+
+Now begin from Unit 1 and continue unit-wise until all units are completed.
+
+----------------------------------------------------------------------------------------
+SECTION B: EXECUTION PLAN (HOW TO GENERATE NOTES SYSTEMATICALLY)
+----------------------------------------------------------------------------------------
+
+PHASE 1: FOUNDATION SETUP
+-------------------------
+1. Start with a “Course Big Picture” page:
+   - What microprocessor is, where it is used, how this course is structured.
+2. Build a dependency map:
+   - Unit 1 → Unit 2/3 → Unit 4 → Unit 5.
+3. Define common symbols/abbreviations once:
+   - ALU, CU, BIU, EU, ISR, PPI, DMA, PIC, etc.
+
+PHASE 2: UNIT-WISE DEEP NOTES
+-----------------------------
+For each unit, generate notes in this order:
+1) Concept page (overview)
+2) Topic-wise detailed pages
+3) Microtopic drilldown pages
+4) Exam answer templates
+5) Practice section
+
+PHASE 3: EXAM ORIENTED PACKAGING
+--------------------------------
+1) 10-mark answer banks topic-wise
+2) 5-mark short note bank
+3) Diagrams-only revision sheet
+4) ALP pattern library (common templates)
+5) “Last 24-hour revision notes”
+
+PHASE 4: PRACTICAL + REAL-LIFE INTEGRATION
+-------------------------------------------
+For every major concept add:
+- 1 practical lab experiment linkage
+- 1 real-world system linkage
+- 1 troubleshooting or debugging scenario
+
+----------------------------------------------------------------------------------------
+SECTION C: MICROTOPIC CHECKLIST (MUST NOT MISS)
+----------------------------------------------------------------------------------------
+
+UNIT 1 MICROTOPICS
+------------------
+- Generations of Intel processors with key improvements
+- Bus fundamentals: data/address/control buses
+- Bus width vs performance
+- Microprocessor vs microcontroller vs microcomputer
+- Stored program concept
+- Von Neumann bottleneck
+- Harvard dual-memory path advantage
+- Step-by-step fetch-decode-execute cycle
+- Program counter/instruction register roles
+
+UNIT 2 (8085) MICROTOPICS
+--------------------------
+- 8085 block-level internal architecture and pin-level interpretation
+- Registers, ALU, flags, accumulator, temporary register
+- Program counter, stack pointer, instruction register/decoder
+- Interrupt control, serial I/O control, clock/control unit
+- Instruction classes with representative mnemonics
+- Flag effects by instruction category
+- Addressing modes with examples and pitfalls
+- Instruction cycle vs machine cycle vs T-state relations
+- Timing waveform interpretation and status signals
+- ALP syntax, label usage, comments, operands
+- Looping constructs, conditional branching strategy
+
+UNIT 3 (8086) MICROTOPICS
+--------------------------
+- BIU vs EU responsibilities
+- Queue/prefetch concept and performance impact
+- Segment registers: CS, DS, SS, ES
+- Physical address formula: Segment × 10H + Offset
+- Effective address calculation patterns
+- 8086 instruction groups and common use-cases
+- Addressing modes (register, immediate, direct, indexed, based, etc.)
+- Pseudo instructions vs machine instructions
+- Toolchain flow: edit → assemble → link → debug → execute
+- DOS interrupt basics (keyboard/display)
+- Procedure design and stack discipline
+- Macro definition and expansion behavior
+
+UNIT 4 MICROTOPICS
+------------------
+- Bus timing and synchronization models
+- Memory hierarchy: speed/cost/capacity tradeoff
+- Decoding logic: full, partial, unique, non-unique
+- Chip select generation and aliasing issues
+- I/O mapped vs memory mapped: pros/cons + instruction impact
+- 8085 memory map planning basics
+- 8255 architecture and mode configuration
+- Handshaking protocols: signals and sequence
+- Serial communication framing concepts
+- 8251 USART blocks and configuration concept
+- DMA transfer steps and bus arbitration
+- 8237 terms: channels, request/acknowledge, transfer mode
+
+UNIT 5 MICROTOPICS
+------------------
+- Interrupt necessity and latency concept
+- Hardware vs software interrupts
+- Maskable vs non-maskable semantics
+- 8085 interrupt lines and priority chain
+- EI/DI/RST functional usage
+- ISR lifecycle: trigger → save context → service → restore → return
+- Vector table concept and address mapping
+- Multiple interrupt handling techniques
+- Polled vs vectored comparison
+- 8259 PIC architecture and cascading idea
+
+----------------------------------------------------------------------------------------
+SECTION D: 10-MARK ANSWER CONSTRUCTION TEMPLATE
+----------------------------------------------------------------------------------------
+
+For any theoretical question, answer should be built as:
+1) Intro/definition (1-2 marks)
+2) Labeled diagram or structured block explanation (2 marks)
+3) Core working/mechanism in steps (3 marks)
+4) Technical details (signals/instructions/timings/comparison) (2 marks)
+5) Real-life/practical example + closing statement (1-2 marks)
+
+Suggested final paragraph style:
+“Thus, <topic> is fundamental in designing efficient microprocessor systems because
+it improves <performance/reliability/interfacing capability>, and is directly used in
+<real application>.”
+
+----------------------------------------------------------------------------------------
+SECTION E: REAL-LIFE / PRACTICAL EXAMPLE BANK RULES
+----------------------------------------------------------------------------------------
+
+For each major topic, include at least one of:
+- Elevator control panel logic
+- Traffic signal controller
+- Digital weighing scale controller
+- Basic keyboard-display terminal
+- Printer interface concept
+- Sensor monitoring unit
+- Robotics actuator control
+- Data acquisition system
+- Embedded alarm/security system
+- Industrial conveyor automation
+
+For ALP examples:
+- Addition/subtraction/multiplication by repeated addition
+- Largest/smallest in array
+- Block transfer and string operations
+- Delay loop
+- Keyboard input and display output routines
+
+----------------------------------------------------------------------------------------
+SECTION F: QUALITY CONTROL CHECKLIST
+----------------------------------------------------------------------------------------
+
+Before finalizing notes, verify:
+[ ] Every syllabus item is covered
+[ ] Every topic has microtopic decomposition
+[ ] Every major topic has a 10-mark framework
+[ ] Examples are practical and realistic
+[ ] Terminology is consistent (8085/8086, PIC/PPI/USART/DMA)
+[ ] Diagrams are present in text-friendly form
+[ ] Layout uses clean special-character boxes/separators consistently
+[ ] Topic includes at least one ASCII table where meaningful
+[ ] Topic includes at least one ASCII graph/visual sketch where meaningful
+[ ] Table/graph alignment is readable in monospaced .txt format
+[ ] At least 2 probable exam questions per topic
+[ ] Revision bullets and common mistakes included
+
+----------------------------------------------------------------------------------------
+SECTION G: DELIVERABLE STRUCTURE (RECOMMENDED FILE/FOLDER PLAN)
+----------------------------------------------------------------------------------------
+
+01_Course_Overview.txt
+02_Unit1_Introduction.txt
+03_Unit2_8085_Details_Programming.txt
+04_Unit3_8086_Details_Programming.txt
+05_Unit4_Bus_Memory_IO_Interfacing.txt
+06_Unit5_Interrupt_Operation.txt
+07_10Mark_Answer_Bank.txt
+08_ALP_Template_Bank_8085_8086.txt
+09_Diagram_Only_Revision.txt
+10_LastDay_Revision_Sheet.txt
+
+----------------------------------------------------------------------------------------
+END GOAL
+----------------------------------------------------------------------------------------
+
+After following this plan, the student should be able to:
+- Write full-length 10-mark answers confidently,
+- Explain diagrams and timing cycles correctly,
+- Solve basic ALP/interfacing questions,
+- Connect theory with practical systems.
+
+════════════════════════════════════════════════════════════════════════════════════════
+END OF PLAN
+════════════════════════════════════════════════════════════════════════════════════════

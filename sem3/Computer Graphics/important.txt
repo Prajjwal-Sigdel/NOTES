@@ -1,0 +1,257 @@
+CHAPTER 1: Overview of Computer Graphics and Graphics Systems
+
+Marks Weightage: 18%
+
+Important Topics:
+- Introduction and Applications
+  - Computer graphics definition and types
+  - Applications: CAD, simulation, scientific visualization, gaming realism
+- Graphics System Components
+  - Video controller and refresh operation
+  - Frame buffer organization and size computation
+  - DAC usage in graphics systems
+- Display Systems and Architectures
+  - Raster vs. random scan systems/architectures
+  - CRT and Shadow Mask method
+- Input/Interaction
+  - Interactive input devices (e.g., data gloves)
+
+Question Trends:
+- Definitions: computer graphics, CRT, raster/random scan
+- Derivations: none (mostly theory)
+- Long Questions: video controller refresh; applications; hardware components
+- Numericals: refresh/flicker time; frame buffer size
+
+Frequently Asked Questions:
+- Video controller refresh and flicker analysis
+- Frame buffer size calculation based on resolution and color depth
+- Raster vs. random scan comparisons
+- Applications of computer graphics (CAD-focused)
+
+Key Definitions:
+- Computer graphics
+- CRT
+- Raster scan system
+- Random scan system
+
+Key Derivations:
+- None
+
+Priority Level:
+- High
+
+
+CHAPTER 2: Scan Conversion Algorithms
+
+Marks Weightage: 18%
+
+Important Topics:
+- Line Drawing Algorithms
+  - DDA vs. Bresenham
+  - Bresenham initial decision parameter (slope < 1)
+- Circle/Ellipse Generation
+  - Midpoint circle algorithm (8 octants)
+  - Circle/ellipse symmetry differences
+  - Circle digitization problems
+- Filled Area Algorithms
+  - Scan line polygon fill
+  - Boundary fill vs. flood fill
+
+Question Trends:
+- Definitions: boundary fill, flood fill, scan conversion
+- Derivations: midpoint circle decision parameter; Bresenham decision parameter
+- Long Questions: algorithm steps and comparisons
+- Numericals: circle digitization, decision parameter calculations
+
+Frequently Asked Questions:
+- DDA vs. Bresenham comparison
+- Midpoint circle decision parameter derivation
+- Boundary fill vs. flood fill differences
+- Circle digitization for given radius
+
+Key Definitions:
+- Scan conversion
+- Boundary fill algorithm
+- Flood fill algorithm
+
+Key Derivations:
+- Midpoint circle decision parameter (P₀, updates for Pₖ < 0 and Pₖ > 0)
+- Bresenham line decision parameter (slope < 1)
+
+Priority Level:
+- High
+
+
+CHAPTER 3: Two Dimensional Geometric Transformations and Viewing
+
+Marks Weightage: 18%
+
+Important Topics:
+- 2D Transformations
+  - Translation, rotation, scaling, reflection (including about arbitrary line)
+  - Composite transformations and fixed-point rotation
+- Viewing Concepts
+  - Window vs. viewport
+  - 2D viewing pipeline
+  - Window-to-viewport transformation (derivation)
+- Clipping
+  - Cohen–Sutherland line clipping
+
+Question Trends:
+- Definitions: window, viewport, uniform scaling, clipping
+- Derivations: window-to-viewport transformation matrix
+- Long Questions: 2D viewing pipeline; clipping algorithm explanation
+- Numericals: reflection about line; rotation about fixed point; clipping problems
+
+Frequently Asked Questions:
+- Window vs. viewport + transformation derivation
+- Cohen–Sutherland line clipping with region codes
+- 2D transformation problems (rotation, translation, reflection)
+
+Key Definitions:
+- Window
+- Viewport
+- Uniform scaling
+- Clipping
+
+Key Derivations:
+- Window-to-viewport transformation (matrix and steps)
+
+Priority Level:
+- High
+
+
+CHAPTER 4: Graphics in Three Dimensions
+
+Marks Weightage: 15%
+
+Important Topics:
+- 3D Representations
+  - Cubic Bezier curve and spline vs. interpolation curve
+  - Bezier curve equation and point computation
+  - Blobby objects
+  - 3D representations (polygon surfaces)
+- Viewing and Projections
+  - 3D viewing pipeline and coordinate systems
+  - Parallel vs. perspective projection (derivation)
+  - World-to-device mapping (3D context)
+
+Question Trends:
+- Definitions: cubic Bezier curve, blobby objects, projection types
+- Derivations: perspective projection; cubic Bezier equation
+- Long Questions: 3D viewing pipeline; projection comparisons
+- Numericals: Bezier point at given t
+
+Frequently Asked Questions:
+- Perspective vs. parallel projection
+- Cubic Bezier curve derivation and evaluation
+- 3D viewing pipeline and coordinate systems
+
+Key Definitions:
+- Cubic Bezier curve
+- Blobby objects
+- Parallel projection
+- Perspective projection
+
+Key Derivations:
+- Perspective projection equation
+- Cubic Bezier curve equation
+
+Priority Level:
+- High
+
+
+CHAPTER 5: Visual Realism
+
+Marks Weightage: 17%
+
+Important Topics:
+- Hidden Surface Removal
+  - Depth sorting (Painter’s algorithm)
+  - Scan line method
+  - Back-face detection vs. Z-buffer
+- Illumination and Shading
+  - Ambient, diffuse, specular reflection (Phong model)
+  - Constant, Gouraud, Phong shading
+  - Polygon surface shading methods
+
+Question Trends:
+- Definitions: specular reflection, illumination model
+- Derivations: Phong model intensity calculations
+- Long Questions: visible surface detection methods; shading comparisons
+- Numericals: specular intensity computation
+
+Frequently Asked Questions:
+- Depth sorting (Painter’s algorithm) and scan line method
+- Back-face vs. Z-buffer comparison
+- Shading model comparisons (Constant, Gouraud, Phong)
+- Specular vs. diffuse reflection
+
+Key Definitions:
+- Specular reflection
+- Illumination model
+
+Key Derivations:
+- Phong specular intensity computation (ambient + specular)
+
+Priority Level:
+- High
+
+
+CHAPTER 6: Graphical Standards
+
+Marks Weightage: 7%
+
+Important Topics:
+- Machine-independent graphics languages
+- Standards: PHIGS, GKS
+- Graphics file formats and visualization of data sets
+
+Question Trends:
+- Definitions: machine-independent graphical language
+- Derivations: none
+- Long Questions: need for standards; explaining PHIGS/GKS
+- Numericals: none
+
+Frequently Asked Questions:
+- Need for machine-independent graphical languages
+- Explanation of PHIGS and GKS
+- Graphics file formats (short notes)
+
+Key Definitions:
+- Machine-independent graphical language
+
+Key Derivations:
+- None
+
+Priority Level:
+- Medium
+
+
+CHAPTER 7: Introduction to OpenGL
+
+Marks Weightage: 7%
+
+Important Topics:
+- OpenGL overview and architecture
+- Rendering pipeline in OpenGL
+- OpenGL features: primitives, transformations, projections, lighting
+
+Question Trends:
+- Definitions: OpenGL significance
+- Derivations: none
+- Long Questions: OpenGL pipeline and features
+- Numericals: none
+
+Frequently Asked Questions:
+- Significance and features of OpenGL
+- OpenGL rendering pipeline
+
+Key Definitions:
+- OpenGL (significance and role)
+
+Key Derivations:
+- None
+
+Priority Level:
+- Medium

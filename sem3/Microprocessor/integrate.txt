@@ -1,0 +1,114 @@
+MASTER INTEGRATION PROMPT (FOR CHAPTER-WISE MERGE)
+====================================================
+
+You are an expert Microprocessor course-content integrator.
+Your task is to integrate the provided RAW CONTENT into the existing chapter files in this folder:
+- Chapter1.txt
+- Chapter2.txt
+- Chapter3.txt
+- Chapter4.txt
+- Chapter5.txt
+
+Primary Goal
+------------
+Merge ALL mandatory topics from RAW CONTENT into their correct chapter(s) without omission, while preserving readability, exam utility, and consistency with existing chapter style.
+
+Hard Rules (Non-Negotiable)
+---------------------------
+1) Do not skip any topic/subtopic/microtopic from RAW CONTENT.
+2) Keep chapter-wise placement conceptually correct (see mapping below).
+3) Do not remove existing useful content in chapters; enrich and reconcile it.
+4) If duplicate content exists, merge into one clean section (no repeated paragraphs).
+5) Keep technical keywords, instruction names, register names, and signal names exact.
+6) Preserve values/tables from source; if inconsistencies exist, add a short "Note:" instead of silently deleting data.
+7) Keep text format plain .txt with clean headings, bullets, and ASCII-friendly tables.
+8) Keep explanations exam-oriented and beginner-friendly.
+9) Include definitions before deep explanations for each major topic.
+10) Ensure each chapter ends with a short recap and probable exam-focus points.
+
+Chapter Mapping Plan
+--------------------
+A) Chapter1.txt (Introduction + Foundations)
+Integrate all of:
+- Definition of microprocessor
+- Programmable machine concept (MPU + Memory + I/O)
+- Microcomputer and microcontroller definitions and examples
+- Applications of microprocessor
+- Difference: Microprocessor vs Microcontroller (tabular)
+- Evolution of Intel microprocessors:
+  4-bit (4004, 4040), 8-bit (8008, 8080, 8085), 16-bit (8086, 8088, 80286),
+  32-bit (80386, 80486, Pentium family, Dual Core), 64-bit (Core 2, i3, i5, i7)
+
+B) Chapter2.txt (8085 Core)
+Integrate all of:
+- 8085 introduction and features
+- Important pins and pin-level functions
+- 8085 architecture blocks and functions (ALU, accumulator, temp register, flags, register array, timing/control, instruction decoder, interrupt control, serial I/O)
+- 8085 instruction set classes and representative instructions
+- 8085 addressing modes (all five)
+- 8085 timing concepts: instruction cycle, machine cycle, T-state, status signal table, 1/2/3-byte instructions
+
+C) Chapter3.txt (8086 + ALP)
+Integrate all of:
+- 8086 internal architecture (BIU/EU)
+- Register organization: general purpose, flag register, pointers, index registers, segment registers, IP, queue/pipelining
+- 8086 addressing modes (all listed modes)
+- 8086 instruction sets (data transfer, arithmetic, bit/shift/rotate, control transfer)
+- Assembly language programming introduction and format (Label/Opcode/Operand/Comment)
+- Program development tools: editor, assembler, linker, locator, debugger, emulator
+- One-pass / two-pass assembler, macro assembler
+- Assembler directives: PAGE, TITLE, SEGMENT (.STACK/.DATA/.CODE), .MODEL, PROC/ENDP, END, EQU, .STARTUP, .EXIT
+- Data definitions: DB, DW, DD, DF, DQ, DT, DUP, character strings, numeric constants
+- 8086 minimum and maximum mode operation + key signals + timing narrative
+- Modular programming: linking, relocation, stack, procedure (near/far), macro, macro vs procedure
+- Include provided ALP sample programs in a structured "Program Bank" section (with short purpose line for each)
+
+D) Chapter4.txt (Bus, Memory, and Peripheral Interfacing)
+Integrate all of:
+- Bus structure: data/address/control bus
+- Synchronous vs asynchronous bus
+- Memory devices: processor memory, main memory, RAM/ROM types, secondary memory types
+- Address decoding: full vs partial decoding
+- 8255 PPI: block diagram explanation, control word, modes (0/1/2), BSR mode
+- 8254 PIT: architecture, control word format, modes 0-5, solved count/control-word examples
+- 8237 DMA controller: concept, channels/registers/signals, DMA transfer sequence, transfer modes (single/block/demand/cascade)
+- 8251 USART: block-level functions, mode/command/status words
+
+E) Chapter5.txt (Interrupt System + PIC)
+Integrate all of:
+- Interrupt introduction, ISR concept
+- Interrupt sources: processor/software/hardware
+- Classifications: maskable/non-maskable, vectored/non-vectored
+- 8085 interrupts (INTR, RST 5.5/6.5/7.5, TRAP, vector table)
+- 8086 interrupts and IVT structure
+- Predefined 8086 interrupt types (0,1,2,3,4)
+- Priority of 8086 interrupts
+- Polling vs vectored interrupt handling
+- Interrupt processing sequence/flow
+- 8259A PIC: block diagram explanation, control logic, status registers, priority resolver, cascade concept, interfacing, modes, and handling >8 interrupts (e.g., 18 interrupts using cascaded 8259A)
+
+Required Integration Workflow
+-----------------------------
+Step 1: Read existing Chapter1..Chapter5 completely.
+Step 2: Build a checklist of RAW CONTENT topics and mark coverage status per chapter.
+Step 3: Merge missing content into the correct chapter sections.
+Step 4: Reconcile duplicates and normalize terminology.
+Step 5: Keep tables, vectors, signal names, and instruction mnemonics explicit.
+Step 6: Add "Exam Focus" and "Quick Revision" at each chapter end.
+Step 7: Run a final chapter-wise coverage audit (nothing left uncovered).
+
+Quality Gate (Must Pass)
+------------------------
+- Coverage: 100% of RAW CONTENT topics integrated.
+- Correctness: topic placed in proper chapter by concept.
+- Clarity: definitions + explanation + examples where applicable.
+- Structure: readable headings, bullets, ASCII tables.
+- Utility: supports 10-mark university answers and viva prep.
+
+Output Requirement
+------------------
+- Update only: Chapter1.txt, Chapter2.txt, Chapter3.txt, Chapter4.txt, Chapter5.txt
+- Do not create fragmented duplicate chapter files.
+- Keep a consistent chapter style across all files.
+
+END OF MASTER INTEGRATION PROMPT

@@ -1,0 +1,170 @@
+CHAPTER 1: INTRODUCTION
+This is a proposal in order to develop website. It focuses on the geographical field. L-Places is a
+simple website which intends to somehow act as a virtual guide to lead user to various places that
+is of interest to the user. This concept of virtual guide is not new in Nepal but the ability to lead to
+destination of various categories by a single website is not seen under practice in Nepal. This
+website can prove to be useful for those who need information about places and also to those who
+are willing to share the information about places they know. Various categories of places shall be
+discussed and described in the website which assists the user in getting to know about places, the
+routes to be followed, the additional features of the places(if it exists). The main focus is given to
+the direction and the basic information about the place will not miss out.
+
+1.1 BACKGROUND
+The website is no different than other location related website which assist users. Only the
+difference is unlike other websites which are intended for the just locating the places and similar
+types of place in particular, this website provides the information about places of various categories
+along with the feature where the user is allowed to add his/her contents. Advancement in the field
+of technology has been remarkable but the traditional methods of locating places by instruction
+path have seen to being practiced more. Inspired by the problems mislead by traditional methods
+we are extremely joyful to introduce our website with the users.
+
+1.2 OBJECTIVES
+1. To provide locating assistance without having to ask time and again with strangers on the course
+of reaching places.
+2. To utilize the Google Maps for locating and navigating the user to places.
+3. To allow the user to share the information about information with other users via the website.
+4. To optimize the use of technology in the geographical field while reducing the complexity of
+1
+
+the using the website.
+5. To improve the user experience by displaying intact the categorically relevant and related
+information.
+
+1.3 MOTIVATION AND SIGNIFICANCE
+Everyone is busy in their day to day works, recent survey reports has shown that most of the people
+are rely on the technology for almost every feasible work do to their tight schedules. Technology
+can be proven equally effective for acquiring and imparting the information about various places
+like parks, lakes, theatres colleges etc. We are motivated to assist the users since asking detailed
+information about places to concerned person by phone call or by any other means can be time
+consuming and costly. L-Places provides its users with information about wide variety of places.
+This project intends to act as a tool to users who are willing to promote and publicize the places
+around them. We are motivated to develop website which provides assistance in locating with the
+total integration of the variety of summed up information about the place.
+Everyone with the internet connectivity supported device can benefit from this website. This
+website is targeted to general internet users and is not specialized for user from specific
+background. So be it to track the upload the information about the places or to find out the nearby
+places this website can be used effectively. The features of the website certainly increases its
+usability for various purposes. Wide range of places are included which can prove to be one of the
+asset of the website.
+
+2
+
+CHAPTER 2: RELATED WORKS
+Under a brief research we found out that there exists large number of websites for assisting the
+user for a tour and travel purpose. Website under this field are highly designed for assisting tourism
+industry. The websites were found to be serving only for internal and external tourism but variety
+of search options were found to be missing. Several mobile application also exists under this field.
+Application like nLocate (Mobile companion for nLocate.com, a local search application for
+Nepal) is very popular among the users. nLocate has the features of locating essential services like
+hospitals, ATMs, bank, petrol pumps etc. It allows searching using the acronyms.
+Welcomenepal.com is a perfect example of location assisting website which introduces the
+different places of Nepal to a person who is new to a places precisely a tourist. It has various
+categories of places and allows several options to user but the core focus is on the places.
+
+3
+
+CHAPTER 3: PROCEDURE AND METHODS
+3.1 FLOWCHART
+
+3.2 SYSTEM DIAGRAM
+The system architecture in the most basic representation is as follows.
+
+4
+
+CHAPTER 4: SYSTEM REQUIREMENT SPECIFICATIONS
+4.1 SOFTWARE REQUIREMENTS
+MongoDB
+MongoDB will be used in the project development for database implementation. It is a free and opensource cross-platform document-oriented database program. Under the classification as a NoSQL
+database program, MongoDB uses JSON-like documents with schemas.
+Node.js
+Node.js is an open-source, cross-platform JavaScript run-time environment for executing JavaScript
+code server-side. Historically, JavaScript was used primarily for client-side scripting, in which scripts
+written in JavaScript are embedded in a webpage's HTML, to be run client-side by a JavaScript engine
+in the user's web browser. Node.js enables JavaScript to be used for server-side scripting, and runs
+scripts server-side to produce dynamic web page content before the page is sent to the user's web
+browser.
+Express
+Our intention is to use express as a framework for project development. Express is a minimal and
+flexible Node.js web application framework that provides a robust set of features for web and mobile
+application.
+Bootstrap
+Bootstrap is another inevitable development component which we will use for website development.
+Bootstrap is the most popular HTML, CSS and JavaScript framework for developing responsive,
+mobile-first web sites.
+jQuery
+In order to simplify the implementation of JavaScript on website we use jQuery. jQuery is nothing
+but lightweight JavaScript library.
+Along with the above tools we will use Sublime Text for source code editing purpose. Various image
+processing tools like adobe Photoshop may be required.
+5
+
+4.2 HARDWARE REQUIREMENTS
+Any internet connectivity supporting device is suitable for the project. Thus the basic requirement of
+the hardware is that it should support the internet connection but the better the connectivity the better
+the experience of using the website.
+The map will use the Global Positioning System and use it’s coordinate to lead from one place to
+another. Needless to denote but the other important hardware component is the display where the
+contents are displayed. Better display is required for better visual user experience.
+
+4.3 LIMITATIONS
+1. A detailed voiced navigation and description is not possible.
+2. Chatting feature among user is not included but interaction is possible in the comment section.
+3. Only some of the contents will be displayed in Nepali language in addition to English.
+
+CHAPTER 5: PROJECT PLANNING AND SCHEDULING
+5.1 CONCLUSION
+We plan to make this project efficient in its targeted services. L-Places solely deals with variety of
+places. The division of places under various categories can produce better end result to the users.
+The main purpose to provide basic information about the places. Key focus of the website is also
+to share the places that needs the public attention. The success of the website lies in its ease of
+usage and coverage of the variety of places.
+This project will be accomplished by a group of 5 members. The division of works shall be done after
+the thorough study under requirement analysis. The initial assumption is we have a time period of 12
+weeks for the completion of the project.
+
+6
+
+GANTT CHART
+
+Week
+1
+Documentation
+Testing
+Coding
+System design
+Requirement
+analysis
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+8
+
+9
+
+REFERENCES
+https://www.w3schools.com/jquery/jquery_intro.asp
+https://expressjs.com
+http://www.welcomenepal.com/places-to-see.html
+http://www.welcomenepal.com/whats-on/maha-shivaratri.html
+https://play.google.com/store/apps/details?id=com.nepways.nlocate&hl=en
+http://www.appthena.com/developer/manual/architecture.html
+
+7
+
+10
+
+11
+
+12
+
+

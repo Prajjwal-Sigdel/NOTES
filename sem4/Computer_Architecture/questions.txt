@@ -1,0 +1,222 @@
+# Computer Architecture — Sorted Question Bank
+**PU · BE Computer Engineering · 4th Semester · Exams 2018–2025**
+
+**How to read this file**
+
+- **New** = new syllabus (2024 onwards). **Old** = old syllabus (2018–2025).
+- Every unique question appears **once**, followed by every exam it appeared in (newest first). Near-identical wordings are merged, and compound questions are split into their separate topics.
+- In every part, questions asked in the **new syllabus come first**, then questions asked only in the old syllabus.
+- Question numbers were missing in most scans, so they were assigned by order (1a, 1b … 6b). A repeated question sits under the part where it most recently appeared in the new syllabus (or in the old syllabus if it was never asked in the new one).
+- Where a question came with an *OR* option, both options are listed as separate questions.
+
+**Unique questions:** 84 (Q1–Q6) + 30 short-note topics (Q7) = 114
+
+---
+
+## Question 1
+
+### 1(a)
+
+1. What do you mean by addressing modes? Explain the different addressing modes with suitable examples and diagrams, and show how the effective address of the operand is determined in each mode. — **New:** Fall 2025, Fall 2024, Spring 2024 · **Old:** Fall 2025, Fall 2022, Fall 2021, Fall 2020, Spring 2019
+2. Draw and explain the hierarchical structure of a computer system with their relationships. — **New:** Fall 2025, Fall 2024
+3. Differentiate between Computer Architecture and Computer Organization. — **New:** Spring 2025, Spring 2024 · **Old:** Spring 2025, Fall 2024, Fall 2023, Spring 2023, Fall 2021, Spring 2021, Fall 2020
+4. What are the functions of a computer that are essential to design its architecture? Explain in detail. — **New:** Spring 2025
+5. Explain the different stages of computer evolution with reference to the generations of computers. — **Old:** Fall 2024, Spring 2019, Fall 2018
+6. Explain in brief the different registers used in the IAS computer. — **Old:** Fall 2024
+7. Discuss the term Computer Architecture. Explain the IAS computer architecture with a detailed diagram. — **Old:** Spring 2024, Fall 2022
+8. Explain the functional view of the computer system with reference to each component. — **Old:** Spring 2023, Fall 2019
+9. What is HDL and what are its advantages? — **Old:** Fall 2021
+10. What are the characteristics of a computer system? Draw and explain the basic computer organization in detail. — **Old:** Spring 2018
+
+### 1(b)
+
+1. Define RTL. How does data transfer take place between registers? Explain in detail (direct and bus implementation, memory transfer, and conditional transfer, e.g. between two 4-bit registers via a bus). — **New:** Fall 2025, Fall 2024 · **Old:** Spring 2025, Fall 2023, Spring 2023, Fall 2022, Fall 2020, Fall 2019, Spring 2018
+2. How can programs be written using VHDL? Write VHDL code for a simple ALU that performs arithmetic and logical operations. — **New:** Spring 2025
+3. Briefly explain the future trends in computer (architecture). — **New:** Spring 2024 · **Old:** Spring 2025, Fall 2023
+4. Write code to evaluate an arithmetic expression using three-, two-, one- and zero-address instruction formats. — **New:** Spring 2024 · **Old:** Spring 2021
+    - X = (M*N) + (P*Q) — **New:** Spring 2024
+    - X = (A − B*F)*C + D/E — **Old:** Spring 2021
+5. What is register transfer? Briefly explain the arithmetic and logical micro-operations (different categories of micro-operations). — **Old:** Fall 2025, Spring 2024, Spring 2021
+6. Explain all shift micro-operations with RTL code. What are the uses of shift micro-operations in computer arithmetic? — **Old:** Spring 2025, Fall 2023
+7. Briefly explain the terms instruction set, addressing modes and instruction formats. — **Old:** Spring 2024
+
+---
+
+## Question 2
+
+### 2(a)
+
+1. Define instruction cycle. What are the different states/stages of the instruction cycle? Explain the fetch, decode, execute, indirect and interrupt cycles (with micro-operations and the state diagram with interrupt). — **New:** Fall 2025 · **Old:** Fall 2025, Fall 2024, Fall 2022, Spring 2019, Fall 2018, Spring 2018
+2. Explain the design principles for modern systems. — **New:** Spring 2025, Fall 2024 · **Old:** Spring 2025, Fall 2024, Spring 2024, Spring 2021
+3. Explain the internal structure of the processor. — **New:** Fall 2024 · **Old:** Spring 2024
+4. Write the structure of VHDL programming and write code for a full adder using component. — **New:** Spring 2024
+5. How can overflow be detected in a computer? Verify the operation (7)/(3) using the signed 2's complement method. [operation unclear in scan] — **Old:** Fall 2018
+
+### 2(b)
+
+1. Differentiate between hardwired and microprogrammed control unit (with suitable example). — **New:** Fall 2025, Spring 2025 · **Old:** Fall 2025, Spring 2025, Spring 2024, Fall 2022, Spring 2021, Spring 2019, Fall 2018
+2. What is a sequencer? Explain the micro-program sequencer with example. — **New:** Fall 2025 · **Old:** Fall 2018, Spring 2018
+3. Describe the hardwired control unit with block diagram and logic (with example). Why is it faster than the microprogrammed control unit? What are its disadvantages? — **New:** Fall 2024 · **Old:** Fall 2023, Fall 2022, Fall 2019
+4. Explain the different types of registers used in a computer system with examples. What is the use of registers? (Also asked as: registers in the CPU perform two major roles — which registers fulfil them? / explain register organization.) — **New:** Spring 2024 · **Old:** Spring 2025, Fall 2024, Fall 2023, Spring 2023, Fall 2021, Fall 2020, Spring 2019
+5. Explain the restoring division algorithm with flowchart. — **Old:** Spring 2025, Spring 2023
+    - Perform 21/6 using the restoring division algorithm — **Old:** Spring 2025
+6. What is an ALU? Describe the arithmetic and logic circuit with block diagram, and design a 2-bit ALU that performs AND, OR and ADD operations. — **Old:** Fall 2021, Fall 2019
+
+---
+
+## Question 3
+
+### 3(a)
+
+1. Explain Booth's multiplication algorithm (steps and flowchart) and use it to multiply the given numbers. — **New:** Fall 2025, Spring 2025, Spring 2024 · **Old:** Fall 2025, Spring 2024, Fall 2023, Spring 2023, Fall 2022, Fall 2021, Spring 2021, Fall 2020, Fall 2019, Spring 2019
+    - −5 × −6 — **New:** Fall 2025
+    - 8 × 5 — **New:** Spring 2025
+    - 17 × 4 — **New:** Spring 2024
+    - 11 × 13 — **Old:** Fall 2023
+    - −15 × 6 — **Old:** Spring 2023
+    - −12 × −9 — **Old:** Fall 2022
+    - −13 × 7 — **Old:** Fall 2020
+    - −5 × −3 — **Old:** Fall 2019
+    - 9 × −3 — **Old:** Spring 2019
+    - Example of your own — **Old:** Spring 2021
+    - Unsigned binary number example — **Old:** Spring 2024
+2. Why are most processors adopting RISC architecture over CISC architecture? — **New:** Spring 2025
+3. How are addition and subtraction performed on floating-point numbers? — **New:** Fall 2024
+4. Why is microinstruction sequencing important? Explain the microinstruction sequencing techniques — single address field, two address field and variable (address) format — with necessary block diagram. — **New:** Spring 2024 · **Old:** Spring 2025, Fall 2024, Fall 2023, Fall 2022, Fall 2019, Spring 2019
+5. Draw and explain the block diagram (working principle) of the microprogrammed control unit and write down its advantages. Why is it slower than the hardwired control unit? — **New:** Spring 2024 · **Old:** Fall 2024, Spring 2023, Fall 2021, Fall 2020, Spring 2018
+6. Define control memory. Differentiate between horizontal and vertical microprogrammed control units. — **New:** Spring 2024
+7. What are the significances of encoded control words in a vertical microprogrammed control unit? — **Old:** Fall 2025, Spring 2025, Spring 2024
+8. Explain the implementation of arithmetic pipelining for floating-point addition and subtraction. — **Old:** Spring 2025, Spring 2018
+9. Define data path. Write the control signals for the micro-operations involved in executing an instruction with the help of the data path diagram of a simple CPU. — **Old:** Fall 2024, Spring 2021
+10. Draw the circuit for a BCD adder. — **Old:** Spring 2021
+
+### 3(b)
+
+1. Prove that the speedup factor for a pipelined processor is equal to the number of stages in the pipeline, and calculate the speedup ratio for a given pipeline (k segments, n tasks, fixed sub-operation time). — **New:** Fall 2025, Fall 2024 · **Old:** Spring 2025, Spring 2024, Fall 2021, Spring 2021, Fall 2018
+    - k = 8, n = 125, 30 sec (numerical only) — **New:** Fall 2025 · **Old:** Fall 2018
+    - k = 8, n = 212, 35 ns — **New:** Fall 2024
+    - k = 6, n = 120, 30 ns — **Old:** Spring 2025, Spring 2024
+    - Proof only (no numerical) — **Old:** Fall 2021, Spring 2021
+2. What are pipeline hazards and how can they be removed? Explain structural and data (and control/branch) hazards with their solutions. — **New:** Fall 2025, Spring 2025, Spring 2024 · **Old:** Fall 2025, Fall 2020
+3. How are integer and floating-point numbers represented in a computer? Explain the various number representation methods. — **New:** Spring 2025, Fall 2024 · **Old:** Spring 2021, Fall 2020, Spring 2018
+    - Verify the operation (9) × (−2) using signed-magnitude data — **Old:** Spring 2018
+4. Unsigned binary numbers cannot be multiplied directly in a computer. Write the algorithm to multiply two unsigned binary numbers, with example (and data-flow diagram). — **New:** Fall 2024 · **Old:** Fall 2019
+    - (14)₁₀ × (3)₁₀ with data-flow diagram — **Old:** Fall 2019
+5. Compare and contrast microinstruction sequencing versus microinstruction execution. (How is a microinstruction executed? Explain the process in detail.) — **Old:** Fall 2025, Spring 2025
+6. Define virtual memory. Explain address mapping using pages in virtual memory. — **Old:** Spring 2019
+7. What is m-way interleaving? Explain the different types of memory interleaving. — **Old:** Fall 2018
+
+---
+
+## Question 4
+
+### 4(a)
+
+1. Briefly explain the difference between arithmetic pipeline and instruction pipeline with suitable examples. — **New:** Fall 2025
+2. Perform 2's complement binary division with its algorithm. — **New:** Spring 2025, Fall 2024
+    - −5 / 2 — **New:** Fall 2024
+    - 7 / 3 — **New:** Spring 2025
+3. What are the pros and cons of direct mapping? Explain the direct mapping technique with necessary diagram. — **Old:** Spring 2024 (asked together with associative mapping), Fall 2023
+4. Explain the associative mapping technique. Why is a replacement algorithm required in associative mapping? — **Old:** Spring 2021, Fall 2020 (asked together with set-associative mapping)
+5. Explain how redundancy is obtained in RAID with reference to any two RAID levels. What are the applications of RAID? — **Old:** Spring 2019
+6. Consider a system with a main memory of 8K blocks, a cache of 256 blocks and a block size of 16 words. What will be the word field, block field and tag field lengths? How many bits are there in the main memory address if the system uses direct mapping and associative mapping? — **Old:** Fall 2018
+
+### 4(b)
+
+1. What is associative memory (content addressable memory)? Explain how read and write operations take place, including the match logic (address matching logic). — **New:** Fall 2025 · **Old:** Fall 2025, Fall 2024, Fall 2023, Spring 2023, Fall 2021, Fall 2019
+2. What is memory hierarchy? Explain why a multilevel memory hierarchy is needed. Draw the hierarchy with relative characteristics and differentiate between main memory and auxiliary memory. — **New:** Fall 2024 · **Old:** Spring 2025, Spring 2024, Fall 2022
+
+---
+
+## Question 5
+
+### 5(a)
+
+1. What is mapping in cache memory and why is it needed? Since the cache is smaller than main memory, how is main memory data mapped into the cache? Explain the various mapping techniques with the advantages and disadvantages of each. — **New:** Fall 2025, Fall 2024, Spring 2024 · **Old:** Fall 2025, Spring 2023, Fall 2022, Spring 2021, Spring 2018
+2. Explain the set-associative cache mapping technique with suitable diagram. — **New:** Spring 2025
+3. Explain about InfiniBand. [scan reads “InfiniBand 244”] — **New:** Spring 2025
+4. What is the importance of managing memory in a computer? Explain the various memory/storage devices used in memory organization. — **New:** Spring 2024 · **Old:** Fall 2024
+5. What are the major functions that an I/O module must perform? Draw the block diagram of an I/O module. — **Old:** Spring 2025
+6. What is pipelining? Differentiate between RISC and CISC pipelining. — **Old:** Fall 2023, Spring 2021
+7. Explain the various communication techniques for I/O devices. — **Old:** Fall 2022
+8. What is hit ratio in cache memory? — **Old:** Spring 2021
+9. What is pipelining? Describe instruction pipelining with examples, including the 3-segment instruction pipeline used in RISC. — **Old:** Fall 2019, Spring 2019, Spring 2018
+10. Explain the advantages of pipelining in a multiprocessor system. — **Old:** Fall 2019
+11. Design an arithmetic pipeline to speed up the computer to evaluate the expression A × Cᵢ + Dᵢ for i = 0, 1, 2, 3, 4. [expression unclear in scan] — **Old:** Spring 2018
+
+### 5(b)
+
+1. What are the drawbacks of programmed I/O and interrupt-driven I/O? Explain how DMA overcomes these drawbacks (why is DMA needed?). — **New:** Fall 2025, Spring 2025, Spring 2024 · **Old:** Fall 2025, Spring 2024, Fall 2021, Spring 2021, Fall 2018, Spring 2018
+2. Define DMA. Explain how DMA works — the DMA controller and DMA transfer modes — with necessary diagrams. — **New:** Spring 2025 · **Old:** Fall 2024, Fall 2021, Fall 2019
+3. How does interrupt-driven I/O differ from programmed I/O? Explain interrupt-driven I/O with necessary block diagram (define an interrupt and its classes). — **New:** Fall 2024 · **Old:** Fall 2024, Spring 2023, Fall 2020
+4. Differentiate between GPU and TPU. — **New:** Fall 2024
+5. Define register renaming. How does it solve data-hazard problems? Illustrate with suitable examples. — **Old:** Spring 2025, Fall 2023
+6. Compare the RISC and CISC architecture of a computer system. — **Old:** Fall 2024, Fall 2021
+7. How does the register window in a RISC processor handle subroutine call and return inside the CPU itself? Illustrate with an example. — **Old:** Fall 2023
+8. How does instruction pipelining support parallelism? Explain. — **Old:** Spring 2023
+9. What are the functions of an ISR? Explain how interrupts are processed in a computer system. — **Old:** Spring 2018
+
+---
+
+## Question 6
+
+### 6(a)
+
+1. Explain the different interconnection structures in multiprocessor systems with necessary block diagrams. — **New:** Fall 2025, Fall 2024 · **Old:** Fall 2023, Spring 2021, Spring 2019, Fall 2018, Spring 2018
+2. Explain Flynn's classification (taxonomy) of computer systems / parallel processors. — **New:** Spring 2025, Spring 2024 · **Old:** Spring 2024, Fall 2022, Fall 2021, Fall 2019, Spring 2018
+3. How can parallelism be achieved in a uniprocessor system? — **New:** Spring 2024 · **Old:** Spring 2024, Fall 2023, Fall 2022, Fall 2020
+4. What is the cache coherence problem and why must it be resolved? Explain the (software and hardware) methods of solving it, e.g. the MESI protocol. — **Old:** Fall 2025, Fall 2024, Spring 2023, Spring 2021, Fall 2020, Fall 2019, Spring 2019, Fall 2018
+5. Compare vector processor with array processor in detail, including their features. — **Old:** Spring 2025
+6. Differentiate between multicomputer and multiprocessor systems. — **Old:** Spring 2021
+7. Explain the symmetric multiprocessor (SMP) in detail. — **Old:** Fall 2020
+
+### 6(b)
+
+1. What do you understand by multicore computers? Compare and contrast dual-core, quad-core and octa-core processors. — **New:** Fall 2025, Fall 2024 · **Old:** Fall 2025, Spring 2025, Spring 2024, Fall 2022
+2. What are the hardware and software performance issues that arise in multicore computers? Explain, including their impact on computational efficiency. — **New:** Spring 2025, Spring 2024 · **Old:** Fall 2025, Fall 2024, Spring 2024, Fall 2023, Spring 2023, Fall 2020, Spring 2019, Fall 2018
+3. What is a power-efficient processor? How can power efficiency be achieved in multicore systems? — **Old:** Spring 2025, Fall 2022
+4. What is cache mapping? Explain the cache replacement algorithms with a suitable example. — **Old:** Fall 2021
+
+---
+
+## Question 7 — Write short notes on (Any two)
+
+1. RISC vs CISC architecture — **New:** Fall 2025 · **Old:** Fall 2025, Spring 2023, Fall 2022, Fall 2020, Fall 2019, Fall 2018
+2. HDL vs VHDL / VHDL and its advantages — **New:** Fall 2025 · **Old:** Fall 2025, Spring 2024, Fall 2018
+3. Signed number representation — **New:** Fall 2025
+4. GPU and TPU — **New:** Spring 2025, Spring 2024
+5. Addressing modes — **New:** Spring 2025
+6. Data paths — **New:** Spring 2025
+7. Flynn's classification — **New:** Fall 2024 · **Old:** Fall 2024, Spring 2023
+8. Future trends in computer — **New:** Fall 2024 · **Old:** Spring 2019
+9. I/O processor and I/O channels — **New:** Fall 2024
+10. Floating-point arithmetic / representation — **New:** Spring 2024 · **Old:** Fall 2023
+11. Register windowing — **New:** Spring 2024
+12. Vector processors and array processors — **Old:** Fall 2025, Spring 2024, Fall 2022, Spring 2021
+13. BCD adder — **Old:** Spring 2025, Spring 2024, Fall 2022
+14. RISC pipelining — **Old:** Spring 2025
+15. SRAM vs DRAM — **Old:** Spring 2025
+16. Pipelining conflicts / branch conflicts in instruction pipelining — **Old:** Fall 2024, Fall 2021
+17. Register transfer language (RTL) / data transfer in registers — **Old:** Fall 2024, Spring 2019
+18. Instruction pipelining — **Old:** Fall 2023, Spring 2019
+19. Horizontal and vertical microinstruction set — **Old:** Fall 2023
+20. Control unit — **Old:** Spring 2023
+21. RAID — **Old:** Fall 2021, Spring 2021
+22. Multicore organization / hardware performance issues in multicore systems — **Old:** Fall 2021, Fall 2019
+23. Role of I/O interface in a computer system — **Old:** Spring 2021
+24. Shift micro-operations — **Old:** Fall 2020
+25. Magnetic tape and disk — **Old:** Fall 2020
+26. Optical disk — **Old:** Fall 2019
+27. Logic micro-operations — **Old:** Fall 2018
+28. Control memory organization and mapping logic — **Old:** Spring 2018
+29. Types of registers — **Old:** Spring 2018
+30. Alternative chip organization — **Old:** Spring 2018
+
+---
+
+## Notes on the scan
+
+- Fall 2019 (old) had 13 items; the unsigned multiplication (14 × 3) and Booth's (−5 × −3) questions were treated as an OR pair.
+- Fall 2018 (old) 5(b) printed the pipeline numerical and the multicore question together; they are treated as two questions.
+- Unclear in the scan and worth checking against the original paper: Fall 2018 2(a) “(7)/(3)”; Spring 2018 arithmetic-pipeline expression “A #Cy+ Dy”; Spring 2019 6(b) (truncated, read as multicore hardware performance issues); Spring 2019 short note “Register Transfer language (HDL)” (read as RTL); Fall 2025 (new) “interconnection in microprocessors” (read as multiprocessors); “InfiniBand 244”.
+- Question 7 topics can also appear as full questions in Q1–Q6 (short notes are a different answer format), so they are listed separately.
